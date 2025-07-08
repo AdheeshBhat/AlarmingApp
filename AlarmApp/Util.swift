@@ -33,20 +33,47 @@ func createDateFromText(dateString: String) -> Date {
 }
 
 
+func getTitle(reminder: ReminderData) -> String {
+    return reminder.title
+}
 
 func getUserData(cur_database: Database, userID: Int) -> [Date: ReminderData] {
     return cur_database.users[userID] ?? [:]
 }
 
 func getReminderFromDate(userData: [Date: ReminderData], date: Date) -> ReminderData {
-    return userData[date] ?? ReminderData(ID: 1, date: createDate(year: 2025, month: 1, day: 1, hour: 1, minute: 1, second: 1), description: "1/1/2025", repeatSettings: RepeatSettings(repeat_type: "None"))
+    return userData[date] ?? ReminderData(ID: 1, date: createDate(year: 2025, month: 1, day: 1, hour: 1, minute: 1, second: 1), title: "undefined", description: "1/1/2025", repeatSettings: RepeatSettings(repeat_type: "None"), priority: "Low", isComplete: false, author: "user", isLocked: false)
 }
 
 func getDescriptionFromReminder(reminder: ReminderData) -> String {
     return reminder.description
 }
 
-func getReminderDateFromReminder(reminder: ReminderData) -> Date {
+func getDayFromReminder(reminder: ReminderData) -> String {
+    let DateFormatter = DateFormatter()
+    DateFormatter.dateFormat = "EEEE"
+    return DateFormatter.string(from: reminder.date as Date)
+}
+    
+func getTimeFromReminder(reminder: ReminderData) -> String {
+    let calendar = Calendar.current
+    let hour = calendar.component(.hour, from: reminder.date)
+    let minute = calendar.component(.minute, from: reminder.date)
+    var minuteString = String(minute)
+    if minute < 10 {
+        minuteString = "0" + String(minute)
+    }
+    return String(hour) + ":" + minuteString
+}
+
+func getMonthFromReminder(reminder: ReminderData) -> String {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "MMMM d"
+    return dateFormatter.string(from: reminder.date as Date)
+    
+}
+
+func getDateFromReminder(reminder: ReminderData) -> Date {
     return reminder.date
 }
 
@@ -64,84 +91,18 @@ func getRepeatIntervalsFromReminder(reminder: ReminderData) -> CustomRepeatType 
 }
 
 
-
-// ↓ REMINDER FILTERS ↓
-
-func filterRemindersForToday(userData: [Date: ReminderData]) -> [Date: ReminderData] {
-    let calendar = Calendar.current
-    let today = Date()
-    let startOfDay = calendar.startOfDay(for: today)
-    let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: startOfDay)!
-    
-    return userData.filter { (date, _) in
-            return date >= startOfDay && date <= endOfDay
-    }
-}
-
-func filterRemindersForWeek(userData: [Date: ReminderData]) -> [Date: ReminderData] {
-    let calendar = Calendar.current
-    let today = Date()
-    //(start of the week always begins on Sunday in this case) RAISES SAME QUESTION AS FOR MONTH FILTER
-    let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
-    var endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
-    endOfWeek = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: endOfWeek)!
-    
-    return userData.filter { (date, _) in
-        return date >= startOfWeek && date <= endOfWeek
-    }
-}
-
-//DOES CURRENT MONTH MEAN ex. MAR 1 - MAR 31 or ex. MAR 30 - APR 30?
-    //Today's date is at the top of the page, and scroll up/down from MAR 1 - MAR 31, swipe left/right for next/previous month
-func filterRemindersForMonth(userData: [Date: ReminderData]) -> [Date: ReminderData] {
-    let calendar = Calendar.current
-    let today = Date()
-    let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
-    let endOfMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth)!
-    
-    return userData.filter { (date, _) in
-        return date >= startOfMonth && date <= endOfMonth
-    }
-}
-
-//Returns reminders based on day, week, or month filter
-func showAllReminders(userData: [Date: ReminderData], period: String = "all") -> some View {
-    
-    let filteredUserData: [Date: ReminderData]
-    if period == "today" {
-        filteredUserData = filterRemindersForToday(userData: userData)
-    } else if period == "week" {
-        filteredUserData = filterRemindersForWeek(userData: userData)
-    } else if period == "month" {
-        filteredUserData = filterRemindersForMonth(userData: userData)
+func addToDatabase(database: inout Database, userID: Int, date: Date, reminder: ReminderData) {
+    if var userReminders = database.users[userID] {
+        userReminders[date] = reminder
+        database.users[userID] = userReminders
     } else {
-        filteredUserData = userData
+        database.users[userID] = [date: reminder]
     }
-    
-    let dateFormatter = DateFormatter()
-        //can change to .short, .medium, or .long format
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .short
-    
-    return VStack {
-        ForEach(filteredUserData.keys.sorted(), id: \.self) { date in
-            if let reminder = filteredUserData[date] {
-                HStack {
-                    Text(dateFormatter.string(from: reminder.date))
-                    Text(reminder.description)
-                    
-                    //Change this function so that all shown reminders are only "today's" reminders
-                    //Add parameter that allows me to use the same function for week's/month's/day's reminders
-                    //Modify show all reminders function for month's/week's/day's reminders
-                    
-                    //Show past reminders that have already been completed
-                    
-                } //HStack ending
-                .padding()
-                .background(RoundedRectangle(cornerRadius: 10).stroke(Color.black, lineWidth: 1))
-            }// if statement ending
-        } //ForEach() ending
-    } //VStack ending
+}
 
-    
+func deleteFromDatabase(database: inout Database, userID: Int, date: Date) {
+    if var userReminders = database.users[userID] {
+        userReminders.removeValue(forKey: date)
+        database.users[userID] = userReminders
+    }
 }

@@ -87,8 +87,8 @@ struct WeekCalendarView: View {
             Toggle("Reminder View", isOn: $isReminderViewOn)
                 .padding(.top, 20)
             
-            // Week Calendar View Toggle
-            Toggle("Week Calendar View", isOn: $isWeekCalendarViewOn)
+            // Calendar View Toggle
+            Toggle("Calendar View", isOn: $isWeekCalendarViewOn)
                 .padding(.bottom, 30)
             
             Spacer()

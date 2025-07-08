@@ -15,7 +15,7 @@ func WelcomeExperience() -> some View {
             .padding(.top, 1.5)
             .padding(.bottom, 1)
         
-        //loadSessionInfo function to show the date
+        //loadSessionInfo function to show the date        
         Text("Sunday, May 5th")
             .font(.title)
             .padding(.bottom)

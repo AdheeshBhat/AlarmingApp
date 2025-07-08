@@ -22,7 +22,8 @@ struct CustomRepeatType {
     }
 }
 
-
+//UPDATE REPEAT SETTINGS TO HAVE PRIORITY
+    //TEXTBOX for
 struct RepeatSettings {
     var repeat_type: String //(None, daily, monthly, etc)
     var repeat_until_date: Date? // should match date field s
@@ -38,17 +39,26 @@ struct RepeatSettings {
 }
 
 struct ReminderData {
-    //var title: String
+    var title: String
     var ID: Int
     var date: Date
     var description: String
     var repeatSettings: RepeatSettings
+    var priority: String    //Low or High
+    var isComplete: Bool    //true = complete
+    var author: String      //"user" or "caregiver"
+    var isLocked: Bool      //true = locked
     
-    init(ID: Int, date: Date, description: String, repeatSettings: RepeatSettings) {
+    init(ID: Int, date: Date, title: String, description: String, repeatSettings: RepeatSettings, priority: String, isComplete: Bool, author: String, isLocked: Bool) {
         self.ID = ID
         self.date = date
+        self.title = title
         self.description = description
         self.repeatSettings = repeatSettings
+        self.priority = priority
+        self.isComplete = isComplete
+        self.author = author
+        self.isLocked = isLocked
     }
 }
 
@@ -82,6 +92,7 @@ struct Database {
 //            Months:  [1-13] (13 means all months are enabled)
 //            }
 //        }
+
 //    Priority:
 //    String (Low: False, High: True)
 //

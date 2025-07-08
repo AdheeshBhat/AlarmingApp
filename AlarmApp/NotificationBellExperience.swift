@@ -20,7 +20,7 @@ struct NotificationBellExperience: View {
                         .font(.title)
                         .foregroundColor(.black)
                 }
-                .padding(.leading, 270)
+                //.padding(.leading, 270)
                 
             } //Navigation Link ending
         } //VStack ending
