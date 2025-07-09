@@ -122,6 +122,7 @@ struct RemindersScreen: View {
                     database: $DatabaseMock,
                     userID: 1,
                     period: filterPeriod,
+                    cur_screen: $cur_screen,
                     showEditButton: !isDeleteViewOn,
                     showDeleteButton: isDeleteViewOn
                 )
@@ -154,6 +155,7 @@ struct RemindersScreen: View {
 
 
 struct ReminderRow: View {
+    @Binding var cur_screen: Screen
     var title: String
     var time: String
     var date: String
@@ -164,10 +166,10 @@ struct ReminderRow: View {
     @State private var showConfirmation = false
     @State private var showDeleteConfirmation = false
     @Binding var database: Database
-    
+
     var userID: Int
     var dateKey: Date
-    
+
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -201,7 +203,14 @@ struct ReminderRow: View {
                     if showEditButton {
                         Spacer().frame(width: 20)
 
-                        NavigationLink(destination: EditReminderScreen()) {
+                        NavigationLink(destination: EditReminderScreen(
+                            cur_screen: $cur_screen,
+                            DatabaseMock: $database,
+                            reminder: Binding(
+                                get: { database.users[userID]![dateKey]! },
+                                set: { database.users[userID]![dateKey]! = $0 }
+                            )
+                        )) {
                             HStack {
                                 Image(systemName: "pencil")
                                     .font(.title3)
@@ -211,7 +220,7 @@ struct ReminderRow: View {
                                     .foregroundColor(.black)
                             }
                         }
-                        
+
                     } else if showDeleteButton {
                         Spacer().frame(width: 20)
                         Button(action: {

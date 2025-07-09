@@ -50,7 +50,7 @@ func filterRemindersForMonth(userData: [Date: ReminderData]) -> [Date: ReminderD
 //--------------------------------------------------------------- 1
 
 //Returns reminders based on day, week, or month filter
-func showAllReminders(database: Binding<Database>, userID: Int, period: String = "all", showEditButton: Bool = false, showDeleteButton: Bool = false) -> some View {
+func showAllReminders(database: Binding<Database>, userID: Int, period: String = "all", cur_screen: Binding<Screen>, showEditButton: Bool = false, showDeleteButton: Bool = false) -> some View {
     let userData = database.wrappedValue.users[userID] ?? [:]
     
     let filteredUserData: [Date: ReminderData]
@@ -74,6 +74,7 @@ func showAllReminders(database: Binding<Database>, userID: Int, period: String =
             if let reminder = filteredUserData[date] {
                 HStack {
                     ReminderRow(
+                        cur_screen: cur_screen,
                         title: getTitle(reminder: reminder),
                         time: getTimeFromReminder(reminder: reminder),
                         date: getDayFromReminder(reminder: reminder),
@@ -101,7 +102,7 @@ func showAllReminders(database: Binding<Database>, userID: Int, period: String =
 //----------------------------------------------------------------- 2
 
 
-func showIncompleteReminders(database: Binding<Database>, userID: Int, period: String = "all", showEditButton: Bool = false, showDeleteButton: Bool = false) -> some View {
+func showIncompleteReminders(database: Binding<Database>, userID: Int, period: String = "all", cur_screen: Binding<Screen>, showEditButton: Bool = false, showDeleteButton: Bool = false) -> some View {
     let userData = database.wrappedValue.users[userID] ?? [:]
     
     let filteredUserData: [Date: ReminderData]
@@ -128,6 +129,7 @@ func showIncompleteReminders(database: Binding<Database>, userID: Int, period: S
                 HStack {
 
                     ReminderRow(
+                        cur_screen: cur_screen,
                         title: getTitle(reminder: reminder),
                         time: getTimeFromReminder(reminder: reminder),
                         date: getDayFromReminder(reminder: reminder),
@@ -152,7 +154,7 @@ func showIncompleteReminders(database: Binding<Database>, userID: Int, period: S
 //----------------------------------------------------------------- 3
 
 
-func formattedReminders(database: Binding<Database>, userID: Int, period: String = "all", showEditButton: Bool = true, showDeleteButton: Bool = false) -> some View {
+func formattedReminders(database: Binding<Database>, userID: Int, period: String = "all", cur_screen: Binding<Screen>, showEditButton: Bool = true, showDeleteButton: Bool = false) -> some View {
     let userData = database.wrappedValue.users[userID] ?? [:]
     
     let filteredUserData: [Date: ReminderData]
@@ -176,6 +178,7 @@ func formattedReminders(database: Binding<Database>, userID: Int, period: String
             if let reminder = filteredUserData[date] {
                 HStack {
                     ReminderRow(
+                        cur_screen: cur_screen,
                         title: getTitle(reminder: reminder),
                         time: getTimeFromReminder(reminder: reminder),
                         date: getMonthFromReminder(reminder: reminder),

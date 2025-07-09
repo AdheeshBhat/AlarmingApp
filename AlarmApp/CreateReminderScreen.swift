@@ -14,8 +14,9 @@ struct CreateReminderScreen: View {
     @State private var description: String = ""
     @State private var date: Date = Date()
     @State private var userID: Int = 1
-    @State private var repeat_setting: String = ""
-    @State private var priority: String = ""
+    @State private var repeat_setting: String = "None"
+    @State private var repeatUntil: String = "Forever"
+    @State private var priority: String = "Low"
     @State private var isComplete: Bool = false
     @State private var author: String = ""
     @State private var isLocked: Bool = false
@@ -24,6 +25,7 @@ struct CreateReminderScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing : 16) {
             TextField("Type Reminder Name...", text: $title)
+                .multilineTextAlignment(.center)
                 .font(.largeTitle)
                 .foregroundColor(.black)
                 .padding(.horizontal)
@@ -32,7 +34,7 @@ struct CreateReminderScreen: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Description")
                     .foregroundColor(.black)
-                    .font(.headline)
+                    .font(.title3)
                     .underline()
                     .padding(.top)
                     .padding(.leading)
@@ -77,45 +79,77 @@ struct CreateReminderScreen: View {
                 DatePicker("", selection: $date, displayedComponents: [.hourAndMinute])
                     .labelsHidden()
                     .datePickerStyle(.wheel)
+                    .frame(height: 100)
+                    .clipped()
                     .padding(.horizontal)
             }
             .background(Color.blue.opacity(0.7))
             .cornerRadius(12)
             .padding(.horizontal)
 
-            // Repeat section
+            
+            
+            // REPEAT SECTION
             HStack {
-                Text("Repeat")
-                    .foregroundColor(.black)
-                    .font(.headline)
-                    .underline()
-                    .padding()
-                    
-                    
+                VStack(alignment: .leading) {
+                    Text("Repeat")
+                        .foregroundColor(.black)
+                        .font(.title3)
+                        .underline()
+                }
+                .padding(.vertical)
+                .padding(.leading)
                 
-                TextField("Type Repeat Setting", text: $repeat_setting)
-                    .font(.headline)
+                Image(systemName: "arrow.2.circlepath")
                     .foregroundColor(.black)
-                    .padding(.horizontal)
+                    .padding(.leading, 6)
+
+                NavigationLink(destination: RepeatSettingsFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: title, repeatSetting: $repeat_setting, repeatUntil: $repeatUntil)) {
+                    Text(repeat_setting)
+                        .foregroundColor(.black)
+                        .font(.title3)
+                        .padding(.leading, 75)
+                }
+
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.black)
+                    .padding(.trailing)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.blue.opacity(0.7))
             .cornerRadius(12)
             .padding(.horizontal)
+            .padding(.vertical, 12)
             
-            // Priority section
+            
+            
+            // PRIORITY SECTION
             HStack {
-                Text("Priority")
-                    .foregroundColor(.black)
-                    .font(.headline)
-                    .underline()
-                    .padding()
-                    
+                VStack(alignment: .leading) {
+                    Text("Priority")
+                        .foregroundColor(.black)
+                        .font(.title3)
+                        .underline()
+                }
+                .padding(.vertical)
+                .padding(.leading)
                 
-                TextField("Type Priority Setting", text: $priority)
-                    .font(.headline)
+                Image(systemName: "exclamationmark.triangle")
                     .foregroundColor(.black)
-                    .padding(.horizontal)
+                    .padding(.leading, 6)
+
+                NavigationLink(destination: PriorityFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: title, priority: $priority)) {
+                    Text(priority)
+                        .foregroundColor(.black)
+                        .font(.title3)
+                        .padding(.leading, 75)
+                }
+
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .foregroundColor(.black)
+                    .padding(.trailing)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.blue.opacity(0.7))
@@ -124,6 +158,8 @@ struct CreateReminderScreen: View {
 
             Spacer()
 
+            
+            
             // Save New Reminder Button
             Button(action: {
                 let reminder = ReminderData(
@@ -145,7 +181,7 @@ struct CreateReminderScreen: View {
             }) {
                 Text("Save New Reminder")
                     .foregroundColor(.green)
-                    .font(.headline)
+                    .font(.title3)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.blue.opacity(0.7))

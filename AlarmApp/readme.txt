@@ -35,13 +35,14 @@ Next Steps on Reminders Screen (Xcode)
 Revisit showEditButton/showDeleteButton and passing them into formattedReminders
 
 5. createReminderScreen
-    - Code full priority flow
-    - Code all buttons except custom for RepeatSettings (including Repeat Until logic)
-    - Use date picker for calendar (make it look like Figma screen)
+    - Code full priority flow                                                                - Done
+    - Code all buttons except custom for RepeatSettings (including Repeat Until logic)       - Done
+    - Use date picker for calendar (make it look like Figma screen)                          - Done
+    - reminderNameSet variable needs to be checked before user can click repeat, priority, or save
 
 6. editReminderScreen
-    - Populate existing info for reminder that was clicked
-    - Reuse functionality from createReminderScreen
+    - Populate existing info for reminder that was clicked                                   -
+    - Reuse functionality from createReminderScreen                                          -
 
 7. Find and migrate to a data store for our reminders dictionary
     - firebase?

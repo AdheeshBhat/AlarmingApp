@@ -23,7 +23,7 @@ struct HomeView: View {
         }
         
         WelcomeExperience()
-        TodayRemindersExperience(cur_database: $DatabaseMock, isHideCompletedReminders: isHideCompletedReminders)
+        TodayRemindersExperience(cur_database: $DatabaseMock, cur_screen: $cur_screen, isHideCompletedReminders: isHideCompletedReminders)
             .padding(.bottom)
         
         VStack {

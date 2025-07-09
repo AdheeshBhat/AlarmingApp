@@ -21,7 +21,7 @@ func filterReminders(userData: [Date: ReminderData], period: String) -> [Date: R
 
 
 
-func TodayRemindersExperience(cur_database: Binding<Database>, isHideCompletedReminders: Bool) -> some View {
+func TodayRemindersExperience(cur_database: Binding<Database>, cur_screen: Binding<Screen>, isHideCompletedReminders: Bool) -> some View {
     
     let userID = 1
     let userData = cur_database.wrappedValue.users[userID] ?? [:]
@@ -45,10 +45,10 @@ func TodayRemindersExperience(cur_database: Binding<Database>, isHideCompletedRe
         } else {
             ScrollView {
                 if isHideCompletedReminders {
-                    showIncompleteReminders(database: cur_database, userID: 1, period: "today", showEditButton: false, showDeleteButton: false)
+                    showIncompleteReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false)
                 }
                 else {
-                    showAllReminders(database: cur_database, userID: 1, period: "today", showEditButton: false, showDeleteButton: false)
+                    showAllReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false)
                 }
             }
             .background(RoundedRectangle(cornerRadius: 12).stroke(Color.black, lineWidth: 2))
@@ -66,4 +66,3 @@ func TodayRemindersExperience(cur_database: Binding<Database>, isHideCompletedRe
     //find alternatives for padding and hard coded values
 
 }
-
