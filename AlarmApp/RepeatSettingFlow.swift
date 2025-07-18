@@ -11,11 +11,23 @@ struct RepeatSettingsFlow: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
-    
     @State var title: String
     @Binding var repeatSetting: String
+    @State private var localRepeatSetting: String? = nil
     @Binding var repeatUntil: String
-    @State private var localRepeatSetting: String = "Empty"
+    @State private var localRepeatScreenRepeatUntil: String
+    
+    
+    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, title: String, repeatSetting: Binding<String>, repeatUntil: Binding<String> ) {
+        self._cur_screen = cur_screen
+        self._DatabaseMock = DatabaseMock
+        self.title = title
+        self._repeatSetting = repeatSetting
+        self._repeatUntil = repeatUntil
+        //local variables
+        self._localRepeatSetting = State(initialValue: repeatSetting.wrappedValue)
+        self._localRepeatScreenRepeatUntil = State(initialValue: repeatUntil.wrappedValue)
+    }
 
     let options = ["None", "Daily", "Weekly", "Monthly", "Yearly", "Custom"]
     
@@ -53,7 +65,7 @@ struct RepeatSettingsFlow: View {
                                     .foregroundColor(.black)
                                     .padding(.trailing)
                             }
-                            if repeatSetting == options[index] {
+                            if (localRepeatSetting == nil && repeatSetting == options[index]) || (localRepeatSetting == options[index]){
                                 Image(systemName: "checkmark")
                                     .font(.title)
                                     .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
@@ -77,14 +89,14 @@ struct RepeatSettingsFlow: View {
             
             //REPEAT UNTIL BUTTON
             
-            if repeatSetting != "None" {
-                NavigationLink(destination: RepeatUntilFlow(title: title, cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, repeatUntil: $repeatUntil)) {
+            if (localRepeatSetting != "None" && localRepeatSetting != nil) {
+                NavigationLink(destination: RepeatUntilFlow(title: title, cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, repeatUntil: $localRepeatScreenRepeatUntil)) {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Until")
                                 .foregroundColor(.black)
                                 .font(.title3)
-                            Text(repeatUntil)
+                            Text(localRepeatScreenRepeatUntil)
                                 .foregroundColor(.gray)
                                 .font(.title3)
                         }
@@ -101,10 +113,12 @@ struct RepeatSettingsFlow: View {
                 }
             }
 
+            // DONE BUTTON
             Button(action: {
-                if localRepeatSetting != "Empty" {
-                    repeatSetting = localRepeatSetting
+                if localRepeatSetting != nil {
+                    repeatSetting = localRepeatSetting!
                 }
+                repeatUntil = localRepeatScreenRepeatUntil
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Done")

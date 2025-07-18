@@ -6,14 +6,14 @@
 //
 import SwiftUI
 
-func filterReminders(userData: [Date: ReminderData], period: String) -> [Date: ReminderData] {
+func filterReminders(userData: [Date: ReminderData], period: String, filteredDay: Date?) -> [Date: ReminderData] {
     switch period {
     case "today":
         return filterRemindersForToday(userData: userData)
     case "week":
         return filterRemindersForWeek(userData: userData)
     case "month":
-        return filterRemindersForMonth(userData: userData)
+        return filterRemindersForMonth(userData: userData, filteredDay: filteredDay)
     default:
         return userData
     }
@@ -25,7 +25,7 @@ func TodayRemindersExperience(cur_database: Binding<Database>, cur_screen: Bindi
     
     let userID = 1
     let userData = cur_database.wrappedValue.users[userID] ?? [:]
-    let filteredReminders = filterReminders(userData: userData, period: "today")
+    let filteredReminders = filterReminders(userData: userData, period: "today", filteredDay: nil)
     let visibleReminders = isHideCompletedReminders ? filteredReminders.filter { !$0.value.isComplete } : filteredReminders
 
     return VStack {
@@ -45,10 +45,10 @@ func TodayRemindersExperience(cur_database: Binding<Database>, cur_screen: Bindi
         } else {
             ScrollView {
                 if isHideCompletedReminders {
-                    showIncompleteReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false)
+                    showIncompleteReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false, filteredDay: nil)
                 }
                 else {
-                    showAllReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false)
+                    showAllReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false, filteredDay: nil)
                 }
             }
             .background(RoundedRectangle(cornerRadius: 12).stroke(Color.black, lineWidth: 2))

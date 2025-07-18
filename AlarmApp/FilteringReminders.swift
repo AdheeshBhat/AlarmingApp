@@ -36,10 +36,14 @@ func filterRemindersForWeek(userData: [Date: ReminderData]) -> [Date: ReminderDa
 
 //DOES CURRENT MONTH MEAN ex. MAR 1 - MAR 31 or ex. MAR 30 - APR 30?
     //Today's date is at the top of the page, and scroll up/down from MAR 1 - MAR 31, swipe left/right for next/previous month
-func filterRemindersForMonth(userData: [Date: ReminderData]) -> [Date: ReminderData] {
+func filterRemindersForMonth(userData: [Date: ReminderData], filteredDay: Date?) -> [Date: ReminderData] {
     let calendar = Calendar.current
     let today = Date()
-    let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
+    var startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: today))!
+    if filteredDay != nil {
+        startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: filteredDay!))!
+    }
+
     let endOfMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth)!
     
     return userData.filter { (date, _) in
@@ -50,7 +54,7 @@ func filterRemindersForMonth(userData: [Date: ReminderData]) -> [Date: ReminderD
 //--------------------------------------------------------------- 1
 
 //Returns reminders based on day, week, or month filter
-func showAllReminders(database: Binding<Database>, userID: Int, period: String = "all", cur_screen: Binding<Screen>, showEditButton: Bool = false, showDeleteButton: Bool = false) -> some View {
+func showAllReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = false, showDeleteButton: Bool = false, filteredDay: Date?) -> some View {
     let userData = database.wrappedValue.users[userID] ?? [:]
     
     let filteredUserData: [Date: ReminderData]
@@ -59,7 +63,7 @@ func showAllReminders(database: Binding<Database>, userID: Int, period: String =
     } else if period == "week" {
         filteredUserData = filterRemindersForWeek(userData: userData)
     } else if period == "month" {
-        filteredUserData = filterRemindersForMonth(userData: userData)
+        filteredUserData = filterRemindersForMonth(userData: userData, filteredDay: filteredDay)
     } else {
         filteredUserData = userData
     }
@@ -78,10 +82,7 @@ func showAllReminders(database: Binding<Database>, userID: Int, period: String =
                         title: getTitle(reminder: reminder),
                         time: getTimeFromReminder(reminder: reminder),
                         date: getDayFromReminder(reminder: reminder),
-                        reminder: Binding(
-                            get: { database.wrappedValue.users[userID]![date]! },
-                            set: { database.wrappedValue.users[userID]![date]! = $0 }
-                        ),
+                        reminder: reminder,
                         showEditButton: showEditButton,
                         showDeleteButton: showDeleteButton,
                         database: database,
@@ -102,7 +103,7 @@ func showAllReminders(database: Binding<Database>, userID: Int, period: String =
 //----------------------------------------------------------------- 2
 
 
-func showIncompleteReminders(database: Binding<Database>, userID: Int, period: String = "all", cur_screen: Binding<Screen>, showEditButton: Bool = false, showDeleteButton: Bool = false) -> some View {
+func showIncompleteReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = false, showDeleteButton: Bool = false, filteredDay: Date?) -> some View {
     let userData = database.wrappedValue.users[userID] ?? [:]
     
     let filteredUserData: [Date: ReminderData]
@@ -111,7 +112,7 @@ func showIncompleteReminders(database: Binding<Database>, userID: Int, period: S
     } else if period == "week" {
         filteredUserData = filterRemindersForWeek(userData: userData)
     } else if period == "month" {
-        filteredUserData = filterRemindersForMonth(userData: userData)
+        filteredUserData = filterRemindersForMonth(userData: userData, filteredDay: filteredDay)
     } else {
         filteredUserData = userData
     }
@@ -133,10 +134,7 @@ func showIncompleteReminders(database: Binding<Database>, userID: Int, period: S
                         title: getTitle(reminder: reminder),
                         time: getTimeFromReminder(reminder: reminder),
                         date: getDayFromReminder(reminder: reminder),
-                        reminder: Binding(
-                            get: { database.wrappedValue.users[userID]![date]! },
-                            set: { database.wrappedValue.users[userID]![date]! = $0 }
-                        ),
+                        reminder: reminder,
                         showEditButton: showEditButton,
                         showDeleteButton: showDeleteButton,
                         database: database,
@@ -154,7 +152,7 @@ func showIncompleteReminders(database: Binding<Database>, userID: Int, period: S
 //----------------------------------------------------------------- 3
 
 
-func formattedReminders(database: Binding<Database>, userID: Int, period: String = "all", cur_screen: Binding<Screen>, showEditButton: Bool = true, showDeleteButton: Bool = false) -> some View {
+func formattedReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = true, showDeleteButton: Bool = false, filteredDay: Date?) -> some View {
     let userData = database.wrappedValue.users[userID] ?? [:]
     
     let filteredUserData: [Date: ReminderData]
@@ -163,7 +161,7 @@ func formattedReminders(database: Binding<Database>, userID: Int, period: String
     } else if period == "week" {
         filteredUserData = filterRemindersForWeek(userData: userData)
     } else if period == "month" {
-        filteredUserData = filterRemindersForMonth(userData: userData)
+        filteredUserData = filterRemindersForMonth(userData: userData, filteredDay: filteredDay)
     } else {
         filteredUserData = userData
     }
@@ -182,10 +180,7 @@ func formattedReminders(database: Binding<Database>, userID: Int, period: String
                         title: getTitle(reminder: reminder),
                         time: getTimeFromReminder(reminder: reminder),
                         date: getMonthFromReminder(reminder: reminder),
-                        reminder: Binding(
-                            get: { database.wrappedValue.users[userID]![date]! },
-                            set: { database.wrappedValue.users[userID]![date]! = $0 }
-                        ),
+                        reminder: reminder,
                         showEditButton: showEditButton,
                         showDeleteButton: showDeleteButton,
                         database: database,

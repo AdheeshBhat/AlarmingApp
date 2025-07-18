@@ -14,12 +14,28 @@ struct PriorityFlow: View {
     
     var title: String
     @Binding var priority: String
-    @State private var isLocked: Bool = false
+    @State private var localPriority: String
+    @Binding var isLocked: Bool
+    @State private var localIsLocked: Bool
+    
+    
+
+    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, title: String, priority: Binding<String>, isLocked: Binding<Bool>) {
+        self._cur_screen = cur_screen
+        self._DatabaseMock = DatabaseMock
+        self.title = title
+        self._priority = priority
+        self._isLocked = isLocked
+        // Initialize local state variables
+        self._localPriority = State(initialValue: priority.wrappedValue)
+        self._localIsLocked = State(initialValue: isLocked.wrappedValue)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             Text(title)
                 .font(.largeTitle)
+                .frame(maxWidth: .infinity, alignment: .center)
                 .padding()
 
             VStack {
@@ -37,7 +53,7 @@ struct PriorityFlow: View {
 
             VStack(spacing: 0) {
                 Button(action: {
-                    priority = "Low"
+                    localPriority = "Low"
                 }) {
                     HStack {
                         Text("Low")
@@ -45,9 +61,9 @@ struct PriorityFlow: View {
                             .font(.title3)
                             .padding(.leading)
                         Spacer()
-                        if priority == "Low" {
+                        if localPriority == "Low" {
                             Image(systemName: "checkmark")
-                                .font(.title)
+                                .font(.system(size: 30, weight: .bold))
                                 .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
                                 .padding(.trailing)
                         }
@@ -60,7 +76,7 @@ struct PriorityFlow: View {
                     .padding(.horizontal, 20)
 
                 Button(action: {
-                    priority = "High"
+                    localPriority = "High"
                 }) {
                     HStack {
                         Text("High")
@@ -68,9 +84,9 @@ struct PriorityFlow: View {
                             .font(.title3)
                             .padding(.leading)
                         Spacer()
-                        if priority == "High" {
+                        if localPriority == "High" {
                             Image(systemName: "checkmark")
-                                .font(.title)
+                                .font(.system(size: 30, weight: .bold))
                                 .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
                                 .padding(.trailing)
                         }
@@ -78,11 +94,11 @@ struct PriorityFlow: View {
                     .padding(.vertical, 14)
                 }
                 
-            } //VStack ending
+            }
             .background(Color.blue.opacity(0.7))
             .cornerRadius(12)
 
-            if priority == "Low" {
+            if localPriority == "Low" {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("You :").bold()
                     Text("You will be sent a notification.").padding(.vertical).foregroundColor(.gray)
@@ -90,7 +106,7 @@ struct PriorityFlow: View {
                     Text("Your caretaker will be sent a notification after 10 minutes if the reminder is not turned off.").foregroundColor(.gray)
                 }
                 .padding(.top)
-            } else if priority == "High" {
+            } else if localPriority == "High" {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("You :").bold()
                     Text("Your alarm will ring.").padding(.vertical).foregroundColor(.gray)
@@ -101,15 +117,15 @@ struct PriorityFlow: View {
             }
 
             Button(action: {
-                isLocked.toggle()
+                localIsLocked.toggle()
             }) {
                 HStack {
-                    Text(isLocked ? "Locked Reminder" : "Unlocked Reminder")
+                    Text(localIsLocked ? "Locked Reminder" : "Unlocked Reminder")
                         .foregroundColor(.black)
                         .font(.title3)
                         .padding(.leading)
                     Spacer()
-                    Image(systemName: isLocked ? "lock.fill" : "lock.open.fill")
+                    Image(systemName: localIsLocked ? "lock.fill" : "lock.open.fill")
                         .font(.title)
                         .foregroundColor(.black)
                         .padding(.trailing)
@@ -120,11 +136,13 @@ struct PriorityFlow: View {
             }
             .padding(.top)
 
-            Text(isLocked ? "You will not be able to edit this reminder." : "You will be able to edit this reminder.")
+            Text(localIsLocked ? "You will not be able to edit this reminder." : "You will be able to edit this reminder.")
                 .padding(.top)
                 .foregroundColor(.gray)
 
             Button(action: {
+                priority = localPriority
+                isLocked = localIsLocked
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Done")
@@ -139,11 +157,17 @@ struct PriorityFlow: View {
             .padding(.top)
 
             Spacer()
-        }
+        } //VStack ending
         .padding()
+        
+        .onAppear {
+            localPriority = priority
+            localIsLocked = isLocked
+        }
+        
         
         VStack {
             NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
         }
-    }
+    } //body ending
 }

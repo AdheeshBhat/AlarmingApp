@@ -26,11 +26,11 @@ struct CustomRepeatType {
     //TEXTBOX for
 struct RepeatSettings {
     var repeat_type: String //(None, daily, monthly, etc)
-    var repeat_until_date: Date? // should match date field s
+    var repeat_until_date: String // should match date field s (STRING IS TEMPORARY - CHANGE BACK TO DATE LATER)
     var repeatIntervals: CustomRepeatType?
     
     
-    init(repeat_type: String, repeat_until_date: Date? = nil, repeatIntervals: CustomRepeatType? = nil) {
+    init(repeat_type: String, repeat_until_date: String, repeatIntervals: CustomRepeatType? = nil) {
         self.repeat_type = repeat_type
         self.repeatIntervals = repeatIntervals
         self.repeat_until_date = repeat_until_date

@@ -30,7 +30,7 @@ struct NavigationBarExperience: View {
                 //REMINDERS BUTTON
                 //NavigationStack {
                 VStack() {
-                    NavigationLink(destination: RemindersScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)) {
+                    NavigationLink(destination: RemindersScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, filterPeriod: "week")) {
                         //Button(action: {
                         //home_pressed = 1
                         //reminders = true

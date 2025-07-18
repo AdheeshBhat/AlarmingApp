@@ -32,6 +32,12 @@ func createDateFromText(dateString: String) -> Date {
     return Date.now
 }
 
+func createTextFromDate(date: Date) -> String {
+    let format = DateFormatter()
+    format.dateFormat = "yyyy-MM-dd"
+    return format.string(from: date)
+}
+
 
 func getTitle(reminder: ReminderData) -> String {
     return reminder.title
@@ -42,7 +48,7 @@ func getUserData(cur_database: Database, userID: Int) -> [Date: ReminderData] {
 }
 
 func getReminderFromDate(userData: [Date: ReminderData], date: Date) -> ReminderData {
-    return userData[date] ?? ReminderData(ID: 1, date: createDate(year: 2025, month: 1, day: 1, hour: 1, minute: 1, second: 1), title: "undefined", description: "1/1/2025", repeatSettings: RepeatSettings(repeat_type: "None"), priority: "Low", isComplete: false, author: "user", isLocked: false)
+    return userData[date] ?? ReminderData(ID: 1, date: createDate(year: 2025, month: 1, day: 1, hour: 1, minute: 1, second: 1), title: "undefined", description: "1/1/2025", repeatSettings: RepeatSettings(repeat_type: "None", repeat_until_date: "Specific Date"), priority: "Low", isComplete: false, author: "user", isLocked: false)
 }
 
 func getDescriptionFromReminder(reminder: ReminderData) -> String {
@@ -81,10 +87,10 @@ func getRepeatTypeFromReminder(reminder: ReminderData) -> String {
     return reminder.repeatSettings.repeat_type
 }
 
-
-func getMaxRepeatDateFromReminder(reminder: ReminderData) -> Date {
-    return reminder.repeatSettings.repeat_until_date ?? Date.now
-}
+//
+//func getMaxRepeatDateFromReminder(reminder: ReminderData) -> Date {
+//    return reminder.repeatSettings.repeat_until_date ?? Date.now
+//}
 
 func getRepeatIntervalsFromReminder(reminder: ReminderData) -> CustomRepeatType {
     return reminder.repeatSettings.repeatIntervals ?? CustomRepeatType(days: "Monday", weeks: [0], months: [0])

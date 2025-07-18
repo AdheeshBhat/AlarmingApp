@@ -14,9 +14,20 @@ struct RepeatUntilFlow: View {
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
     @Environment(\.presentationMode) var presentationMode
-    @Binding var repeatUntil: String
     @State private var selectedDate: Date = Date()
+    @Binding var repeatUntil: String
+    @State private var repeatUntilOptionSelected: String
+    //define a string variable to use to check if specific date is pressed
     
+    
+    init(title: String, cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, repeatUntil: Binding<String>) {
+        self.title = title
+        self._cur_screen = cur_screen
+        self._DatabaseMock = DatabaseMock
+        self._repeatUntil = repeatUntil
+        self._repeatUntilOptionSelected = State(initialValue: "")
+    }
+
     var body: some View {
         VStack(spacing: 20) {
             Text(title)
@@ -27,7 +38,7 @@ struct RepeatUntilFlow: View {
             VStack(spacing: 0) {
                 ForEach(["Forever", "Specific Date"], id: \.self) { option in
                     Button(action: {
-                        repeatUntil = option
+                        repeatUntilOptionSelected = option
                     }) {
                         HStack {
                             Text(option)
@@ -35,20 +46,18 @@ struct RepeatUntilFlow: View {
                                 .font(.title3)
                                 .padding(.leading)
                             Spacer()
-                            if repeatUntil == option {
+                            if repeatUntilOptionSelected == option {
                                 Image(systemName: "checkmark")
                                     .font(.title)
                                     .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
                                     .padding(.trailing)
                             }
-                        }
+                        } //HStack ending
                         .padding(.vertical, 18)
                     }
-                    if option == "Forever" {
-                        Divider()
-                            .background(Color.gray)
-                            .padding(.horizontal, 20)
-                    }
+                    Divider()
+                        .background(Color.gray)
+                        .padding(.horizontal, 20)
                 }
             }
             .background(Color.blue.opacity(0.7))
@@ -56,7 +65,7 @@ struct RepeatUntilFlow: View {
             .padding(.horizontal)
 
             // CALENDAR
-            if repeatUntil == "Specific Date" {
+            if repeatUntilOptionSelected == "Specific Date" {
                 DatePicker(
                     "Select Date",
                     selection: $selectedDate,
@@ -68,7 +77,15 @@ struct RepeatUntilFlow: View {
             
             Spacer()
 
+            //DONE BUTTON
             Button(action: {
+                if repeatUntilOptionSelected == "Specific Date" {
+                    repeatUntil = createTextFromDate(date: selectedDate)
+                } else {
+                    repeatUntil = repeatUntilOptionSelected
+                }
+
+                
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Done")
@@ -82,6 +99,15 @@ struct RepeatUntilFlow: View {
             }
             .padding(.horizontal)
             .padding(.bottom)
+            
+            
+            .onAppear {
+                if repeatUntil == "Forever" {
+                    repeatUntilOptionSelected = repeatUntil
+                } else {
+                    repeatUntilOptionSelected = "Specific Date"
+                }
+            }
 
             NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
         }

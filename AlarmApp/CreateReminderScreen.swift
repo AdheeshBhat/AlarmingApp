@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CreateReminderScreen: View {
+    @Environment(\.presentationMode) private var presentationMode
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
     @State private var title: String = ""
@@ -20,6 +21,7 @@ struct CreateReminderScreen: View {
     @State private var isComplete: Bool = false
     @State private var author: String = ""
     @State private var isLocked: Bool = false
+    @State private var showReminderNameAlert: Bool = false
     
 
     var body: some View {
@@ -103,13 +105,27 @@ struct CreateReminderScreen: View {
                 Image(systemName: "arrow.2.circlepath")
                     .foregroundColor(.black)
                     .padding(.leading, 6)
-
-                NavigationLink(destination: RepeatSettingsFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: title, repeatSetting: $repeat_setting, repeatUntil: $repeatUntil)) {
+                
+                NavigationLink(
+                    destination: RepeatSettingsFlow(
+                        cur_screen: $cur_screen,
+                        DatabaseMock: $DatabaseMock,
+                        title: title,
+                        repeatSetting: $repeat_setting,
+                        repeatUntil: $repeatUntil
+                    )
+                ) {
                     Text(repeat_setting)
                         .foregroundColor(.black)
                         .font(.title3)
                         .padding(.leading, 75)
                 }
+                .disabled(title.isEmpty)
+                .simultaneousGesture(TapGesture().onEnded {
+                    if title.isEmpty {
+                        showReminderNameAlert = true
+                    }
+                })
 
                 Spacer()
                 Image(systemName: "chevron.right")
@@ -139,18 +155,26 @@ struct CreateReminderScreen: View {
                     .foregroundColor(.black)
                     .padding(.leading, 6)
 
-                NavigationLink(destination: PriorityFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: title, priority: $priority)) {
+                NavigationLink(
+                    destination: PriorityFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: title, priority: $priority, isLocked: $isLocked)
+                ) {
                     Text(priority)
                         .foregroundColor(.black)
                         .font(.title3)
                         .padding(.leading, 75)
                 }
+                .disabled(title.isEmpty)
+                .simultaneousGesture(TapGesture().onEnded {
+                    if title.isEmpty {
+                        showReminderNameAlert = true
+                    }
+                })
 
                 Spacer()
                 Image(systemName: "chevron.right")
                     .foregroundColor(.black)
                     .padding(.trailing)
-            }
+            } //HStack ending
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.blue.opacity(0.7))
             .cornerRadius(12)
@@ -162,25 +186,29 @@ struct CreateReminderScreen: View {
             
             // Save New Reminder Button
             Button(action: {
-                let reminder = ReminderData(
-                    ID: Int.random(in: 1000...9999),
-                    //Look at what date looks like and parse it
-                    date: createDate(year: 2025, month: 6, day: 19, hour: 11, minute: 1, second: 1),
-                    title: title,
-                    description: description,
-                    repeatSettings: RepeatSettings(repeat_type: "None"),
-                    priority: priority,
-                    isComplete: isComplete,
-                    author: author,
-                    isLocked: isLocked
-                )
-                addToDatabase(database: &DatabaseMock, userID: userID, date: date, reminder: reminder)
-                title = ""
-                description = ""
-                date = Date()
+                if title.isEmpty {
+                    showReminderNameAlert = true
+                } else {
+                    let reminder = ReminderData(
+                        ID: Int.random(in: 1000...9999),
+                        date: createDate(year: 2025, month: 6, day: 19, hour: 11, minute: 1, second: 1),
+                        title: title,
+                        description: description,
+                        repeatSettings: RepeatSettings(repeat_type: "None", repeat_until_date: "Specific Date"),
+                        priority: priority,
+                        isComplete: isComplete,
+                        author: author,
+                        isLocked: isLocked
+                    )
+                    addToDatabase(database: &DatabaseMock, userID: userID, date: date, reminder: reminder)
+                    title = ""
+                    description = ""
+                    date = Date()
+                    presentationMode.wrappedValue.dismiss()
+                }
             }) {
                 Text("Save New Reminder")
-                    .foregroundColor(.green)
+                    .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
                     .font(.title3)
                     .frame(maxWidth: .infinity)
                     .padding()
@@ -189,6 +217,10 @@ struct CreateReminderScreen: View {
                     .padding(.horizontal)
             }
         } //VStack ending
+        
+        .alert("Please type the reminder name first.", isPresented: $showReminderNameAlert) {
+            Button("OK", role: .cancel) {}
+        }
         
 //        Form {
 //            Section(header: Text("Reminder Info")) {

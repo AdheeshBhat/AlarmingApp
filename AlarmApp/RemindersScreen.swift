@@ -11,7 +11,9 @@ struct RemindersScreen: View {
     @State private var isDeleteViewOn : Bool = false
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
-    @State private var filterPeriod : String = "week"
+    @State var filterPeriod : String
+    var filteredDay: Date?
+    
     //create a variable that would change the period depending on the button pressed
     var currentPeriodText: String {
         let today = Date()
@@ -30,6 +32,10 @@ struct RemindersScreen: View {
             return "\(formatter.string(from: startOfWeek)) – \(formatter.string(from: endOfWeek))"
             
         case "month":
+            if filteredDay != nil {
+                formatter.dateFormat = "MMMM yyyy"
+                return formatter.string(from: filteredDay!)
+            }
             formatter.dateFormat = "MMMM yyyy"
             return formatter.string(from: today)
             
@@ -39,7 +45,7 @@ struct RemindersScreen: View {
     }
     
     var body: some View {
-        //NOTIFICATION BELL BUTTON
+        //NOTIFICATION BELL BUTTON + CREATE REMINDER BUTTON
         VStack {
             HStack {
                 NotificationBellExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
@@ -57,7 +63,6 @@ struct RemindersScreen: View {
             .padding()
             HStack {
                 Button(action: {
-                    //put actions here
                     filterPeriod = "today"
                 }) {
                     Text("Day")
@@ -70,7 +75,6 @@ struct RemindersScreen: View {
                 
                 
                 Button(action: {
-                    //put actions here
                     filterPeriod = "week"
                 }) {
                     Text("Week")
@@ -83,7 +87,6 @@ struct RemindersScreen: View {
                 
                 
                 Button(action: {
-                    //put actions here
                     filterPeriod = "month"
                 }) {
                     Text("Month")
@@ -94,10 +97,10 @@ struct RemindersScreen: View {
                 .background(filterPeriod == "month" ? Color.blue : Color(.systemGray3))
                 .cornerRadius(5)
                 
-                Button(action: {
-                    //put actions here
-                    
-                }) {
+                
+                NavigationLink(
+                    destination: AllRemindersScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                ) {
                     Text("All")
                         .font(.title)
                 }
@@ -124,7 +127,8 @@ struct RemindersScreen: View {
                     period: filterPeriod,
                     cur_screen: $cur_screen,
                     showEditButton: !isDeleteViewOn,
-                    showDeleteButton: isDeleteViewOn
+                    showDeleteButton: isDeleteViewOn,
+                    filteredDay: filteredDay
                 )
             }
             .background(RoundedRectangle(cornerRadius: 12).stroke(Color.black, lineWidth: 2))
@@ -160,12 +164,13 @@ struct ReminderRow: View {
     var time: String
     var date: String
     // Remove local copy of reminder
-    @Binding var reminder: ReminderData
+    @State var reminder: ReminderData
     var showEditButton: Bool = false
     var showDeleteButton: Bool = false
     @State private var showConfirmation = false
     @State private var showDeleteConfirmation = false
     @Binding var database: Database
+    
 
     var userID: Int
     var dateKey: Date
