@@ -104,6 +104,7 @@ struct PriorityFlow: View {
                     Text("You will be sent a notification.").padding(.vertical).foregroundColor(.gray)
                     Text("Caretaker :").bold()
                     Text("Your caretaker will be sent a notification after 10 minutes if the reminder is not turned off.").foregroundColor(.gray)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.top)
             } else if localPriority == "High" {
@@ -112,6 +113,7 @@ struct PriorityFlow: View {
                     Text("Your alarm will ring.").padding(.vertical).foregroundColor(.gray)
                     Text("Caretaker :").bold()
                     Text("Your caretaker will be called after 10 minutes if the alarm is not turned off.").foregroundColor(.gray)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.top)
             }

@@ -57,15 +57,35 @@ Revisit showEditButton/showDeleteButton and passing them into formattedReminders
 
 Minor Stuff
 - Run through all the files, and add comments to make code more clear                                       -
-- Make repeatUntil "forever"/"date" text white instead of gray                                              -
+- Make repeatUntil "forever"/"date" text white instead of gray                                              - Done
     - also dividers
 - Test the app in all screens using lots of mock data & document/fix bugs                                   -
--   + "Low Priority & Fixes"                                                                                -
+    - Notification screen is still only hard coded (removed)
+        - REMOVE NOTIFICATION CENTER
+        - possible expansion: to have a way to contact caretaker here
+    - Text on priority flow is cut off (fixed)
+    - Repeat Until values for existing reminders in the database are stored as "Specific Date" or some string, not actual date that the calendar can show
+    - When calendar is being displayed after re-entering RepeatUntil flow, the selectedDate is not shown
+        - REVISIT THIS LATER
+    - repeatSetting is not saved from newly created reminders, when edited (fixed)
+    - HomeScreen does not show current date (fixed)
+    - CreateReminder does not save time/date properly
+    
+-   + "Low Priority & Fixes"                                                                                - Done
 
 7. All Reminders view
     - Figma all reminders view takes user to month reminder screen for selected month                       - Done
-    - test AllReminders use cases using mock data from databaseMock                                         -
-    - change period, not dismiss for all three AllReminders filter buttons                                  -
+    - test AllReminders use cases using mock data from databaseMock                                         - Done
+    
+    PROPOSE NEW ALL REMINDERS FUNCTIONALITY -- have a way to go back to current month date, see if this is native funcationality
+        - selector at the top of the reminders month view (ex. where it says "July 2025") that allows user to scroll through months/years to filter
+        - same thing as AllReminders screen, but as a filter that can change on the same screen, instead of on a new screen
+        - issue with current AllReminders:
+            - once a month is selected from AllReminders, there is no way to remove this "filter" unless you click the back button
+            
+        - Remove AllReminders                                                                                           -
+        - Move "Reminders" text into HStack next to CreateReminderScreen button, and make month/year picker bigger      - 
+
 
 
 7.5 Notifications/Alerts?
@@ -86,5 +106,5 @@ Minor Stuff
 
 
 Low Priority Fixes
-1. Add AM and PM to all displayed times instead of  24 hr clock (for home screen and reminders screen)
-2. Remove blue highlight when moving away from page (home & reminders screens)
+1. Add AM and PM to all displayed times instead of  24 hr clock (for home screen and reminders screen)      - Done
+2. Remove blue highlight when moving away from page (home & reminders screens)                              - Done

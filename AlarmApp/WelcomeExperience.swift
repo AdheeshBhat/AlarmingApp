@@ -12,11 +12,10 @@ func WelcomeExperience() -> some View {
         Text("Welcome Adheesh!")
             .font(.largeTitle)
             .fontWeight(.bold)
-            .padding(.top, 1.5)
+            //.padding(.top, 1.5)
             .padding(.bottom, 1)
-        
-        //loadSessionInfo function to show the date        
-        Text("Sunday, May 5th")
+             
+        Text(getCurrentDateString())
             .font(.title)
             .padding(.bottom)
     } //VStack ending

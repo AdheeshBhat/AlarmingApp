@@ -19,8 +19,8 @@ struct AllRemindersScreen: View {
         //NOTIFICATION BELL BUTTON + CREATE REMINDER BUTTON
         VStack {
             HStack {
-                NotificationBellExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
-                    .padding(.trailing, 10)
+                //NotificationBellExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                    //.padding(.trailing, 10)
                 CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
             }
         } //VStack ending

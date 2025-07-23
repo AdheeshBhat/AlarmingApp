@@ -39,6 +39,7 @@ struct EditReminderScreen: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             TextField("Type Reminder Name...", text: $localTitle)
+                .multilineTextAlignment(.center)
                 .font(.largeTitle)
                 .foregroundColor(.black)
                 .padding(.horizontal)
@@ -56,7 +57,7 @@ struct EditReminderScreen: View {
                 ZStack(alignment: .topLeading) {
                     if localDescription.isEmpty {
                         Text("Add your description here!")
-                            .foregroundColor(.gray)
+                            .foregroundColor(.white)
                             .padding(.horizontal, 2)
                             .padding(.vertical, 2)
                     }
@@ -210,6 +211,10 @@ struct EditReminderScreen: View {
                     .background(Color.blue.opacity(0.7))
                     .cornerRadius(10)
                     .padding(.horizontal)
+            }
+            
+            .onAppear {
+                cur_screen = .EditScreen
             }
             
             VStack {

@@ -26,13 +26,14 @@ struct CreateReminderScreen: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing : 16) {
+            //TITLE
             TextField("Type Reminder Name...", text: $title)
                 .multilineTextAlignment(.center)
                 .font(.largeTitle)
                 .foregroundColor(.black)
                 .padding(.horizontal)
 
-            // Description Box
+            // DESCRIPTION BOX
             VStack(alignment: .leading, spacing: 8) {
                 Text("Description")
                     .foregroundColor(.black)
@@ -44,7 +45,7 @@ struct CreateReminderScreen: View {
                 ZStack(alignment: .topLeading) {
                         if description.isEmpty {
                             Text("Add your description here!")
-                                .foregroundColor(.gray)
+                                .foregroundColor(.white)
                                 .padding(.horizontal, 2)
                                 .padding(.vertical, 2)
                         }
@@ -62,7 +63,7 @@ struct CreateReminderScreen: View {
             .cornerRadius(12)
             .padding(.horizontal)
 
-            // Time Selector
+            // TIME SELECTOR
             VStack(spacing: 8) {
                 HStack {
                     Text("Today")
@@ -156,7 +157,12 @@ struct CreateReminderScreen: View {
                     .padding(.leading, 6)
 
                 NavigationLink(
-                    destination: PriorityFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: title, priority: $priority, isLocked: $isLocked)
+                    destination: PriorityFlow(
+                        cur_screen: $cur_screen,
+                        DatabaseMock: $DatabaseMock,
+                        title: title,
+                        priority: $priority,
+                        isLocked: $isLocked)
                 ) {
                     Text(priority)
                         .foregroundColor(.black)
@@ -184,27 +190,27 @@ struct CreateReminderScreen: View {
 
             
             
-            // Save New Reminder Button
+            // SAVE NEW REMINDER BUTTON
             Button(action: {
                 if title.isEmpty {
                     showReminderNameAlert = true
                 } else {
                     let reminder = ReminderData(
                         ID: Int.random(in: 1000...9999),
+                        //date that user selects for the reminder
                         date: createDate(year: 2025, month: 6, day: 19, hour: 11, minute: 1, second: 1),
                         title: title,
                         description: description,
-                        repeatSettings: RepeatSettings(repeat_type: "None", repeat_until_date: "Specific Date"),
+                        repeatSettings: RepeatSettings(repeat_type: repeat_setting, repeat_until_date: repeatUntil),
                         priority: priority,
                         isComplete: isComplete,
                         author: author,
                         isLocked: isLocked
                     )
-                    addToDatabase(database: &DatabaseMock, userID: userID, date: date, reminder: reminder)
-                    title = ""
-                    description = ""
-                    date = Date()
+                    let uniqueID = Date.now
+                    addToDatabase(database: &DatabaseMock, userID: userID, date: uniqueID, reminder: reminder)
                     presentationMode.wrappedValue.dismiss()
+                    setAlarm(time: date, title: title, description: description, repeat_setting: reminder.repeatSettings.repeat_type, uniqueDate: uniqueID)
                 }
             }) {
                 Text("Save New Reminder")
@@ -222,36 +228,10 @@ struct CreateReminderScreen: View {
             Button("OK", role: .cancel) {}
         }
         
-//        Form {
-//            Section(header: Text("Reminder Info")) {
-//                TextField("Title", text: $title)
-//                TextField("Description", text: $description)
-//                DatePicker("Date & Time", selection: $date)
-//            }
-//
-//            Button(action: {
-//                let reminder = ReminderData(
-//                    ID: Int.random(in: 1000...9999),
-//                    date: date,
-//                    title: title,
-//                    description: description,
-//                    repeatSettings: RepeatSettings(repeat_type: "None")
-//                )
-//                addToDatabase(database: &DatabaseMock, userID: userID, date: date, reminder: reminder)
-//
-//                // Clear input fields
-//                title = ""
-//                description = ""
-//                date = Date()
-//            }) {
-//                Text("Add Reminder")
-//                    .frame(maxWidth: .infinity)
-//                    .padding()
-//                    .background(Color.blue)
-//                    .foregroundColor(.white)
-//                    .cornerRadius(10)
-//            }
-//        }
+        .onAppear {
+            cur_screen = .CreateReminderScreen
+        }
+        
         VStack {
             NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
         }

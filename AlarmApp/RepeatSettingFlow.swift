@@ -15,6 +15,7 @@ struct RepeatSettingsFlow: View {
     @Binding var repeatSetting: String
     @State private var localRepeatSetting: String? = nil
     @Binding var repeatUntil: String
+    //local repeatUntil var for repeatSettings screen (2nd local)
     @State private var localRepeatScreenRepeatUntil: String
     
     
@@ -33,11 +34,13 @@ struct RepeatSettingsFlow: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
+            //TITLE
             Text(title)
                 .font(.largeTitle)
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .center)
 
+            //"REPEAT" HEADING
             HStack {
                 Text("Repeat")
                     .foregroundColor(.black)
@@ -46,9 +49,10 @@ struct RepeatSettingsFlow: View {
                 Image(systemName: "arrow.2.circlepath")
                     .foregroundColor(.black)
                     .padding(.leading, 6)
-            }
+            } //HStack ending
             .frame(maxWidth: .infinity, alignment: .center)
 
+            //None, Daily, Weekly, Monthly, Yearly, Custom BUTTONS
             VStack(spacing: 0) {
                 ForEach(options.indices, id: \.self) { index in
                     Button(action: {
@@ -71,24 +75,23 @@ struct RepeatSettingsFlow: View {
                                     .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
                                     .padding(.trailing)
                             }
-                        }
+                        } //HStack ending
                         .padding(.vertical, 14)
-                    }
+                    } //Button ending
 
                     if index < options.count - 1 {
                         Divider()
-                            .background(Color.gray)
+                            .foregroundColor(Color(red: 255, green: 255, blue: 255))
+                            //.background(Color(red: 255, green: 255, blue: 255))
                             .padding(.horizontal, 20)
                     }
-                }
-            }
+                } //For loop ending
+            } //VStack ending
             .background(Color.blue.opacity(0.7))
             .cornerRadius(12)
 
             
-            
             //REPEAT UNTIL BUTTON
-            
             if (localRepeatSetting != "None" && localRepeatSetting != nil) {
                 NavigationLink(destination: RepeatUntilFlow(title: title, cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, repeatUntil: $localRepeatScreenRepeatUntil)) {
                     HStack {
@@ -97,7 +100,7 @@ struct RepeatSettingsFlow: View {
                                 .foregroundColor(.black)
                                 .font(.title3)
                             Text(localRepeatScreenRepeatUntil)
-                                .foregroundColor(.gray)
+                                .foregroundColor(.white)
                                 .font(.title3)
                         }
                         .padding(.leading)
@@ -111,7 +114,7 @@ struct RepeatSettingsFlow: View {
                     .cornerRadius(12)
                     .padding(.top, 8)
                 }
-            }
+            } //if statement ending
 
             // DONE BUTTON
             Button(action: {

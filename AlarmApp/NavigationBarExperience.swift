@@ -11,8 +11,6 @@ struct NavigationBarExperience: View {
     //@Environment(\.presentationMode) var
         //presentationMode: Binding<PresentationMode>
     @Environment(\.dismiss) var dismiss
-    @State var home_pressed : Int = 0
-    @State var reminders : Bool = false
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
     
@@ -28,46 +26,44 @@ struct NavigationBarExperience: View {
             HStack(spacing: 60) {
                 
                 //REMINDERS BUTTON
-                //NavigationStack {
                 VStack() {
-                    NavigationLink(destination: RemindersScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, filterPeriod: "week")) {
-                        //Button(action: {
-                        //home_pressed = 1
-                        //reminders = true
-                        
-                        //}) {
+                    if cur_screen != .RemindersScreen {
+                        NavigationLink(destination: RemindersScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, filterPeriod: "week")) {
+                            Image(systemName: "list.bullet")
+                                .font(.title)
+                                .padding(7)
+                                .foregroundColor((cur_screen == .RemindersScreen) ? Color.blue : Color.black)
+                        }
+                    } else {
                         Image(systemName: "list.bullet")
                             .font(.title)
-                        //.foregroundColor(home_pressed == 1 ? Color.blue : Color.black)
-                        
-                        //} //button ending
                             .padding(7)
-                        
+                            .foregroundColor(Color.blue)
+
                         
                     } //Navigation Link ending
                     
                     Text("Reminders")
                     
                 } //VStack ending
-                //} //Navigation Stack ending
-                
                 
                 
                 //HOME BUTTON
-                
+
                 VStack() {
-                    NavigationLink(destination: HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen)) {
+                    if cur_screen != .HomeScreen {
+                        NavigationLink(destination: HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen)) {
+                            Image(systemName: "house")
+                                .font(.title)
+                                .foregroundColor((cur_screen == .HomeScreen) ? Color.blue : Color.black)
+                        }
+                        .padding(4)
+                    } else {
                         Image(systemName: "house")
                             .font(.title)
+                            .foregroundColor(Color.blue)
+                            .padding(4)
                     }
-                    //Button(action: {
-                    //home_pressed = 0
-                    //}) {
-                    //Image(systemName: "house")
-                    //.font(.title)
-                    //.foregroundColor(home_pressed == 0 ? Color.blue : Color.black)
-                    //}
-                    .padding(4)
                     
                     Text("Home")
                     

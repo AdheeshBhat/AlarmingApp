@@ -38,6 +38,12 @@ func createTextFromDate(date: Date) -> String {
     return format.string(from: date)
 }
 
+func createUniqueIDFromDate(date: Date) -> String {
+    let format = DateFormatter()
+    format.dateFormat = "yyyy-MM-dd HH:mm:ss"
+    return format.string(from: date)
+}
+
 
 func getTitle(reminder: ReminderData) -> String {
     return reminder.title
@@ -92,6 +98,12 @@ func getRepeatTypeFromReminder(reminder: ReminderData) -> String {
 //    return reminder.repeatSettings.repeat_until_date ?? Date.now
 //}
 
+func getCurrentDateString() -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "EEEE, MMM d"
+    return formatter.string(from: Date())
+}
+
 func getRepeatIntervalsFromReminder(reminder: ReminderData) -> CustomRepeatType {
     return reminder.repeatSettings.repeatIntervals ?? CustomRepeatType(days: "Monday", weeks: [0], months: [0])
 }
@@ -111,4 +123,17 @@ func deleteFromDatabase(database: inout Database, userID: Int, date: Date) {
         userReminders.removeValue(forKey: date)
         database.users[userID] = userReminders
     }
+}
+
+
+func timeAsDate(_ timeString: String) -> Date? {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "H:mm"
+    return formatter.date(from: timeString)
+}
+
+func timeAsString(_ time: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "H:mm"
+    return formatter.string(from: time)
 }

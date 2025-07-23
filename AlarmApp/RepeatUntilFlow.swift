@@ -14,7 +14,7 @@ struct RepeatUntilFlow: View {
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
     @Environment(\.presentationMode) var presentationMode
-    @State private var selectedDate: Date = Date()
+    @State var selectedDate: Date
     @Binding var repeatUntil: String
     @State private var repeatUntilOptionSelected: String
     //define a string variable to use to check if specific date is pressed
@@ -26,6 +26,12 @@ struct RepeatUntilFlow: View {
         self._DatabaseMock = DatabaseMock
         self._repeatUntil = repeatUntil
         self._repeatUntilOptionSelected = State(initialValue: "")
+        if _repeatUntil.wrappedValue != "Forever" {
+            self.selectedDate = createDateFromText(dateString: repeatUntil.wrappedValue)
+        } else {
+            self.selectedDate = Date()
+        }
+       
     }
 
     var body: some View {
