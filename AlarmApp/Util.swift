@@ -137,3 +137,34 @@ func timeAsString(_ time: Date) -> String {
     formatter.dateFormat = "H:mm"
     return formatter.string(from: time)
 }
+
+func dayString(from date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "EEEE, MMM d"
+    return formatter.string(from: date)
+}
+
+func weekString(from date: Date) -> String {
+    let calendar = Calendar.current
+    let formatter = DateFormatter()
+    formatter.dateFormat = "MMM d"
+    
+    let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
+    let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
+    
+    return "\(formatter.string(from: startOfWeek)) – \(formatter.string(from: endOfWeek))"
+}
+
+func monthString(_ date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "LLLL"
+    return formatter.string(from: date)
+}
+
+func yearString(_ date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy"
+    return formatter.string(from: date)
+}
+
+

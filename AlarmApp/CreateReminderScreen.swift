@@ -22,7 +22,7 @@ struct CreateReminderScreen: View {
     @State private var author: String = ""
     @State private var isLocked: Bool = false
     @State private var showReminderNameAlert: Bool = false
-    
+    @State var selectedSound: String = "Chord"
 
     var body: some View {
         VStack(alignment: .leading, spacing : 16) {
@@ -210,16 +210,17 @@ struct CreateReminderScreen: View {
                     let uniqueID = Date.now
                     addToDatabase(database: &DatabaseMock, userID: userID, date: uniqueID, reminder: reminder)
                     presentationMode.wrappedValue.dismiss()
-                    setAlarm(time: date, title: title, description: description, repeat_setting: reminder.repeatSettings.repeat_type, uniqueDate: uniqueID)
+                    setAlarm(dateAndTime: date, title: title, description: description, repeat_setting: reminder.repeatSettings.repeat_type, uniqueDate: uniqueID, soundType: selectedSound)
                 }
             }) {
                 Text("Save New Reminder")
+                    .font(.title)
+                    .fontWeight(.bold)
                     .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
-                    .font(.title3)
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.blue.opacity(0.7))
-                    .cornerRadius(10)
+                    .cornerRadius(12)
                     .padding(.horizontal)
             }
         } //VStack ending

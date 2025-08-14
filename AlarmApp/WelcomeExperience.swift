@@ -12,7 +12,6 @@ func WelcomeExperience() -> some View {
         Text("Welcome Adheesh!")
             .font(.largeTitle)
             .fontWeight(.bold)
-            //.padding(.top, 1.5)
             .padding(.bottom, 1)
              
         Text(getCurrentDateString())

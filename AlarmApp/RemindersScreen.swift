@@ -6,7 +6,7 @@ struct RemindersScreen: View {
         presentationMode: Binding<PresentationMode>
     @State private var navigate_to_home_screen : Bool = false
     @State private var notifications : Bool = false
-    @State private var isRemindersViewOn : Bool = false
+    @State private var showCalendarView : Bool = false
     @State private var isDeleteViewOn : Bool = false
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
@@ -17,27 +17,16 @@ struct RemindersScreen: View {
     //create a variable that would change the period depending on the button pressed
     var currentPeriodText: String {
         let today = Date()
-        let calendar = Calendar.current
-        let formatter = DateFormatter()
         
         switch filterPeriod {
         case "today":
-            formatter.dateFormat = "EEEE, MMM d"
-            return formatter.string(from: today)
+            return dayString(from: filteredDay ?? today)
             
         case "week":
-            let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
-            let endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
-            formatter.dateFormat = "MMM d"
-            return "\(formatter.string(from: startOfWeek)) – \(formatter.string(from: endOfWeek))"
+            return weekString(from: filteredDay ?? today)
             
         case "month":
-            if filteredDay != nil {
-                formatter.dateFormat = "MMMM yyyy"
-                return formatter.string(from: filteredDay!)
-            }
-            formatter.dateFormat = "MMMM yyyy"
-            return formatter.string(from: today)
+            return monthString(filteredDay ?? today) + " " + yearString(filteredDay ?? today)
             
         default:
             return ""
@@ -45,24 +34,30 @@ struct RemindersScreen: View {
     }
     
     var body: some View {
-        //NOTIFICATION BELL BUTTON + CREATE REMINDER BUTTON
+        //TITLE + CREATE REMINDER BUTTON
         VStack {
-            HStack {
+            ZStack {
                 //NotificationBellExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
                     //.padding(.trailing, 10)
-                CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
-            }
-            .frame(maxWidth: .infinity, alignment: .topTrailing)
-        }
+                HStack {
+                    SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                    Spacer()
+                }
+                
+                Text("Reminders")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top)
+
+                HStack {
+                    Spacer()
+                    CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                }
+            } //ZStack ending
+            .padding(.bottom)
+        } //VStack ending
         
-        
-        VStack {
-            Text("Reminders")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-            
-                .padding(.bottom)
-        }
         
         VStack {
             //REMINDER FILTERS
@@ -103,123 +98,21 @@ struct RemindersScreen: View {
                         .foregroundColor(filterPeriod == "month" ? .white : .black)
                 }
 
-                //ALL
-                NavigationLink(
-                    destination: AllRemindersScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
-                ) {
-                    Text("All")
-                        .font(.title)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical)
-                        .background(Color(.systemGray3))
-                        .foregroundColor(.black)
-                }
-            }
-            .padding(.horizontal, 0)
+            } //HStack ending (filters)
             .font(.headline)
-            .padding(.bottom, 10)
             
             
             //Displays current period right below filters
             if filterPeriod == "month" {
-                if isEditingMonthYear {
-                    VStack {
-                        HStack {
-                            //MONTH PICKER
-                            Picker("Month", selection: Binding(
-                                get: {
-                                    Calendar.current.component(.month, from: filteredDay ?? Date()) - 1
-                                },
-                                set: { newValue in
-                                    let calendar = Calendar.current
-                                    var components = calendar.dateComponents([.year, .day], from: filteredDay ?? Date())
-                                    components.month = newValue + 1
-                                    components.day = 1
-                                    if let newDate = calendar.date(from: components) {
-                                        filteredDay = newDate
-                                    }
-                                }
-                            )) {
-                                ForEach(0..<12) { index in
-                                    Text(Calendar.current.monthSymbols[index])
-                                        .font(.title2)
-                                        .tag(index)
-                                }
-                            } //Picker ending
-                            .pickerStyle(.wheel)
-                            .frame(maxWidth: .infinity)
-                            
-                            //YEAR PICKER
-                            Picker("Year", selection: Binding(
-                                get: {
-                                    Calendar.current.component(.year, from: filteredDay ?? Date())
-                                },
-                                set: { newValue in
-                                    let calendar = Calendar.current
-                                    var components = calendar.dateComponents([.month, .day], from: filteredDay ?? Date())
-                                    components.year = newValue
-                                    components.day = 1
-                                    if let newDate = calendar.date(from: components) {
-                                        filteredDay = newDate
-                                    }
-                                }
-                            )) {
-                                ForEach(2020...2080, id: \.self) { year in
-                                    Text(String(year))
-                                        .font(.title2)
-                                        .tag(year)
-                                }
-                            } //Picker ending
-                            .pickerStyle(.wheel)
-                            .frame(maxWidth: .infinity)
-                        } //HStack ending
-                        .frame(height: 100)
-                        
-                        HStack {
-                            //DONE BUTTON
-                            Button(action: {
-                                isEditingMonthYear = false
-                            }) {
-                                Text("Done")
-                                    .font(.title2)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.green)
-                            } //Reset button ending
-                            .padding(.horizontal)
-                            
-                            //RESET BUTTON
-                            Button(action: {
-                                let now = Date()
-                                let calendar = Calendar.current
-                                var components = calendar.dateComponents([.year, .month], from: now)
-                                components.day = 1
-                                if let currentDate = calendar.date(from: components) {
-                                    filteredDay = currentDate
-                                }
-                            }) {
-                                Text("Reset")
-                                    .font(.title2)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.blue)
-                            } // Done button ending
-                        } //HStack ending
-                        
-                        
-                    } //VStack ending
-                } else {
-                    Text(currentPeriodText)
-                        .font(.title2)
-                        .foregroundColor(.black)
-                        .onTapGesture {
-                            isEditingMonthYear = true
-                        }
-                        .padding(.bottom, 10)
-                }
+                MonthYearSelector(
+                    filteredDay: $filteredDay,
+                    isEditingMonthYear: $isEditingMonthYear,
+                    currentPeriodText: currentPeriodText
+                )
             } else {
                 Text(currentPeriodText)
-                    .font(.title2)
+                    .font(.title)
                     .foregroundColor(.black)
-                    .padding(.bottom, 10)
             }
         } //VStack ending
         
@@ -240,17 +133,30 @@ struct RemindersScreen: View {
             .padding(.horizontal)
         } //VStack ending
         Spacer()
-        
-        VStack {
-            //TOGGLES
-            Toggle("Delete View", isOn: $isDeleteViewOn)
-                .font(.title3)
-                .padding(.horizontal)
-            Toggle("Calendar View", isOn: $isRemindersViewOn)
-                .font(.title3)
+        NavigationStack {
+            VStack {
+                //TOGGLES
+                Toggle("Delete View", isOn: $isDeleteViewOn)
+                    .font(.title3)
+                    .padding(.horizontal)
+                HStack {
+                    Toggle(isOn: $showCalendarView) {
+                        Text("Calendar View")
+                            .font(.title3)
+                    }
+                    .onChange(of: showCalendarView) {
+                        if showCalendarView {
+                            cur_screen = .RemindersScreen
+                        }
+                    }
+                }
                 .padding()
-        } //VStack ending
-        .padding(.leading)
+            } //VStack ending
+            .padding(.leading)
+        } //NavigationStack ending
+        .navigationDestination(isPresented: $showCalendarView) {
+            CalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+        }
         
         .onAppear {
             cur_screen = .RemindersScreen

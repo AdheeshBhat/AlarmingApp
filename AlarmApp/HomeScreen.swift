@@ -11,15 +11,19 @@ struct HomeView: View {
     @Binding var DatabaseMock: Database
     @Binding var cur_screen: Screen
     @State var isHideCompletedReminders : Bool = false
+    
     var body: some View {
         VStack {
             //Top bar with notification bell and create reminder button
             HStack {
                 //NotificationBellExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
                     //.padding(.trailing, 10)
+                SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                Spacer()
                 CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
             }
-            .frame(maxWidth: .infinity, alignment: .topTrailing)
+            //.padding(.horizontal)
+            //.frame(maxWidth: .infinity, alignment: .topTrailing)
         }
         
         //"Welcome [user]" & today's date

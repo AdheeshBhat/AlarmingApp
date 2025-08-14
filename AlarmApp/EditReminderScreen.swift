@@ -192,7 +192,7 @@ struct EditReminderScreen: View {
 
             Spacer()
 
-            // SAVE BUTTON
+            // SAVE CHANGES BUTTON
             Button(action: {
                 reminder.title = localTitle
                 reminder.description = localDescription
@@ -203,13 +203,13 @@ struct EditReminderScreen: View {
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Save Changes")
-                    .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
                     .font(.largeTitle)
                     .fontWeight(.bold)
+                    .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(Color.blue.opacity(0.7))
-                    .cornerRadius(10)
+                    .cornerRadius(12)
                     .padding(.horizontal)
             }
             

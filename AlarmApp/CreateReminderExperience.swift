@@ -14,11 +14,12 @@ struct CreateReminderExperience: View {
     var body: some View {
         NavigationLink(destination: CreateReminderScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)) {
             Image(systemName: "plus")
-                .font(.system(size: 18, weight: .bold))
+                .font(.title3)
+                .fontWeight(.bold)
                 .foregroundColor(.white)
                 .padding(10)
                 .background(Circle().fill(Color.blue))
         }
-        .padding(.trailing, 20) 
+        .padding(.trailing) 
     }
 }

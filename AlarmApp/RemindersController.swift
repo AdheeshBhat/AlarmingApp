@@ -80,7 +80,13 @@ struct Database {
 }
 
 
-
+struct userSettings {
+    var selectedSound: String
+    
+    init(selectedSound: String) {
+        self.selectedSound = selectedSound
+    }
+}
 
 
 //    struct RepeatSettings: {

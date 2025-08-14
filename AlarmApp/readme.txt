@@ -52,19 +52,16 @@ Revisit showEditButton/showDeleteButton and passing them into formattedReminders
     when user clicks back button, stuff is not saved
         - ensure final values of variables are not changed until save is pressed                            - Done
         
-        
-        
 
 Minor Stuff
 - Run through all the files, and add comments to make code more clear                                       -
 - Make repeatUntil "forever"/"date" text white instead of gray                                              - Done
     - also dividers
-- Test the app in all screens using lots of mock data & document/fix bugs                                   -
+- Test the app in all screens using lots of mock data & document/fix bugs                                   - Done
     - Notification screen is still only hard coded (removed)
         - REMOVE NOTIFICATION CENTER
         - possible expansion: to have a way to contact caretaker here
     - Text on priority flow is cut off (fixed)
-    - Repeat Until values for existing reminders in the database are stored as "Specific Date" or some string, not actual date that the calendar can show
     - When calendar is being displayed after re-entering RepeatUntil flow, the selectedDate is not shown
         - REVISIT THIS LATER
     - repeatSetting is not saved from newly created reminders, when edited (fixed)
@@ -83,28 +80,42 @@ Minor Stuff
         - issue with current AllReminders:
             - once a month is selected from AllReminders, there is no way to remove this "filter" unless you click the back button
             
-        - Remove AllReminders                                                                                           -
-        - Move "Reminders" text into HStack next to CreateReminderScreen button, and make month/year picker bigger      - 
+        - Remove AllReminders                                                                                           - Done
+        - Move "Reminders" text into HStack next to CreateReminderScreen button, and make month/year picker bigger      - Done
 
 
 
-7.5 Notifications/Alerts?
+
+8 Settings Screen
+ - Create a gear button in the top left for settings screen                                                             - Done
+ - Notification sound picker                                                                                            -       Needs local variable to save
+
+9 Notifications/Alerts                                                                                                  - Done
 
 
-8. Find and migrate to a data store for our reminders dictionary
+10. Calendar
+    - Color code circles based on number of reminders (length of list of reminders on a given day)                      - Done
+        - Change the background of the date VStack, not circle                                                          - Done
+    - Functional Calendar view toggle                                                                                   - Done
+    - Calendar Week view                                                                                                - Done
+    - Grid lines between dates                                                                                          -
+    - Hide week/month filters when currentCalendarPeriodText is pressed
+    - Reminder/calendar filter: week filter display shouldn't be linked to month filter (when month changes, week is changing too)
+    - Reminder View for week/month calendars
+        - Reminder dimensions should be variables, not hard coded values
+    
+
+11. Find and migrate to a data store for our reminders dictionary                                                        -
     - firebase?
     - AWS?
     - want free storage
-
-9. Calendar
-
-10. Code filtering logic for pressing a month in AllReminders
-    - put this in filteringReminders
-11. Styling changes to relfect Figma state for home screen and reminders screen, no hard coded values (should work for all screens)
+    
+12. Styling changes to relfect Figma state for home screen and reminders screen, no hard coded values (should work for all screens)     -
     Change device from iPhone 16 Pro to iPad...
-
 
 
 Low Priority Fixes
 1. Add AM and PM to all displayed times instead of  24 hr clock (for home screen and reminders screen)      - Done
 2. Remove blue highlight when moving away from page (home & reminders screens)                              - Done
+3. Add swiping feature for RemindersScreen and CalendarView                                                 - 
+4. Light mode/dark mode                                                                                     -

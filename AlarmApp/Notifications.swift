@@ -9,6 +9,7 @@ import UserNotifications
 
 func requestNotificationPermission() {
     let center = UNUserNotificationCenter.current()
+    center.delegate = NotificationDelegate.shared
     center.requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
         if granted {
             print("Permission granted")
@@ -18,27 +19,46 @@ func requestNotificationPermission() {
     }
 }
 
+//Used to allow notifications to pop up even if app is running in the foreground
+class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
+    static let shared = NotificationDelegate()
 
-func setAlarm(time: Date, title: String, description: String, repeat_setting: String, uniqueDate: Date) {
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler:
+                                @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound, .badge])
+    }
+}
+
+
+func setAlarm(dateAndTime: Date, title: String, description: String, repeat_setting: String, uniqueDate: Date, soundType: String) {
     //check if reminder already exists
     //if reminder does not exist,
-    let calendar = Calendar.current
-    let components = calendar.dateComponents([.hour, .minute], from: Date.now.addingTimeInterval(10))
     let content = UNMutableNotificationContent()
     content.title = title
     content.body = description
-    content.sound = UNNotificationSound.default
+    //content.sound = UNNotificationSound.default
+    if soundType == "Alert" {
+        content.sound = UNNotificationSound(named: UNNotificationSoundName("notification_alert.wav"))
+    } else {
+        content.sound = UNNotificationSound(named: UNNotificationSoundName("chord_iphone.WAV"))
+
+    }
     var shouldRepeat: Bool = false
     if repeat_setting != "None" {
         shouldRepeat = true
     }
-    let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+    let dateComponents = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: dateAndTime)
+    
+    let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: shouldRepeat)
     let request = UNNotificationRequest(identifier: createUniqueIDFromDate(date: uniqueDate), content: content, trigger: trigger)
+    
     UNUserNotificationCenter.current().add(request) { error in
         if let error = error {
             print("Error adding notification: \(error)")
         } else {
-            print("Successfully adding notification for time" + timeAsString(Date.now.addingTimeInterval(10)))
+            print("Successfully added notification for \(dateAndTime)")
         }
     }
 }
