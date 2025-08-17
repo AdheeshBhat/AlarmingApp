@@ -156,6 +156,41 @@ struct CalendarDayCellView: View {
     }
 }
 
+struct WeekDayCellView: View {
+    let date: Date
+    let reminders: [CalendarReminder]
+    let cellWidth: CGFloat
+    let cellHeight: CGFloat
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Text("\(Calendar.current.component(.day, from: date))")
+                .font(.system(size: 16, weight: .bold))
+                .foregroundColor(.black)
+            
+            ScrollView {
+                VStack(spacing: 2) {
+                    ForEach(reminders) { reminder in
+                        Text(reminder.title)
+                            .font(.system(size: 10))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 2)
+                            .background(RoundedRectangle(cornerRadius: 4).fill(Color.blue))
+                            .lineLimit(2)
+                    }
+                }
+            }
+        }
+        .frame(width: cellWidth, height: cellHeight)
+        .background(
+            RoundedRectangle(cornerRadius: 4)
+                .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
+        )
+        .padding(1)
+    }
+}
+
 struct CalendarView: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var cur_screen: Screen
@@ -178,99 +213,109 @@ struct CalendarView: View {
     let columns = Array(repeating: GridItem(.flexible(), spacing: 1), count: 7)
     
     var body: some View {
-        GeometryReader { geometry in
-            VStack(spacing: 0) {
-                // Header
-                ZStack {
-                    HStack {
-                        SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
-                        Spacer()
-                    }
-                    
-                    Text("Calendar")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.top)
-                    
-                    HStack {
-                        Spacer()
-                        CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
-                    }
+        VStack(spacing: 0) {
+            // Header
+            ZStack {
+                HStack {
+                    SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                    Spacer()
                 }
-                .padding(.bottom)
                 
-                // Week/Month Toggle
-                HStack(spacing: 0) {
-                    Button(action: { calendarViewType = "week" }) {
-                        Text("Week")
-                            .font(.title)
-                            .frame(maxWidth: .infinity)
-                            .foregroundColor(calendarViewType == "week" ? .white : .black)
-                            .padding(.vertical)
-                            .background(calendarViewType == "week" ? Color.blue : Color(.systemGray3))
-                    }
-                    Button(action: { calendarViewType = "month" }) {
-                        Text("Month")
-                            .font(.title)
-                            .frame(maxWidth: .infinity)
-                            .foregroundColor(calendarViewType == "month" ? .white : .black)
-                            .padding(.vertical)
-                            .background(calendarViewType == "month" ? Color.blue : Color(.systemGray3))
-                    }
+                Text("Calendar")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top)
+                
+                HStack {
+                    Spacer()
+                    CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
                 }
-                .font(.headline)
-                
-                // Month/Year Selector
-                if calendarViewType == "month" {
-                    MonthYearSelector(
-                        filteredDay: $filteredDay,
-                        isEditingMonthYear: $isEditingMonthYear,
-                        currentPeriodText: currentPeriodText
-                    )
-                } else {
-                    Text(currentPeriodText)
+            }
+            .padding(.bottom)
+            
+            // Week/Month Toggle
+            HStack(spacing: 0) {
+                Button(action: { calendarViewType = "week" }) {
+                    Text("Week")
                         .font(.title)
-                        .foregroundColor(.black)
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(calendarViewType == "week" ? .white : .black)
+                        .padding(.vertical)
+                        .background(calendarViewType == "week" ? Color.blue : Color(.systemGray3))
                 }
-                
-                // Calendar Grid - This takes up the remaining space
+                Button(action: { calendarViewType = "month" }) {
+                    Text("Month")
+                        .font(.title)
+                        .frame(maxWidth: .infinity)
+                        .foregroundColor(calendarViewType == "month" ? .white : .black)
+                        .padding(.vertical)
+                        .background(calendarViewType == "month" ? Color.blue : Color(.systemGray3))
+                }
+            }
+            .font(.headline)
+            
+            // Month/Year Selector
+            if calendarViewType == "month" {
+                MonthYearSelector(
+                    filteredDay: $filteredDay,
+                    isEditingMonthYear: $isEditingMonthYear,
+                    currentPeriodText: currentPeriodText
+                )
+            } else {
+                Text(currentPeriodText)
+                    .font(.title)
+                    .foregroundColor(.black)
+            }
+            
+            // Calendar Grid - Takes remaining space
+            GeometryReader { geometry in
                 VStack(spacing: 0) {
-                    HStack {
+                    // Day headers
+                    HStack(spacing: 0) {
                         ForEach(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], id: \.self) { day in
                             Text(day)
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.gray)
-                                .frame(maxWidth: .infinity)
+                                .frame(width: geometry.size.width / 7, height: 30)
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-
+                    
+                    // Calendar cells
+                    let cellWidth = geometry.size.width / 7
+                    let cellHeight = (geometry.size.height - 30) / (calendarViewType == "month" ? 6 : 1)
+                    
                     if calendarViewType == "month" {
-                        LazyVGrid(columns: columns, spacing: 1) {
-                            ForEach(helper.generateCalendarDays(for: filteredDay ?? Date()), id: \.self) { day in
-                                CalendarDayCellView(
-                                    date: day,
-                                    reminders: viewModel.remindersOnGivenDay(for: day ?? Date()),
-                                    cellHeight: (geometry.size.height - 350) / 6,
-                                    zoomScale: zoomScale
-                                )
+                        VStack(spacing: 0) {
+                            ForEach(0..<6, id: \.self) { row in
+                                HStack(spacing: 0) {
+                                    ForEach(0..<7, id: \.self) { col in
+                                        let dayIndex = row * 7 + col
+                                        let days = helper.generateCalendarDays(for: filteredDay ?? Date())
+                                        let day = dayIndex < days.count ? days[dayIndex] : nil
+                                        
+                                        CalendarDayCellView(
+                                            date: day,
+                                            reminders: viewModel.remindersOnGivenDay(for: day ?? Date()),
+                                            cellHeight: cellHeight,
+                                            zoomScale: zoomScale
+                                        )
+                                        .frame(width: cellWidth, height: cellHeight)
+                                    }
+                                }
                             }
                         }
-                        .padding(.horizontal, 4)
                     } else {
-                        LazyVGrid(columns: columns, spacing: 1) {
+                        HStack(spacing: 0) {
                             ForEach(helper.generateWeekDays(for: viewModel.selectedDate), id: \.self) { day in
-                                CalendarDayCellView(
+                                WeekDayCellView(
                                     date: day,
                                     reminders: viewModel.remindersOnGivenDay(for: day),
-                                    cellHeight: geometry.size.height - 300,
-                                    zoomScale: zoomScale
+                                    cellWidth: cellWidth,
+                                    cellHeight: cellHeight
                                 )
                             }
                         }
-                        .padding(.horizontal, 4)
                     }
                     
                     if zoomScale > 1.0 {
@@ -287,14 +332,11 @@ struct CalendarView: View {
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(8)
-                            .padding(.trailing)
                         }
-                        .padding(.top, 8)
+                        .padding(.top, 4)
                     }
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(RoundedRectangle(cornerRadius: 12).stroke(Color.black, lineWidth: 2))
-                .padding(.horizontal)
                 .scaleEffect(zoomScale, anchor: .center)
                 .offset(offset)
                 .animation(.easeOut(duration: 0.1), value: zoomScale)
@@ -306,7 +348,6 @@ struct CalendarView: View {
                             let newScale = zoomScale * delta
                             zoomScale = min(max(newScale, minZoom), maxZoom)
                             
-                            // Reset offset when zooming back to 1.0 or below
                             if zoomScale <= 1.0 {
                                 offset = .zero
                                 lastOffset = .zero
@@ -314,7 +355,6 @@ struct CalendarView: View {
                         }
                         .onEnded { _ in
                             lastZoomScale = 1.0
-                            // Ensure centered when at normal zoom
                             if zoomScale <= 1.0 {
                                 withAnimation(.easeOut(duration: 0.2)) {
                                     offset = .zero
@@ -347,32 +387,32 @@ struct CalendarView: View {
                     }
                 }
                 .clipped()
-                
-                // Bottom Controls
-                VStack {
-                    Toggle(isOn: $isReminderViewOn) {
-                        Text("Reminder View")
-                            .font(.title3)
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom)
-                    
-                    Toggle(isOn: $isCalendarViewOn) {
-                        Text("Calendar View")
-                            .font(.title3)
-                    }
-                    .padding(.horizontal)
-                    .onChange(of: isCalendarViewOn) { _, newValue in
-                        if !newValue {
-                            presentationMode.wrappedValue.dismiss()
-                        }
-                    }
+            }
+            
+            // Bottom Controls
+            VStack {
+                Toggle(isOn: $isReminderViewOn) {
+                    Text("Reminder View")
+                        .font(.title3)
                 }
-                .padding(.leading)
+                .padding(.horizontal)
                 .padding(.bottom)
                 
-                NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                Toggle(isOn: $isCalendarViewOn) {
+                    Text("Calendar View")
+                        .font(.title3)
+                }
+                .padding(.horizontal)
+                .onChange(of: isCalendarViewOn) { _, newValue in
+                    if !newValue {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                }
             }
+            .padding(.leading)
+            .padding(.bottom)
+            
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
         }
         .onAppear {
             if let userReminders = DatabaseMock.users[1] {
