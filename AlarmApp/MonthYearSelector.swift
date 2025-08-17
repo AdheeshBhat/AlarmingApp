@@ -98,18 +98,19 @@ struct MonthYearSelector: View {
         } else {
             HStack {
                 Image(systemName: "chevron.left")
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .padding(.leading)
                 Text(currentPeriodText)
                     .font(.title)
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .onTapGesture {
                         isEditingMonthYear = true
                     }
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .padding(.trailing)
             }
         }
     }
 }
+

@@ -17,7 +17,7 @@ struct NotificationBellExperience: View {
                     
                     Image(systemName: "bell")
                         .font(.title2)
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                 }
                 //.padding(.leading, 270)
                 
@@ -27,3 +27,4 @@ struct NotificationBellExperience: View {
 
 }
     
+

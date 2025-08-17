@@ -30,13 +30,13 @@ struct CreateReminderScreen: View {
             TextField("Type Reminder Name...", text: $title)
                 .multilineTextAlignment(.center)
                 .font(.largeTitle)
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
                 .padding(.horizontal)
 
             // DESCRIPTION BOX
             VStack(alignment: .leading, spacing: 8) {
                 Text("Description")
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .font(.title3)
                     .underline()
                     .padding(.top)
@@ -67,11 +67,11 @@ struct CreateReminderScreen: View {
             VStack(spacing: 8) {
                 HStack {
                     Text("Today")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .padding(.leading)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .padding(.trailing)
                 }
                 .frame(height: 40)
@@ -96,7 +96,7 @@ struct CreateReminderScreen: View {
             HStack {
                 VStack(alignment: .leading) {
                     Text("Repeat")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .underline()
                 }
@@ -104,7 +104,7 @@ struct CreateReminderScreen: View {
                 .padding(.leading)
                 
                 Image(systemName: "arrow.2.circlepath")
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .padding(.leading, 6)
                 
                 NavigationLink(
@@ -117,7 +117,7 @@ struct CreateReminderScreen: View {
                     )
                 ) {
                     Text(repeat_setting)
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .padding(.leading, 75)
                 }
@@ -145,7 +145,7 @@ struct CreateReminderScreen: View {
             HStack {
                 VStack(alignment: .leading) {
                     Text("Priority")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .underline()
                 }
@@ -153,7 +153,7 @@ struct CreateReminderScreen: View {
                 .padding(.leading)
                 
                 Image(systemName: "exclamationmark.triangle")
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .padding(.leading, 6)
 
                 NavigationLink(
@@ -165,7 +165,7 @@ struct CreateReminderScreen: View {
                         isLocked: $isLocked)
                 ) {
                     Text(priority)
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .padding(.leading, 75)
                 }
@@ -238,3 +238,4 @@ struct CreateReminderScreen: View {
         }
     }
 }
+

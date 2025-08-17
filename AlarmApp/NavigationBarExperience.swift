@@ -32,7 +32,7 @@ struct NavigationBarExperience: View {
                             Image(systemName: "list.bullet")
                                 .font(.title)
                                 .padding(7)
-                                .foregroundColor((cur_screen == .RemindersScreen) ? Color.blue : Color.black)
+                                .foregroundColor((cur_screen == .RemindersScreen) ? Color.blue : Color.primary)
                         }
                     } else {
                         Image(systemName: "list.bullet")
@@ -55,7 +55,7 @@ struct NavigationBarExperience: View {
                         NavigationLink(destination: HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen)) {
                             Image(systemName: "house")
                                 .font(.title)
-                                .foregroundColor((cur_screen == .HomeScreen) ? Color.blue : Color.black)
+                                .foregroundColor((cur_screen == .HomeScreen) ? Color.blue : Color.primary)
                         }
                         .padding(4)
                     } else {
@@ -79,10 +79,10 @@ struct NavigationBarExperience: View {
                     }) {
                         Image(systemName: "arrowshape.backward")
                             .font(.title)
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                     }
                     .padding(1.5)
-                    .background(RoundedRectangle(cornerRadius: 5).stroke(Color.black, lineWidth: 1))
+                    .background(RoundedRectangle(cornerRadius: 5).stroke(Color.primary, lineWidth: 1))
                     .padding(4)
                     Text("Back")
                     
@@ -92,3 +92,4 @@ struct NavigationBarExperience: View {
         } //VStack ending
     } //body ending
 }
+

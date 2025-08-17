@@ -16,7 +16,7 @@ struct SettingsExperience: View {
             Image(systemName: "gearshape")
                 .font(.title)
                 .fontWeight(.bold)
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary)
                 .padding(.horizontal)
         }
         .padding(.leading)
@@ -24,3 +24,4 @@ struct SettingsExperience: View {
         
     } //body ending
 }
+

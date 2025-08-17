@@ -48,7 +48,7 @@ struct RepeatUntilFlow: View {
                     }) {
                         HStack {
                             Text(option)
-                                .foregroundColor(.black)
+                                .foregroundColor(.primary)
                                 .font(.title3)
                                 .padding(.leading)
                             Spacer()
@@ -119,3 +119,4 @@ struct RepeatUntilFlow: View {
         }
     }
 }
+

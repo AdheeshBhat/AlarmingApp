@@ -41,14 +41,14 @@ struct EditReminderScreen: View {
             TextField("Type Reminder Name...", text: $localTitle)
                 .multilineTextAlignment(.center)
                 .font(.largeTitle)
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
                 .padding(.horizontal)
 
 
             // Description
             VStack(alignment: .leading, spacing: 8) {
                 Text("Description")
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .font(.headline)
                     .underline()
                     .padding(.top)
@@ -79,11 +79,11 @@ struct EditReminderScreen: View {
             VStack(spacing: 8) {
                 HStack {
                     Text("Today")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .padding(.leading)
                     Spacer()
                     Image(systemName: "chevron.right")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .padding(.trailing)
                 }
                 .frame(height: 40)
@@ -106,7 +106,7 @@ struct EditReminderScreen: View {
             HStack {
                 VStack(alignment: .leading) {
                     Text("Repeat")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .underline()
                 }
@@ -114,7 +114,7 @@ struct EditReminderScreen: View {
                 .padding(.leading)
                 
                 Image(systemName: "arrow.2.circlepath")
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .padding(.leading, 6)
                 
                 NavigationLink(
@@ -127,7 +127,7 @@ struct EditReminderScreen: View {
                     )
                 ) {
                     Text(localEditScreenRepeatSetting)
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .padding(.leading, 75)
                 }
@@ -153,7 +153,7 @@ struct EditReminderScreen: View {
             HStack {
                 VStack(alignment: .leading) {
                     Text("Priority")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .underline()
                 }
@@ -161,14 +161,14 @@ struct EditReminderScreen: View {
                 .padding(.leading)
                 
                 Image(systemName: "exclamationmark.triangle")
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .padding(.leading, 6)
 
                 NavigationLink(
                     destination: PriorityFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: localTitle, priority: $localEditScreenPriority, isLocked: $localEditScreenIsLocked)
                 ) {
                     Text(localEditScreenPriority)
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .padding(.leading, 75)
                 }
@@ -226,3 +226,4 @@ struct EditReminderScreen: View {
         }
     } //body ending
 }
+

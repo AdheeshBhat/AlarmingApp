@@ -71,7 +71,7 @@ struct RemindersScreen: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical)
                         .background(filterPeriod == "today" ? Color.blue : Color(.systemGray3))
-                        .foregroundColor(filterPeriod == "today" ? .white : .black)
+                        .foregroundColor(filterPeriod == "today" ? .white : .primary)
                 }
 
                 //WEEK
@@ -83,7 +83,7 @@ struct RemindersScreen: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical)
                         .background(filterPeriod == "week" ? Color.blue : Color(.systemGray3))
-                        .foregroundColor(filterPeriod == "week" ? .white : .black)
+                        .foregroundColor(filterPeriod == "week" ? .white : .primary)
                 }
 
                 //MONTH
@@ -95,7 +95,7 @@ struct RemindersScreen: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical)
                         .background(filterPeriod == "month" ? Color.blue : Color(.systemGray3))
-                        .foregroundColor(filterPeriod == "month" ? .white : .black)
+                        .foregroundColor(filterPeriod == "month" ? .white : .primary)
                 }
 
             } //HStack ending (filters)
@@ -112,7 +112,7 @@ struct RemindersScreen: View {
             } else {
                 Text(currentPeriodText)
                     .font(.title)
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
             }
         } //VStack ending
         
@@ -129,7 +129,7 @@ struct RemindersScreen: View {
                     filteredDay: filteredDay
                 )
             }
-            .background(RoundedRectangle(cornerRadius: 12).stroke(Color.black, lineWidth: 2))
+            .background(RoundedRectangle(cornerRadius: 12).stroke(Color.primary, lineWidth: 2))
             .padding(.horizontal)
         } //VStack ending
         Spacer()
@@ -223,7 +223,7 @@ struct ReminderRow: View {
                             Text("Done")
                                 .font(.title3)
                                 .bold()
-                                .foregroundColor(.black)
+                                .foregroundColor(.primary)
                         }
                         
                     } // Button ending
@@ -253,7 +253,7 @@ struct ReminderRow: View {
                                 Text("Edit")
                                     .font(.title3)
                                     .bold()
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.primary)
                             }
                         }
                         
@@ -270,7 +270,7 @@ struct ReminderRow: View {
                                 Text("Delete")
                                     .font(.title3)
                                     .bold()
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.primary)
                             }
                         }
                         .alert("Are you sure you want to delete this reminder?", isPresented: $showDeleteConfirmation) {
@@ -290,11 +290,11 @@ struct ReminderRow: View {
                     .font(.title2)
                     .fontWeight(.semibold)
                 Text(date)
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
             }
         } // HStack ending
         .padding()
-        .background(RoundedRectangle(cornerRadius: 12).stroke(Color.black, lineWidth: 1))
+        .background(RoundedRectangle(cornerRadius: 12).stroke(Color.primary, lineWidth: 1))
     }
 }
 
@@ -302,3 +302,4 @@ struct ReminderRow: View {
 #Preview {
     ContentView()
 }
+

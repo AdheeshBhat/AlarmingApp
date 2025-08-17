@@ -46,7 +46,7 @@ struct SettingsScreen: View {
             Text("Notifications")
                 .font(.title3)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
              
         }
         .padding(.horizontal)
@@ -60,16 +60,16 @@ struct SettingsScreen: View {
             }) {
                 HStack {
                     Text("Alert Sound:")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .underline()
                     Spacer()
                     Text(selectedSound)
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                     Spacer()
                     Image(systemName: isDropdownVisible ? "chevron.up" : "chevron.down")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                 }
                 .padding(.horizontal)
             } //Button ending
@@ -83,11 +83,11 @@ struct SettingsScreen: View {
                         }) {
                             Text(sound)
                                 .font(.title3)
-                                .foregroundColor(.black)
+                                .foregroundColor(.primary)
                                 .padding(.vertical)
                                 .padding(.horizontal)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color.white)
+                                .background(Color(.systemBackground))
                                 .cornerRadius(12)
                         } //Button ending
                     } //For loop ending
@@ -129,3 +129,4 @@ struct SettingsScreen: View {
         }
     } //body ending
 }
+

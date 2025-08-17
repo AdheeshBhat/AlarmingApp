@@ -118,12 +118,12 @@ struct CalendarDayCellView: View {
                             .frame(width: 20, height: 20)
                         Text("\(Calendar.current.component(.day, from: date))")
                             .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                     }
                 } else {
                     Text("\(Calendar.current.component(.day, from: date))")
                         .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .frame(width: 20, height: 20)
                 }
                 
@@ -142,7 +142,7 @@ struct CalendarDayCellView: View {
                         if reminders.count > 3 {
                             Text("+\(reminders.count - 3)")
                                 .font(.system(size: 6))
-                                .foregroundColor(.gray)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }
@@ -166,7 +166,7 @@ struct WeekDayCellView: View {
         VStack(spacing: 4) {
             Text("\(Calendar.current.component(.day, from: date))")
                 .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
             
             ScrollView {
                 VStack(spacing: 2) {
@@ -207,6 +207,7 @@ struct CalendarView: View {
     @State private var lastZoomScale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
+    @State private var zoomAnchor: UnitPoint = .center
     
     let minZoom: CGFloat = 1.0
     let maxZoom: CGFloat = 3.0
@@ -240,7 +241,7 @@ struct CalendarView: View {
                     Text("Week")
                         .font(.title)
                         .frame(maxWidth: .infinity)
-                        .foregroundColor(calendarViewType == "week" ? .white : .black)
+                        .foregroundColor(calendarViewType == "week" ? .white : .primary)
                         .padding(.vertical)
                         .background(calendarViewType == "week" ? Color.blue : Color(.systemGray3))
                 }
@@ -248,7 +249,7 @@ struct CalendarView: View {
                     Text("Month")
                         .font(.title)
                         .frame(maxWidth: .infinity)
-                        .foregroundColor(calendarViewType == "month" ? .white : .black)
+                        .foregroundColor(calendarViewType == "month" ? .white : .primary)
                         .padding(.vertical)
                         .background(calendarViewType == "month" ? Color.blue : Color(.systemGray3))
                 }
@@ -265,7 +266,7 @@ struct CalendarView: View {
             } else {
                 Text(currentPeriodText)
                     .font(.title)
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
             }
             
             // Calendar Grid - Takes remaining space
@@ -276,7 +277,7 @@ struct CalendarView: View {
                         ForEach(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], id: \.self) { day in
                             Text(day)
                                 .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.gray)
+                                .foregroundColor(.secondary)
                                 .frame(width: geometry.size.width / 7, height: 30)
                         }
                     }
@@ -336,48 +337,55 @@ struct CalendarView: View {
                         .padding(.top, 4)
                     }
                 }
-                .background(RoundedRectangle(cornerRadius: 12).stroke(Color.black, lineWidth: 2))
-                .scaleEffect(zoomScale, anchor: .center)
+                .background(RoundedRectangle(cornerRadius: 12).stroke(Color.primary, lineWidth: 2))
+                .scaleEffect(zoomScale, anchor: zoomAnchor)
                 .offset(offset)
                 .animation(.easeOut(duration: 0.1), value: zoomScale)
                 .gesture(
-                    MagnificationGesture()
-                        .onChanged { value in
-                            let delta = value / lastZoomScale
-                            lastZoomScale = value
-                            let newScale = zoomScale * delta
-                            zoomScale = min(max(newScale, minZoom), maxZoom)
-                            
-                            if zoomScale <= 1.0 {
-                                offset = .zero
-                                lastOffset = .zero
-                            }
-                        }
-                        .onEnded { _ in
-                            lastZoomScale = 1.0
-                            if zoomScale <= 1.0 {
-                                withAnimation(.easeOut(duration: 0.2)) {
+                    SimultaneousGesture(
+                        MagnificationGesture()
+                            .onChanged { value in
+                                let delta = value / lastZoomScale
+                                lastZoomScale = value
+                                let newScale = zoomScale * delta
+                                zoomScale = min(max(newScale, minZoom), maxZoom)
+                                
+                                if zoomScale <= 1.0 {
                                     offset = .zero
                                     lastOffset = .zero
+                                    zoomAnchor = .center
                                 }
                             }
-                        }
-                )
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            if zoomScale > 1.0 {
-                                offset = CGSize(
-                                    width: lastOffset.width + value.translation.width,
-                                    height: lastOffset.height + value.translation.height
-                                )
+                            .onEnded { _ in
+                                lastZoomScale = 1.0
+                                if zoomScale <= 1.0 {
+                                    withAnimation(.easeOut(duration: 0.2)) {
+                                        offset = .zero
+                                        lastOffset = .zero
+                                        zoomAnchor = .center
+                                    }
+                                }
+                            },
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { value in
+                                if zoomScale == 1.0 {
+                                    zoomAnchor = UnitPoint(
+                                        x: min(max(value.location.x / geometry.size.width, 0), 1),
+                                        y: min(max(value.location.y / geometry.size.height, 0), 1)
+                                    )
+                                } else {
+                                    offset = CGSize(
+                                        width: lastOffset.width + value.translation.width,
+                                        height: lastOffset.height + value.translation.height
+                                    )
+                                }
                             }
-                        }
-                        .onEnded { _ in
-                            if zoomScale > 1.0 {
-                                lastOffset = offset
+                            .onEnded { _ in
+                                if zoomScale > 1.0 {
+                                    lastOffset = offset
+                                }
                             }
-                        }
+                    )
                 )
                 .onTapGesture(count: 2) {
                     withAnimation(.easeInOut(duration: 0.3)) {

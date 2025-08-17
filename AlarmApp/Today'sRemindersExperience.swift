@@ -40,7 +40,7 @@ func TodayRemindersExperience(cur_database: Binding<Database>, cur_screen: Bindi
             Spacer()
             Text("No Pending Tasks! 🙂")
                 .font(.title)
-                .foregroundColor(.black)
+                .foregroundColor(.primary)
             Spacer()
         } else {
             ScrollView {
@@ -51,7 +51,7 @@ func TodayRemindersExperience(cur_database: Binding<Database>, cur_screen: Bindi
                     showAllReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false, filteredDay: nil)
                 }
             }
-            .background(RoundedRectangle(cornerRadius: 12).stroke(Color.black, lineWidth: 2))
+            .background(RoundedRectangle(cornerRadius: 12).stroke(Color.primary, lineWidth: 2))
             .padding(.horizontal)
             //}
         }
@@ -66,3 +66,4 @@ func TodayRemindersExperience(cur_database: Binding<Database>, cur_screen: Bindi
     //find alternatives for padding and hard coded values
 
 }
+

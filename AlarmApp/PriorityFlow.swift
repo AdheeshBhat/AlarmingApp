@@ -41,11 +41,11 @@ struct PriorityFlow: View {
             VStack {
                 HStack {
                     Text("Priority")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .underline()
                     Image(systemName: "exclamationmark.triangle")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .padding(.leading, 6)
                 }
             }
@@ -57,7 +57,7 @@ struct PriorityFlow: View {
                 }) {
                     HStack {
                         Text("Low")
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                             .font(.title3)
                             .padding(.leading)
                         Spacer()
@@ -80,7 +80,7 @@ struct PriorityFlow: View {
                 }) {
                     HStack {
                         Text("High")
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                             .font(.title3)
                             .padding(.leading)
                         Spacer()
@@ -101,18 +101,18 @@ struct PriorityFlow: View {
             if localPriority == "Low" {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("You :").bold()
-                    Text("You will be sent a notification.").padding(.vertical).foregroundColor(.gray)
+                    Text("You will be sent a notification.").padding(.vertical).foregroundColor(.secondary)
                     Text("Caretaker :").bold()
-                    Text("Your caretaker will be sent a notification after 10 minutes if the reminder is not turned off.").foregroundColor(.gray)
+                    Text("Your caretaker will be sent a notification after 10 minutes if the reminder is not turned off.").foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.top)
             } else if localPriority == "High" {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("You :").bold()
-                    Text("Your alarm will ring.").padding(.vertical).foregroundColor(.gray)
+                    Text("Your alarm will ring.").padding(.vertical).foregroundColor(.secondary)
                     Text("Caretaker :").bold()
-                    Text("Your caretaker will be called after 10 minutes if the alarm is not turned off.").foregroundColor(.gray)
+                    Text("Your caretaker will be called after 10 minutes if the alarm is not turned off.").foregroundColor(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.top)
@@ -123,13 +123,13 @@ struct PriorityFlow: View {
             }) {
                 HStack {
                     Text(localIsLocked ? "Locked Reminder" : "Unlocked Reminder")
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .font(.title3)
                         .padding(.leading)
                     Spacer()
                     Image(systemName: localIsLocked ? "lock.fill" : "lock.open.fill")
                         .font(.title)
-                        .foregroundColor(.black)
+                        .foregroundColor(.primary)
                         .padding(.trailing)
                 }
                 .padding(.vertical, 14)
@@ -140,7 +140,7 @@ struct PriorityFlow: View {
 
             Text(localIsLocked ? "You will not be able to edit this reminder." : "You will be able to edit this reminder.")
                 .padding(.top)
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary)
 
             Button(action: {
                 priority = localPriority
@@ -173,3 +173,4 @@ struct PriorityFlow: View {
         }
     } //body ending
 }
+

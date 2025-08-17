@@ -43,11 +43,11 @@ struct RepeatSettingsFlow: View {
             //"REPEAT" HEADING
             HStack {
                 Text("Repeat")
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .font(.title3)
                     .underline()
                 Image(systemName: "arrow.2.circlepath")
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
                     .padding(.leading, 6)
             } //HStack ending
             .frame(maxWidth: .infinity, alignment: .center)
@@ -60,13 +60,13 @@ struct RepeatSettingsFlow: View {
                     }) {
                         HStack {
                             Text(options[index])
-                                .foregroundColor(.black)
+                                .foregroundColor(.primary)
                                 .font(.title3)
                                 .padding(.leading)
                             Spacer()
                             if options[index] == "Custom" {
                                 Image(systemName: "chevron.right")
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.primary)
                                     .padding(.trailing)
                             }
                             if (localRepeatSetting == nil && repeatSetting == options[index]) || (localRepeatSetting == options[index]){
@@ -97,7 +97,7 @@ struct RepeatSettingsFlow: View {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Until")
-                                .foregroundColor(.black)
+                                .foregroundColor(.primary)
                                 .font(.title3)
                             Text(localRepeatScreenRepeatUntil)
                                 .foregroundColor(.white)
@@ -106,7 +106,7 @@ struct RepeatSettingsFlow: View {
                         .padding(.leading)
                         Spacer()
                         Image(systemName: "chevron.right")
-                            .foregroundColor(.black)
+                            .foregroundColor(.primary)
                             .padding(.trailing)
                     }
                     .frame(maxWidth: .infinity, minHeight: 80)
@@ -144,3 +144,4 @@ struct RepeatSettingsFlow: View {
         }
     }
 }
+
