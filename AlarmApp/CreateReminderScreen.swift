@@ -65,20 +65,28 @@ struct CreateReminderScreen: View {
 
             // TIME SELECTOR
             VStack(spacing: 8) {
-                HStack {
-                    Text("Today")
-                        .foregroundColor(.primary)
-                        .padding(.leading)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.primary)
-                        .padding(.trailing)
+                NavigationLink(
+                    destination: DateSelectorScreen(
+                        reminderTitle: title,
+                        selectedDate: $date,
+                        cur_screen: $cur_screen,
+                        DatabaseMock: $DatabaseMock
+                    )
+                ) {
+                    HStack {
+                        Text(date, style: .date)
+                            .foregroundColor(.primary)
+                            .padding(.leading)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.primary)
+                            .padding(.trailing)
+                    }
+                    .frame(height: 40)
+                    .background(Color.gray.opacity(0.7))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
                 }
-                .frame(height: 40)
-                .background(Color.gray.opacity(0.7))
-                .cornerRadius(8)
-                .padding(.horizontal)
-
                 DatePicker("", selection: $date, displayedComponents: [.hourAndMinute])
                     .labelsHidden()
                     .datePickerStyle(.wheel)
@@ -198,7 +206,7 @@ struct CreateReminderScreen: View {
                     let reminder = ReminderData(
                         ID: Int.random(in: 1000...9999),
                         //date that user selects for the reminder
-                        date: createDate(year: 2025, month: 6, day: 19, hour: 11, minute: 1, second: 1),
+                        date: date,
                         title: title,
                         description: description,
                         repeatSettings: RepeatSettings(repeat_type: repeat_setting, repeat_until_date: repeatUntil),

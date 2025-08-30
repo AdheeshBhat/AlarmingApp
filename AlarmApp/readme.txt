@@ -98,7 +98,7 @@ Minor Stuff
         - Change the background of the date VStack, not circle                                                          - Done
     - Functional Calendar view toggle                                                                                   - Done
     - Calendar Week view                                                                                                - Done
-    - Grid lines between dates                                                                                          -
+    - Grid lines between dates                                                                                          - Done
     - Hide week/month filters when currentCalendarPeriodText is pressed
     - Reminder/calendar filter: week filter display shouldn't be linked to month filter (when month changes, week is changing too)
     - Reminder View for week/month calendars
@@ -109,6 +109,8 @@ Minor Stuff
     - firebase?
     - AWS?
     - want free storage
+    
+dateSelector for EditReminderScreen and CreateReminderScreen
     
 12. Styling changes to relfect Figma state for home screen and reminders screen, no hard coded values (should work for all screens)     -
     Change device from iPhone 16 Pro to iPad...

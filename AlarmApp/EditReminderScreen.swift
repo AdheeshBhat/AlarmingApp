@@ -19,6 +19,12 @@ struct EditReminderScreen: View {
     @State var localEditScreenIsLocked: Bool
     @State var localEditScreenRepeatSetting: String
     @State var localEditScreenRepeatUntil: String
+    @State private var localDate: Date
+    var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: localDate)
+    }
 
     init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, reminder: Binding<ReminderData>) {
         self._cur_screen = cur_screen
@@ -32,7 +38,7 @@ struct EditReminderScreen: View {
         self._localEditScreenRepeatSetting = State(initialValue: reminder.wrappedValue.repeatSettings.repeat_type)
         //HAD TO MAKE REPEAT_UNTIL_DATE A STRING FOR THIS TO WORK -> might need to look into that (was originally a date type)
         self._localEditScreenRepeatUntil = State(initialValue: reminder.wrappedValue.repeatSettings.repeat_until_date)
-
+        self._localDate = State(initialValue: reminder.wrappedValue.date)
         
     }
     
@@ -77,21 +83,30 @@ struct EditReminderScreen: View {
 
             // Date/Time
             VStack(spacing: 8) {
-                HStack {
-                    Text("Today")
-                        .foregroundColor(.primary)
-                        .padding(.leading)
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.primary)
-                        .padding(.trailing)
+                NavigationLink(
+                    destination: DateSelectorScreen(
+                        reminderTitle: reminder.title,
+                        selectedDate: $localDate,
+                        cur_screen: $cur_screen,
+                        DatabaseMock: $DatabaseMock
+                    )
+                ) {
+                    HStack {
+                        Text(formattedDate)
+                            .foregroundColor(.primary)
+                            .padding(.leading)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.primary)
+                            .padding(.trailing)
+                    }
+                    .frame(height: 40)
+                    .background(Color.gray.opacity(0.7))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
                 }
-                .frame(height: 40)
-                .background(Color.gray.opacity(0.7))
-                .cornerRadius(8)
-                .padding(.horizontal)
 
-                DatePicker("", selection: $reminder.date, displayedComponents: [.hourAndMinute])
+                DatePicker("", selection: $localDate, displayedComponents: [.hourAndMinute])
                     .labelsHidden()
                     .frame(height: 150)
                     .clipped()
@@ -200,6 +215,7 @@ struct EditReminderScreen: View {
                 reminder.isLocked = localEditScreenIsLocked
                 reminder.repeatSettings.repeat_type = localEditScreenRepeatSetting
                 reminder.repeatSettings.repeat_until_date = localEditScreenRepeatUntil
+                reminder.date = localDate
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Save Changes")

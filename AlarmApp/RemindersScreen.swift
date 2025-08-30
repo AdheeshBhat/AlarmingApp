@@ -13,6 +13,7 @@ struct RemindersScreen: View {
     @State var filterPeriod : String
     @State var filteredDay: Date? = nil
     @State private var isEditingMonthYear: Bool = false
+    @State private var swipeOffset: Int = 0
     
     //create a variable that would change the period depending on the button pressed
     var currentPeriodText: String {
@@ -107,30 +108,55 @@ struct RemindersScreen: View {
                 MonthYearSelector(
                     filteredDay: $filteredDay,
                     isEditingMonthYear: $isEditingMonthYear,
-                    currentPeriodText: currentPeriodText
+                    currentPeriodText: currentPeriodText,
+                    onDone: {
+                        isEditingMonthYear = false
+                        swipeOffset = 0
+                    }
                 )
             } else {
                 Text(currentPeriodText)
                     .font(.title)
                     .foregroundColor(.primary)
             }
+            if swipeOffset != 0 {
+                Button("Reset") {
+                    swipeOffset = 0
+                    updateFilteredDay()
+                }
+                .font(.title2)
+                .bold()
+                .foregroundColor(.blue)
+                .padding(.top, 5)
+            }
         } //VStack ending
         
         VStack {
             //REMINDERS
-            ScrollView {
-                formattedReminders(
-                    database: $DatabaseMock,
-                    userID: 1,
-                    period: filterPeriod,
-                    cur_screen: $cur_screen,
-                    showEditButton: !isDeleteViewOn,
-                    showDeleteButton: isDeleteViewOn,
-                    filteredDay: filteredDay
-                )
+            TabView(selection: $swipeOffset) {
+                ForEach(-6...6, id: \.self) { index in
+                    ScrollView {
+                        formattedReminders(
+                            database: $DatabaseMock,
+                            userID: 1,
+                            period: filterPeriod,
+                            cur_screen: $cur_screen,
+                            showEditButton: !isDeleteViewOn,
+                            showDeleteButton: isDeleteViewOn,
+                            filteredDay: calculateDateFor(index: index)
+                        )
+                        
+                    }
+                    .tag(index)
+                }
             }
             .background(RoundedRectangle(cornerRadius: 12).stroke(Color.primary, lineWidth: 2))
             .padding(.horizontal)
+            .tabViewStyle(.page(indexDisplayMode: .never))
+            .onChange(of: swipeOffset) { _, _ in
+                updateFilteredDay()
+            }
+            //.frame(height: 400) // adjust as needed
         } //VStack ending
         Spacer()
         NavigationStack {
@@ -167,6 +193,37 @@ struct RemindersScreen: View {
         }
     
     } //body ending
+    
+    func updateFilteredDay() {
+        let calendar = Calendar.current
+        let today = Date()
+        
+        switch filterPeriod {
+        case "today":
+            filteredDay = calendar.date(byAdding: .day, value: swipeOffset, to: today)
+        case "week":
+            filteredDay = calendar.date(byAdding: .weekOfYear, value: swipeOffset, to: today)
+        case "month":
+            filteredDay = calendar.date(byAdding: .month, value: swipeOffset, to: today)
+        default:
+            filteredDay = today
+        }
+    }
+
+    func calculateDateFor(index: Int) -> Date {
+        let calendar = Calendar.current
+        let baseDate = filteredDay ?? Date()
+        switch filterPeriod {
+        case "today":
+            return calendar.date(byAdding: .day, value: index, to: baseDate)!
+        case "week":
+            return calendar.date(byAdding: .weekOfYear, value: index, to: baseDate)!
+        case "month":
+            return calendar.date(byAdding: .month, value: index, to: baseDate)!
+        default:
+            return baseDate
+        }
+    }
     
 } //struct ending
 
@@ -302,4 +359,3 @@ struct ReminderRow: View {
 #Preview {
     ContentView()
 }
-

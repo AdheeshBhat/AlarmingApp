@@ -11,6 +11,7 @@ struct MonthYearSelector: View {
     @Binding var filteredDay: Date?
     @Binding var isEditingMonthYear: Bool
     var currentPeriodText: String
+    var onDone: () -> Void
 
     var body: some View {
         if isEditingMonthYear {
@@ -70,6 +71,7 @@ struct MonthYearSelector: View {
                     // DONE BUTTON
                     Button(action: {
                         isEditingMonthYear = false
+                        onDone()
                     }) {
                         Text("Done")
                             .font(.title2)
