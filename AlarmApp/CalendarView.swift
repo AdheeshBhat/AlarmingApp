@@ -303,6 +303,66 @@ struct CalendarView: View {
     let maxZoom: CGFloat = 3.0
     let columns = Array(repeating: GridItem(.flexible(), spacing: 1), count: 7)
     
+    private var calendarGesture: AnyGesture<Void> {
+        if zoomScale > 1.0 {
+            return AnyGesture(
+                SimultaneousGesture(
+                    MagnificationGesture()
+                        .onChanged { value in
+                            let delta = value / lastZoomScale
+                            lastZoomScale = value
+                            let newScale = zoomScale * delta
+                            zoomScale = min(max(newScale, minZoom), maxZoom)
+                            
+                            if zoomScale <= 1.0 {
+                                offset = .zero
+                                lastOffset = .zero
+                                zoomAnchor = .center
+                            }
+                        }
+                        .onEnded { _ in
+                            lastZoomScale = 1.0
+                            if zoomScale <= 1.0 {
+                                withAnimation(.easeOut(duration: 0.2)) {
+                                    offset = .zero
+                                    lastOffset = .zero
+                                    zoomAnchor = .center
+                                }
+                            }
+                        },
+                    DragGesture()
+                        .onChanged { value in
+                            offset = CGSize(
+                                width: lastOffset.width + value.translation.width,
+                                height: lastOffset.height + value.translation.height
+                            )
+                        }
+                        .onEnded { _ in
+                            lastOffset = offset
+                        }
+                ).map { _ in () }
+            )
+        } else {
+            return AnyGesture(
+                MagnificationGesture()
+                    .onChanged { value in
+                        let delta = value / lastZoomScale
+                        lastZoomScale = value
+                        let newScale = zoomScale * delta
+                        zoomScale = min(max(newScale, minZoom), maxZoom)
+                        
+                        if zoomScale > 1.0 {
+                            zoomAnchor = .center
+                        }
+                    }
+                    .onEnded { _ in
+                        lastZoomScale = 1.0
+                    }
+                    .map { _ in () }
+            )
+        }
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -464,52 +524,7 @@ struct CalendarView: View {
                 .scaleEffect(zoomScale, anchor: zoomAnchor)
                 .offset(offset)
                 .animation(.easeOut(duration: 0.1), value: zoomScale)
-                .gesture(
-                    SimultaneousGesture(
-                        MagnificationGesture()
-                            .onChanged { value in
-                                let delta = value / lastZoomScale
-                                lastZoomScale = value
-                                let newScale = zoomScale * delta
-                                zoomScale = min(max(newScale, minZoom), maxZoom)
-
-                                if zoomScale <= 1.0 {
-                                    offset = .zero
-                                    lastOffset = .zero
-                                    zoomAnchor = .center
-                                }
-                            }
-                            .onEnded { _ in
-                                lastZoomScale = 1.0
-                                if zoomScale <= 1.0 {
-                                    withAnimation(.easeOut(duration: 0.2)) {
-                                        offset = .zero
-                                        lastOffset = .zero
-                                        zoomAnchor = .center
-                                    }
-                                }
-                            },
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                if zoomScale == 1.0 {
-                                    zoomAnchor = UnitPoint(
-                                        x: min(max(value.location.x / geometry.size.width, 0), 1),
-                                        y: min(max(value.location.y / geometry.size.height, 0), 1)
-                                    )
-                                } else {
-                                    offset = CGSize(
-                                        width: lastOffset.width + value.translation.width,
-                                        height: lastOffset.height + value.translation.height
-                                    )
-                                }
-                            }
-                            .onEnded { _ in
-                                if zoomScale > 1.0 {
-                                    lastOffset = offset
-                                }
-                            }
-                    )
-                )
+                .gesture(calendarGesture)
                 .onTapGesture(count: 2) {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         zoomScale = 1.0
@@ -592,3 +607,4 @@ struct CalendarView: View {
         }
     }
 }
+
