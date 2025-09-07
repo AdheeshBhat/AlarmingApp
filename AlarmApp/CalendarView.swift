@@ -100,190 +100,13 @@ enum ZoomLevel {
     case day, week, month
 }
 
-struct CalendarDayCellView: View {
-    let date: Date?
-    let reminders: [CalendarReminder]
-    let cellHeight: CGFloat
-    let zoomScale: CGFloat
-    let isReminderViewOn: Bool
-    @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
 
-    // Helper to safely fetch ReminderData for a normalized date
-    private func reminderData(for reminder: CalendarReminder) -> ReminderData? {
-        let normalizedDate = normalizeDate(reminder.date)
-        if let userReminders = DatabaseMock.users[1] {
-            // Find the ReminderData with the same normalized date and matching title
-            return userReminders.first(where: {
-                normalizeDate($0.value.date) == normalizedDate && $0.value.title == reminder.title
-            })?.value
-        }
-        return nil
-    }
-
-    var body: some View {
-        VStack(spacing: 2) {
-            if let date = date {
-                if !reminders.isEmpty {
-                    let reminderCount = reminders.count
-                    let circleColor: Color = reminderCount == 1 ? .green : (reminderCount <= 3 ? .yellow : .red)
-                    ZStack {
-                        Circle()
-                            .fill(circleColor)
-                            .frame(width: 20, height: 20)
-                        Text("\(Calendar.current.component(.day, from: date))")
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundColor(.primary)
-                    }
-                } else {
-                    Text("\(Calendar.current.component(.day, from: date))")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.primary)
-                        .frame(width: 20, height: 20)
-                }
-
-                if (zoomScale > 1.2 || isReminderViewOn) && !reminders.isEmpty {
-                    VStack(spacing: 1) {
-                        ForEach(reminders.prefix(min(3, reminders.count))) { reminder in
-                            if let reminderData = reminderData(for: reminder) {
-                                NavigationLink(
-                                    destination: EditReminderScreen(
-                                        cur_screen: $cur_screen,
-                                        DatabaseMock: $DatabaseMock,
-                                        reminder: Binding(
-                                            get: { reminderData },
-                                            set: { updated in
-                                                // Update the correct ReminderData in DatabaseMock
-                                                let normalizedDate = normalizeDate(reminder.date)
-                                                if let userReminders = DatabaseMock.users[1] {
-                                                    if let key = userReminders.first(where: {
-                                                        normalizeDate($0.value.date) == normalizedDate && $0.value.title == reminder.title
-                                                    })?.key {
-                                                        DatabaseMock.users[1]?[key] = updated
-                                                    }
-                                                }
-                                            }
-                                        )
-                                    ) // destination ending
-                                ) {
-                                    Text(reminder.title)
-                                        .font(.system(size: 8))
-                                        .foregroundColor(.white)
-                                        .padding(.horizontal, 2)
-                                        .padding(.vertical, 1)
-                                        .background(RoundedRectangle(cornerRadius: 2).fill(Color.blue))
-                                        .lineLimit(1)
-                                }
-                            } else {
-                                Text(reminder.title)
-                                    .font(.system(size: 8))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 2)
-                                    .padding(.vertical, 1)
-                                    .background(RoundedRectangle(cornerRadius: 2).fill(Color.gray))
-                                    .lineLimit(1)
-                            }
-                        }
-
-                        if reminders.count > 3 {
-                            Text("+\(reminders.count - 3)")
-                                .font(.system(size: 6))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
-        )
-    }
-}
-
-struct WeekDayCellView: View {
-    let date: Date
-    let reminders: [CalendarReminder]
-    let cellWidth: CGFloat
-    let cellHeight: CGFloat
-    @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
-
-    // Helper to safely fetch ReminderData for a normalized date
-    private func reminderData(for reminder: CalendarReminder) -> ReminderData? {
-        let normalizedDate = normalizeDate(reminder.date)
-        if let userReminders = DatabaseMock.users[1] {
-            return userReminders.first(where: {
-                normalizeDate($0.value.date) == normalizedDate && $0.value.title == reminder.title
-            })?.value
-        }
-        return nil
-    }
-
-    var body: some View {
-        VStack(spacing: 4) {
-            Text("\(Calendar.current.component(.day, from: date))")
-                .font(.system(size: 16, weight: .bold))
-                .foregroundColor(.primary)
-
-            ScrollView {
-                VStack(spacing: 2) {
-                    ForEach(reminders) { reminder in
-                        if let reminderData = reminderData(for: reminder) {
-                            NavigationLink(
-                                destination: EditReminderScreen(
-                                    cur_screen: $cur_screen,
-                                    DatabaseMock: $DatabaseMock,
-                                    reminder: Binding(
-                                        get: { reminderData },
-                                        set: { updated in
-                                            let normalizedDate = normalizeDate(reminder.date)
-                                            if let userReminders = DatabaseMock.users[1] {
-                                                if let key = userReminders.first(where: {
-                                                    normalizeDate($0.value.date) == normalizedDate && $0.value.title == reminder.title
-                                                })?.key {
-                                                    DatabaseMock.users[1]?[key] = updated
-                                                }
-                                            }
-                                        }
-                                    )
-                                )
-                            ) {
-                                Text(reminder.title)
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 4)
-                                    .padding(.vertical, 2)
-                                    .background(RoundedRectangle(cornerRadius: 4).fill(Color.blue))
-                                    .lineLimit(2)
-                            }
-                        } else {
-                            Text(reminder.title)
-                                .font(.system(size: 10))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 2)
-                                .background(RoundedRectangle(cornerRadius: 4).fill(Color.gray))
-                                .lineLimit(2)
-                        }
-                    }
-                }
-            }
-        }
-        .frame(width: cellWidth, height: cellHeight)
-        .background(
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
-        )
-        .padding(1)
-    }
-}
 
 struct CalendarView: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
+    @Binding var initialViewType: String
     
     @StateObject var viewModel = CalendarViewModel()
     let helper = CalendarHelper()
@@ -291,18 +114,80 @@ struct CalendarView: View {
     @State private var isCalendarViewOn: Bool = true
     @State private var isReminderViewOn: Bool = false
     @State private var isEditingMonthYear = false
-    @State private var filteredDay: Date? = Date()
+    @State private var monthFilteredDay: Date? = Date()
+    @State private var weekFilteredDay: Date? = Date()
     @State private var zoomScale: CGFloat = 1.0
     @State private var lastZoomScale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
     @State private var zoomAnchor: UnitPoint = .center
     @State private var swipeOffset: Int = 0
+    @State private var canResetDate: Bool = false
     
     let minZoom: CGFloat = 1.0
     let maxZoom: CGFloat = 3.0
     let columns = Array(repeating: GridItem(.flexible(), spacing: 1), count: 7)
     
+    private var calendarGesture: AnyGesture<Void> {
+        if zoomScale > 1.0 {
+            return AnyGesture(
+                SimultaneousGesture(
+                    MagnificationGesture()
+                        .onChanged { value in
+                            let delta = value / lastZoomScale
+                            lastZoomScale = value
+                            let newScale = zoomScale * delta
+                            zoomScale = min(max(newScale, minZoom), maxZoom)
+                            
+                            if zoomScale <= 1.0 {
+                                offset = .zero
+                                lastOffset = .zero
+                                zoomAnchor = .center
+                            }
+                        }
+                        .onEnded { _ in
+                            lastZoomScale = 1.0
+                            if zoomScale <= 1.0 {
+                                withAnimation(.easeOut(duration: 0.2)) {
+                                    offset = .zero
+                                    lastOffset = .zero
+                                    zoomAnchor = .center
+                                }
+                            }
+                        },
+                    DragGesture()
+                        .onChanged { value in
+                            offset = CGSize(
+                                width: lastOffset.width + value.translation.width,
+                                height: lastOffset.height + value.translation.height
+                            )
+                        }
+                        .onEnded { _ in
+                            lastOffset = offset
+                        }
+                ).map { _ in () }
+            )
+        } else {
+            return AnyGesture(
+                MagnificationGesture()
+                    .onChanged { value in
+                        let delta = value / lastZoomScale
+                        lastZoomScale = value
+                        let newScale = zoomScale * delta
+                        zoomScale = min(max(newScale, minZoom), maxZoom)
+                        
+                        if zoomScale > 1.0 {
+                            zoomAnchor = .center
+                        }
+                    }
+                    .onEnded { _ in
+                        lastZoomScale = 1.0
+                    }
+                    .map { _ in () }
+            )
+        }
+    } //AnyGesture ending
+   
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -350,7 +235,7 @@ struct CalendarView: View {
             HStack(spacing: 8) {
                 if calendarViewType == "month" {
                     MonthYearSelector(
-                        filteredDay: $filteredDay,
+                        filteredDay: $monthFilteredDay,
                         isEditingMonthYear: $isEditingMonthYear,
                         currentPeriodText: currentPeriodText,
                         onDone: {
@@ -362,10 +247,13 @@ struct CalendarView: View {
                         .font(.title)
                         .foregroundColor(.primary)
                 }
-                if swipeOffset != 0 {
+                //RESET BUTTON
+                if canResetDate == true {
                     Button(action: {
                         swipeOffset = 0
-                        updateFilteredDay()
+                        weekFilteredDay = Date.now
+                        monthFilteredDay = Date.now
+                        canResetDate = false
                     }) {
                         Text("Reset")
                             .font(.caption)
@@ -374,7 +262,7 @@ struct CalendarView: View {
                             .foregroundColor(.white)
                             .cornerRadius(6)
                     }
-                }
+                } //if statement ending
             }
             
             // Calendar Grid - Takes remaining space
@@ -398,13 +286,13 @@ struct CalendarView: View {
                             Group {
                                 if calendarViewType == "month" {
                                     VStack(spacing: 0) {
-                                        let days = helper.generateCalendarDays(for: calculateDateFor(index: index))
+                                        let days = helper.generateCalendarDays(for: calculateDateFor())
                                         ForEach(0..<6, id: \.self) { row in
                                             HStack(spacing: 0) {
                                                 ForEach(0..<7, id: \.self) { col in
                                                     let dayIndex = row * 7 + col
                                                     let day = dayIndex < days.count ? days[dayIndex] : nil
-                                                    CalendarDayCellView(
+                                                    MonthDayCellView(
                                                         date: day,
                                                         reminders: viewModel.remindersOnGivenDay(for: day ?? Date()),
                                                         cellHeight: cellHeight,
@@ -420,17 +308,17 @@ struct CalendarView: View {
                                     }
                                 } else {
                                     HStack(spacing: 0) {
-                                let weekDays = helper.generateWeekDays(for: calculateDateFor(index: index))
-                                ForEach(weekDays, id: \.self) { day in
-                                    WeekDayCellView(
-                                        date: day,
-                                        reminders: viewModel.remindersOnGivenDay(for: day),
-                                        cellWidth: cellWidth,
-                                        cellHeight: cellHeight,
-                                        cur_screen: $cur_screen,
-                                        DatabaseMock: $DatabaseMock
-                                    )
-                                }
+                                        let weekDays = helper.generateWeekDays(for: calculateDateFor())
+                                        ForEach(weekDays, id: \.self) { day in
+                                            WeekDayCellView(
+                                                date: day,
+                                                reminders: viewModel.remindersOnGivenDay(for: day),
+                                                cellWidth: cellWidth,
+                                                cellHeight: cellHeight,
+                                                cur_screen: $cur_screen,
+                                                DatabaseMock: $DatabaseMock
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -464,52 +352,10 @@ struct CalendarView: View {
                 .scaleEffect(zoomScale, anchor: zoomAnchor)
                 .offset(offset)
                 .animation(.easeOut(duration: 0.1), value: zoomScale)
-                .gesture(
-                    SimultaneousGesture(
-                        MagnificationGesture()
-                            .onChanged { value in
-                                let delta = value / lastZoomScale
-                                lastZoomScale = value
-                                let newScale = zoomScale * delta
-                                zoomScale = min(max(newScale, minZoom), maxZoom)
-
-                                if zoomScale <= 1.0 {
-                                    offset = .zero
-                                    lastOffset = .zero
-                                    zoomAnchor = .center
-                                }
-                            }
-                            .onEnded { _ in
-                                lastZoomScale = 1.0
-                                if zoomScale <= 1.0 {
-                                    withAnimation(.easeOut(duration: 0.2)) {
-                                        offset = .zero
-                                        lastOffset = .zero
-                                        zoomAnchor = .center
-                                    }
-                                }
-                            },
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { value in
-                                if zoomScale == 1.0 {
-                                    zoomAnchor = UnitPoint(
-                                        x: min(max(value.location.x / geometry.size.width, 0), 1),
-                                        y: min(max(value.location.y / geometry.size.height, 0), 1)
-                                    )
-                                } else {
-                                    offset = CGSize(
-                                        width: lastOffset.width + value.translation.width,
-                                        height: lastOffset.height + value.translation.height
-                                    )
-                                }
-                            }
-                            .onEnded { _ in
-                                if zoomScale > 1.0 {
-                                    lastOffset = offset
-                                }
-                            }
-                    )
-                )
+                
+                // ZOOM/SWIPE
+                .gesture(calendarGesture)
+                
                 .onTapGesture(count: 2) {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         zoomScale = 1.0
@@ -546,48 +392,64 @@ struct CalendarView: View {
             NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
         }
         .onAppear {
+            calendarViewType = initialViewType
             if let userReminders = DatabaseMock.users[1] {
                 viewModel.loadReminders(from: userReminders)
             }
-            filteredDay = viewModel.selectedDate
+            monthFilteredDay = viewModel.selectedDate
+            weekFilteredDay = viewModel.selectedDate
             cur_screen = .CalendarScreen
         }
-        .onChange(of: filteredDay) { _, newValue in
-            if let newValue = newValue {
-                viewModel.selectedDate = newValue
-            }
+        .onChange(of: calendarViewType) { _, newValue in
+            initialViewType = newValue
         }
         .onChange(of: viewModel.selectedDate) { _, newValue in
-            filteredDay = newValue
+            // Keep both in sync with selectedDate, but only update the visible one
+            if calendarViewType == "month" {
+                monthFilteredDay = newValue
+            } else {
+                weekFilteredDay = newValue
+            }
         }
     }
 
-    private func calculateDateFor(index: Int) -> Date {
-        let base = filteredDay ?? Date()
+    private func calculateDateFor() -> Date {
+        let base: Date
         if calendarViewType == "month" {
-            return Calendar.current.date(byAdding: .month, value: index + swipeOffset, to: base) ?? base
+            base = monthFilteredDay ?? Date()
+            let calculatedDate = Calendar.current.date(byAdding: .month, value: swipeOffset, to: base) ?? base
+            return calculatedDate
         } else {
-            return Calendar.current.date(byAdding: .weekOfYear, value: index + swipeOffset, to: base) ?? base
+            base = weekFilteredDay ?? Date()
+            let calculatedDate = Calendar.current.date(byAdding: .weekOfYear, value: swipeOffset, to: base) ?? base
+            return calculatedDate
         }
     }
 
     private func updateFilteredDay() {
-        let base = filteredDay ?? Date()
         if calendarViewType == "month" {
-            filteredDay = Calendar.current.date(byAdding: .month, value: swipeOffset, to: base)
+            let base = monthFilteredDay ?? Date()
+            monthFilteredDay = Calendar.current.date(byAdding: .month, value: swipeOffset, to: base)
         } else {
-            filteredDay = Calendar.current.date(byAdding: .weekOfYear, value: swipeOffset, to: base)
+            let base = weekFilteredDay ?? Date()
+            weekFilteredDay = Calendar.current.date(byAdding: .weekOfYear, value: swipeOffset, to: base)
         }
+        
+        if swipeOffset != 0 {
+            canResetDate = true
+        }
+        swipeOffset = 0
     }
 
     private var currentPeriodText: String {
-        let today = filteredDay ?? Date()
-        switch calendarViewType {
-        case "week":
-            return weekString(from: today)
-        case "month":
+        let today: Date
+        if calendarViewType == "month" {
+            today = monthFilteredDay ?? Date()
             return monthString(today) + " " + yearString(today)
-        default:
+        } else if calendarViewType == "week" {
+            today = weekFilteredDay ?? Date()
+            return weekString(from: today)
+        } else {
             return ""
         }
     }

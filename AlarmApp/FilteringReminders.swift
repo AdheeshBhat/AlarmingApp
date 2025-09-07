@@ -9,27 +9,35 @@ import SwiftUI
 
 // ↓ REMINDER FILTERS ↓
 
-func filterRemindersForToday(userData: [Date: ReminderData]) -> [Date: ReminderData] {
+func filterRemindersForToday(userData: [Date: ReminderData], filteredDay: Date?) -> [Date: ReminderData] {
     let calendar = Calendar.current
     let today = Date()
-    let startOfDay = calendar.startOfDay(for: today)
+    var startOfDay = calendar.startOfDay(for: today)
+    if filteredDay != nil {
+        startOfDay = calendar.startOfDay(for: filteredDay!)
+    }
     let endOfDay = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: startOfDay)!
     
-    return userData.filter { (date, _) in
-            return date >= startOfDay && date <= endOfDay
+    return userData.filter { (_, reminder) in
+        let reminderDate = reminder.date
+        return reminderDate >= startOfDay && reminderDate <= endOfDay
     }
 }
 
-func filterRemindersForWeek(userData: [Date: ReminderData]) -> [Date: ReminderData] {
+func filterRemindersForWeek(userData: [Date: ReminderData], filteredDay: Date?) -> [Date: ReminderData] {
     let calendar = Calendar.current
     let today = Date()
     //(start of the week always begins on Sunday in this case) RAISES SAME QUESTION AS FOR MONTH FILTER
-    let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
+    var startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
+    if filteredDay != nil {
+        startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: filteredDay!))!
+    }
     var endOfWeek = calendar.date(byAdding: .day, value: 6, to: startOfWeek)!
     endOfWeek = calendar.date(bySettingHour: 23, minute: 59, second: 59, of: endOfWeek)!
     
-    return userData.filter { (date, _) in
-        return date >= startOfWeek && date <= endOfWeek
+    return userData.filter { (_, reminder) in
+        let reminderDate = reminder.date
+        return reminderDate >= startOfWeek && reminderDate <= endOfWeek
     }
 }
 
@@ -46,8 +54,9 @@ func filterRemindersForMonth(userData: [Date: ReminderData], filteredDay: Date?)
 
     let endOfMonth = calendar.date(byAdding: .month, value: 1, to: startOfMonth)!
     
-    return userData.filter { (date, _) in
-        return date >= startOfMonth && date <= endOfMonth
+    return userData.filter { (_, reminder) in
+        let reminderDate = reminder.date
+        return reminderDate >= startOfMonth && reminderDate <= endOfMonth
     }
 }
 
@@ -59,9 +68,9 @@ func showAllReminders(database: Binding<Database>, userID: Int, period: String, 
     
     let filteredUserData: [Date: ReminderData]
     if period == "today" {
-        filteredUserData = filterRemindersForToday(userData: userData)
+        filteredUserData = filterRemindersForToday(userData: userData, filteredDay: filteredDay)
     } else if period == "week" {
-        filteredUserData = filterRemindersForWeek(userData: userData)
+        filteredUserData = filterRemindersForWeek(userData: userData, filteredDay: filteredDay)
     } else if period == "month" {
         filteredUserData = filterRemindersForMonth(userData: userData, filteredDay: filteredDay)
     } else {
@@ -108,9 +117,9 @@ func showIncompleteReminders(database: Binding<Database>, userID: Int, period: S
     
     let filteredUserData: [Date: ReminderData]
     if period == "today" {
-        filteredUserData = filterRemindersForToday(userData: userData)
+        filteredUserData = filterRemindersForToday(userData: userData, filteredDay: filteredDay)
     } else if period == "week" {
-        filteredUserData = filterRemindersForWeek(userData: userData)
+        filteredUserData = filterRemindersForWeek(userData: userData, filteredDay: filteredDay)
     } else if period == "month" {
         filteredUserData = filterRemindersForMonth(userData: userData, filteredDay: filteredDay)
     } else {
@@ -157,9 +166,9 @@ func formattedReminders(database: Binding<Database>, userID: Int, period: String
     
     let filteredUserData: [Date: ReminderData]
     if period == "today" {
-        filteredUserData = filterRemindersForToday(userData: userData)
+        filteredUserData = filterRemindersForToday(userData: userData, filteredDay: filteredDay)
     } else if period == "week" {
-        filteredUserData = filterRemindersForWeek(userData: userData)
+        filteredUserData = filterRemindersForWeek(userData: userData, filteredDay: filteredDay)
     } else if period == "month" {
         filteredUserData = filterRemindersForMonth(userData: userData, filteredDay: filteredDay)
     } else {

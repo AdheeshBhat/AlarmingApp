@@ -23,6 +23,11 @@ struct CreateReminderScreen: View {
     @State private var isLocked: Bool = false
     @State private var showReminderNameAlert: Bool = false
     @State var selectedSound: String = "Chord"
+    var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing : 16) {
@@ -65,34 +70,40 @@ struct CreateReminderScreen: View {
 
             // TIME SELECTOR
             VStack(spacing: 8) {
-                NavigationLink(
-                    destination: DateSelectorScreen(
-                        reminderTitle: title,
-                        selectedDate: $date,
-                        cur_screen: $cur_screen,
-                        DatabaseMock: $DatabaseMock
-                    )
-                ) {
-                    HStack {
-                        Text(date, style: .date)
-                            .foregroundColor(.primary)
-                            .padding(.leading)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.primary)
-                            .padding(.trailing)
-                    }
-                    .frame(height: 40)
-                    .background(Color.gray.opacity(0.7))
-                    .cornerRadius(8)
-                    .padding(.horizontal)
+                VStack {
+                    NavigationLink(
+                        destination: DateSelectorScreen(
+                            reminderTitle: title,
+                            selectedDate: $date,
+                            cur_screen: $cur_screen,
+                            DatabaseMock: $DatabaseMock
+                        )
+                    ) {
+                        HStack {
+                            Text(formattedDate)
+                                .foregroundColor(.primary)
+                                .padding(.leading)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.primary)
+                                .padding(.trailing)
+                        }
+                        .frame(height: 40)
+                        .background(Color.gray.opacity(0.7))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                    } //Navigation Link ending
                 }
-                DatePicker("", selection: $date, displayedComponents: [.hourAndMinute])
-                    .labelsHidden()
-                    .datePickerStyle(.wheel)
-                    .frame(height: 100)
-                    .clipped()
-                    .padding(.horizontal)
+                
+                VStack {
+                    DatePicker("", selection: $date, displayedComponents: [.hourAndMinute])
+                        .labelsHidden()
+                        .datePickerStyle(.wheel)
+                        .scaleEffect(0.97)
+                        .frame(height: 190)
+                        .clipped()
+                }
+                
             }
             .background(Color.blue.opacity(0.7))
             .cornerRadius(12)
@@ -145,8 +156,6 @@ struct CreateReminderScreen: View {
             .background(Color.blue.opacity(0.7))
             .cornerRadius(12)
             .padding(.horizontal)
-            .padding(.vertical, 12)
-            
             
             
             // PRIORITY SECTION
@@ -217,6 +226,16 @@ struct CreateReminderScreen: View {
                     )
                     let uniqueID = Date.now
                     addToDatabase(database: &DatabaseMock, userID: userID, date: uniqueID, reminder: reminder)
+                    
+//                    let repository = ReminderRepository()
+//                    repository.addReminder(reminder, userID: String(userID)) { error in
+//                        if let error = error {
+//                            print("Error saving reminder: \(error)")
+//                        } else {
+//                            print("Reminder saved successfully!")
+//                        }
+//                    }
+                    
                     presentationMode.wrappedValue.dismiss()
                     setAlarm(dateAndTime: date, title: title, description: description, repeat_setting: reminder.repeatSettings.repeat_type, uniqueDate: uniqueID, soundType: selectedSound)
                 }

@@ -11,9 +11,13 @@ struct RemindersScreen: View {
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
     @State var filterPeriod : String
-    @State var filteredDay: Date? = nil
+    @State var dayFilteredDay: Date? = Date()
+    @State private var weekFilteredDay: Date? = Date()
+    @State private var monthFilteredDay: Date? = Date()
     @State private var isEditingMonthYear: Bool = false
     @State private var swipeOffset: Int = 0
+    @State private var calendarViewType: String = "month"
+    @State private var canResetDate: Bool = false
     
     //create a variable that would change the period depending on the button pressed
     var currentPeriodText: String {
@@ -21,13 +25,13 @@ struct RemindersScreen: View {
         
         switch filterPeriod {
         case "today":
-            return dayString(from: filteredDay ?? today)
+            return dayString(from: dayFilteredDay ?? today)
             
         case "week":
-            return weekString(from: filteredDay ?? today)
+            return weekString(from: weekFilteredDay ?? today)
             
         case "month":
-            return monthString(filteredDay ?? today) + " " + yearString(filteredDay ?? today)
+            return monthString(monthFilteredDay ?? today) + " " + yearString(monthFilteredDay ?? today)
             
         default:
             return ""
@@ -106,7 +110,7 @@ struct RemindersScreen: View {
             //Displays current period right below filters
             if filterPeriod == "month" {
                 MonthYearSelector(
-                    filteredDay: $filteredDay,
+                    filteredDay: $monthFilteredDay,
                     isEditingMonthYear: $isEditingMonthYear,
                     currentPeriodText: currentPeriodText,
                     onDone: {
@@ -119,16 +123,21 @@ struct RemindersScreen: View {
                     .font(.title)
                     .foregroundColor(.primary)
             }
-            if swipeOffset != 0 {
+            //RESET BUTTON
+            if canResetDate == true {
                 Button("Reset") {
                     swipeOffset = 0
-                    updateFilteredDay()
+                    dayFilteredDay = Date.now
+                    weekFilteredDay = Date.now
+                    monthFilteredDay = Date.now
+                    canResetDate = false
                 }
                 .font(.title2)
                 .bold()
                 .foregroundColor(.blue)
                 .padding(.top, 5)
             }
+            
         } //VStack ending
         
         VStack {
@@ -143,7 +152,7 @@ struct RemindersScreen: View {
                             cur_screen: $cur_screen,
                             showEditButton: !isDeleteViewOn,
                             showDeleteButton: isDeleteViewOn,
-                            filteredDay: calculateDateFor(index: index)
+                            filteredDay: calculateDateFor()
                         )
                         
                     }
@@ -170,9 +179,9 @@ struct RemindersScreen: View {
                         Text("Calendar View")
                             .font(.title3)
                     }
-                    .onChange(of: showCalendarView) {
-                        if showCalendarView {
-                            cur_screen = .RemindersScreen
+                    .onChange(of: showCalendarView) { _, newValue in
+                        if newValue {
+                            calendarViewType = filterPeriod == "today" ? "week" : filterPeriod
                         }
                     }
                 }
@@ -181,11 +190,32 @@ struct RemindersScreen: View {
             .padding(.leading)
         } //NavigationStack ending
         .navigationDestination(isPresented: $showCalendarView) {
-            CalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+            CalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, initialViewType: $calendarViewType)
+                .onDisappear {
+                    if calendarViewType == "week" {
+                        filterPeriod = "week"
+                    } else if calendarViewType == "month" {
+                        filterPeriod = "month"
+                    }
+                }
         }
         
         .onAppear {
             cur_screen = .RemindersScreen
+            canResetDate = displayedPeriodDiffersFromToday()
+        }
+        
+        .onChange(of: dayFilteredDay) { _, _ in
+            canResetDate = displayedPeriodDiffersFromToday()
+        }
+        .onChange(of: weekFilteredDay) { _, _ in
+            canResetDate = displayedPeriodDiffersFromToday()
+        }
+        .onChange(of: monthFilteredDay) { _, _ in
+            canResetDate = displayedPeriodDiffersFromToday()
+        }
+        .onChange(of: filterPeriod) { _, _ in
+            canResetDate = displayedPeriodDiffersFromToday()
         }
         
         VStack {
@@ -196,32 +226,83 @@ struct RemindersScreen: View {
     
     func updateFilteredDay() {
         let calendar = Calendar.current
-        let today = Date()
+        let today = Calendar.current.startOfDay(for: Date())
         
         switch filterPeriod {
         case "today":
-            filteredDay = calendar.date(byAdding: .day, value: swipeOffset, to: today)
+            let baseDate = dayFilteredDay ?? Date()
+            dayFilteredDay = calendar.date(byAdding: .day, value: swipeOffset, to: baseDate)
         case "week":
-            filteredDay = calendar.date(byAdding: .weekOfYear, value: swipeOffset, to: today)
+            let baseDate = weekFilteredDay ?? Date()
+            weekFilteredDay = calendar.date(byAdding: .weekOfYear, value: swipeOffset, to: baseDate)
         case "month":
-            filteredDay = calendar.date(byAdding: .month, value: swipeOffset, to: today)
+            let baseDate = monthFilteredDay ?? Date()
+            monthFilteredDay = calendar.date(byAdding: .month, value: swipeOffset, to: baseDate)
         default:
-            filteredDay = today
+            dayFilteredDay = today
+            weekFilteredDay = today
+            monthFilteredDay = today
+        }
+
+        if swipeOffset != 0 || displayedPeriodDiffersFromToday() {
+            canResetDate = true
+        }
+        swipeOffset = 0
+    }
+    
+    //Helper function that determines whether the period currently being displayed is different from today's period
+    //Used to show/hide the reset button
+    private func displayedPeriodDiffersFromToday() -> Bool {
+        let cal = Calendar.current
+        let today = Date()
+        switch filterPeriod {
+        case "today":
+            if let d = dayFilteredDay {
+                //checks if dayFilteredDay is the same as today (returns true if selected day is not today)
+                return !cal.isDate(d, inSameDayAs: today)
+            }
+            return false
+        case "week":
+            if let d = weekFilteredDay {
+                //compares weekFilteredDay's "week number" and year (ex. week 36, 2025) to today's
+                let w1 = cal.component(.weekOfYear, from: d)
+                let w2 = cal.component(.weekOfYear, from: today)
+                let y1 = cal.component(.yearForWeekOfYear, from: d)
+                let y2 = cal.component(.yearForWeekOfYear, from: today)
+                return w1 != w2 || y1 != y2 //(returns true if weekFilteredDay is different from today's week)
+            }
+            return false
+        case "month":
+            if let d = monthFilteredDay {
+                //compares monthFilteredDay's month and year to today's
+                let m1 = cal.component(.month, from: d)
+                let m2 = cal.component(.month, from: today)
+                let y1 = cal.component(.year, from: d)
+                let y2 = cal.component(.year, from: today)
+                return m1 != m2 || y1 != y2 //(returns true if monthFilteredDay is different from today's week)
+            }
+            return false
+        default:
+            return false
         }
     }
 
-    func calculateDateFor(index: Int) -> Date {
-        let calendar = Calendar.current
-        let baseDate = filteredDay ?? Date()
+    func calculateDateFor() -> Date {
         switch filterPeriod {
         case "today":
-            return calendar.date(byAdding: .day, value: index, to: baseDate)!
+            let baseDate = dayFilteredDay ?? Date()
+            let calculatedDate = Calendar.current.date(byAdding: .day, value: swipeOffset, to: baseDate) ?? baseDate
+            return calculatedDate
         case "week":
-            return calendar.date(byAdding: .weekOfYear, value: index, to: baseDate)!
+            let baseDate = weekFilteredDay ?? Date()
+            let calculatedDate = Calendar.current.date(byAdding: .weekOfYear, value: swipeOffset, to: baseDate) ?? baseDate
+            return calculatedDate
         case "month":
-            return calendar.date(byAdding: .month, value: index, to: baseDate)!
+            let baseDate = monthFilteredDay ?? Date()
+            let calculatedDate = Calendar.current.date(byAdding: .month, value: swipeOffset, to: baseDate) ?? baseDate
+            return calculatedDate
         default:
-            return baseDate
+            return Date()
         }
     }
     

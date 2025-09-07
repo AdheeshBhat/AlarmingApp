@@ -9,9 +9,9 @@ import SwiftUI
 func filterReminders(userData: [Date: ReminderData], period: String, filteredDay: Date?) -> [Date: ReminderData] {
     switch period {
     case "today":
-        return filterRemindersForToday(userData: userData)
+        return filterRemindersForToday(userData: userData, filteredDay: filteredDay)
     case "week":
-        return filterRemindersForWeek(userData: userData)
+        return filterRemindersForWeek(userData: userData, filteredDay: filteredDay)
     case "month":
         return filterRemindersForMonth(userData: userData, filteredDay: filteredDay)
     default:

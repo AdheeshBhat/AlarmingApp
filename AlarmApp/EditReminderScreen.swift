@@ -76,42 +76,48 @@ struct EditReminderScreen: View {
                         .scrollContentBackground(.hidden)
                 }
                 .padding(.horizontal)
-            }
+            } //VStack ending
             .background(Color.blue.opacity(0.7))
             .cornerRadius(12)
             .padding(.horizontal)
 
             // Date/Time
-            VStack(spacing: 8) {
-                NavigationLink(
-                    destination: DateSelectorScreen(
-                        reminderTitle: reminder.title,
-                        selectedDate: $localDate,
-                        cur_screen: $cur_screen,
-                        DatabaseMock: $DatabaseMock
-                    )
-                ) {
-                    HStack {
-                        Text(formattedDate)
-                            .foregroundColor(.primary)
-                            .padding(.leading)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(.primary)
-                            .padding(.trailing)
-                    }
-                    .frame(height: 40)
-                    .background(Color.gray.opacity(0.7))
-                    .cornerRadius(8)
-                    .padding(.horizontal)
+            VStack {
+                VStack {
+                    NavigationLink(
+                        destination: DateSelectorScreen(
+                            reminderTitle: reminder.title,
+                            selectedDate: $localDate,
+                            cur_screen: $cur_screen,
+                            DatabaseMock: $DatabaseMock
+                        )
+                    ) {
+                        HStack {
+                            Text(formattedDate)
+                                .foregroundColor(.primary)
+                                .padding(.leading)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.primary)
+                                .padding(.trailing)
+                        }
+                        .frame(height: 40)
+                        .background(Color.gray.opacity(0.7))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                        //.padding(.bottom)
+                    } //Navigation Link ending
                 }
-
-                DatePicker("", selection: $localDate, displayedComponents: [.hourAndMinute])
-                    .labelsHidden()
-                    .frame(height: 150)
-                    .clipped()
-                    .datePickerStyle(.wheel)
-                    .padding(.horizontal)
+                
+                VStack {
+                    DatePicker("", selection: $localDate, displayedComponents: [.hourAndMinute])
+                        .labelsHidden()
+                        .scaleEffect(0.97)
+                        .frame(height: 190)
+                        .clipped()
+                        .datePickerStyle(.wheel)
+                }
+                
             }
             .background(Color.blue.opacity(0.7))
             .cornerRadius(12)
@@ -157,12 +163,11 @@ struct EditReminderScreen: View {
                 Image(systemName: "chevron.right")
                     .foregroundColor(.black)
                     .padding(.trailing)
-            }
+            } //HStack ending
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.blue.opacity(0.7))
             .cornerRadius(12)
             .padding(.horizontal)
-            .padding(.vertical, 12)
 
             // Priority
             HStack {

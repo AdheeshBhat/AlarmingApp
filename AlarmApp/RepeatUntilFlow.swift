@@ -27,6 +27,7 @@ struct RepeatUntilFlow: View {
         self._repeatUntil = repeatUntil
         self._repeatUntilOptionSelected = State(initialValue: "")
         if _repeatUntil.wrappedValue != "Forever" {
+            //SELECTED DATE IS NOT BEING SET CORRECTLY HERE
             self.selectedDate = createDateFromText(dateString: repeatUntil.wrappedValue)
         } else {
             self.selectedDate = Date()
