@@ -13,13 +13,15 @@ struct DateSelectorScreen: View {
     @Binding var DatabaseMock: Database
     @Environment(\.presentationMode) private var presentationMode
     @State private var localSelectedDate: Date
+    let firestoreManager: FirestoreManager
 
-    init(reminderTitle: String, selectedDate: Binding<Date>, cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>) {
+    init(reminderTitle: String, selectedDate: Binding<Date>, cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, firestoreManager: FirestoreManager) {
         self.reminderTitle = reminderTitle
         self._selectedDate = selectedDate
         self._cur_screen = cur_screen
         self._DatabaseMock = DatabaseMock
         self._localSelectedDate = State(initialValue: selectedDate.wrappedValue)
+        self.firestoreManager = firestoreManager
     }
 
     var body: some View {
@@ -61,7 +63,7 @@ struct DateSelectorScreen: View {
             cur_screen = .EditScreen
         }
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
     } //body ending
 }

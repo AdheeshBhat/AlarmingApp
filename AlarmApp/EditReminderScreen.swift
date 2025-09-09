@@ -20,13 +20,14 @@ struct EditReminderScreen: View {
     @State var localEditScreenRepeatSetting: String
     @State var localEditScreenRepeatUntil: String
     @State private var localDate: Date
+    let firestoreManager: FirestoreManager
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: localDate)
     }
 
-    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, reminder: Binding<ReminderData>) {
+    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, reminder: Binding<ReminderData>, firestoreManager: FirestoreManager) {
         self._cur_screen = cur_screen
         self._DatabaseMock = DatabaseMock
         self._reminder = reminder
@@ -39,6 +40,7 @@ struct EditReminderScreen: View {
         //HAD TO MAKE REPEAT_UNTIL_DATE A STRING FOR THIS TO WORK -> might need to look into that (was originally a date type)
         self._localEditScreenRepeatUntil = State(initialValue: reminder.wrappedValue.repeatSettings.repeat_until_date)
         self._localDate = State(initialValue: reminder.wrappedValue.date)
+        self.firestoreManager = firestoreManager
         
     }
     
@@ -89,7 +91,8 @@ struct EditReminderScreen: View {
                             reminderTitle: reminder.title,
                             selectedDate: $localDate,
                             cur_screen: $cur_screen,
-                            DatabaseMock: $DatabaseMock
+                            DatabaseMock: $DatabaseMock,
+                            firestoreManager: firestoreManager
                         )
                     ) {
                         HStack {
@@ -144,7 +147,8 @@ struct EditReminderScreen: View {
                         DatabaseMock: $DatabaseMock,
                         title: localTitle,
                         repeatSetting: $localEditScreenRepeatSetting,
-                        repeatUntil: $localEditScreenRepeatUntil
+                        repeatUntil: $localEditScreenRepeatUntil,
+                        firestoreManager: firestoreManager
                     )
                 ) {
                     Text(localEditScreenRepeatSetting)
@@ -185,7 +189,7 @@ struct EditReminderScreen: View {
                     .padding(.leading, 6)
 
                 NavigationLink(
-                    destination: PriorityFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: localTitle, priority: $localEditScreenPriority, isLocked: $localEditScreenIsLocked)
+                    destination: PriorityFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: localTitle, priority: $localEditScreenPriority, isLocked: $localEditScreenIsLocked, firestoreManager: firestoreManager)
                 ) {
                     Text(localEditScreenPriority)
                         .foregroundColor(.primary)
@@ -239,7 +243,7 @@ struct EditReminderScreen: View {
             }
             
             VStack {
-                NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
             }
         } //VStack ending
         .alert("Please type the reminder name first.", isPresented: $showReminderNameAlert) {

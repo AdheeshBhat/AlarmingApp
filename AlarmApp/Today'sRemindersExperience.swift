@@ -21,7 +21,7 @@ func filterReminders(userData: [Date: ReminderData], period: String, filteredDay
 
 
 
-func TodayRemindersExperience(cur_database: Binding<Database>, cur_screen: Binding<Screen>, isHideCompletedReminders: Bool) -> some View {
+func TodayRemindersExperience(cur_database: Binding<Database>, cur_screen: Binding<Screen>, isHideCompletedReminders: Bool, firestoreManager: FirestoreManager) -> some View {
     
     let userID = 1
     let userData = cur_database.wrappedValue.users[userID] ?? [:]
@@ -45,10 +45,10 @@ func TodayRemindersExperience(cur_database: Binding<Database>, cur_screen: Bindi
         } else {
             ScrollView {
                 if isHideCompletedReminders {
-                    showIncompleteReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false, filteredDay: nil)
+                    showIncompleteReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false, filteredDay: nil, firestoreManager: firestoreManager)
                 }
                 else {
-                    showAllReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false, filteredDay: nil)
+                    showAllReminders(database: cur_database, userID: 1, period: "today", cur_screen: cur_screen, showEditButton: false, showDeleteButton: false, filteredDay: nil, firestoreManager: firestoreManager)
                 }
             }
             .background(RoundedRectangle(cornerRadius: 12).stroke(Color.primary, lineWidth: 2))

@@ -13,6 +13,7 @@ struct NavigationBarExperience: View {
     @Environment(\.dismiss) var dismiss
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
+    let firestoreManager: FirestoreManager
     
     var body: some View {
         VStack {
@@ -28,7 +29,7 @@ struct NavigationBarExperience: View {
                 //REMINDERS BUTTON
                 VStack() {
                     if cur_screen != .RemindersScreen {
-                        NavigationLink(destination: RemindersScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, filterPeriod: "week")) {
+                        NavigationLink(destination: RemindersScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, filterPeriod: "week", firestoreManager: firestoreManager)) {
                             Image(systemName: "list.bullet")
                                 .font(.title)
                                 .padding(7)
@@ -52,7 +53,7 @@ struct NavigationBarExperience: View {
 
                 VStack() {
                     if cur_screen != .HomeScreen {
-                        NavigationLink(destination: HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen)) {
+                        NavigationLink(destination: HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen, firestoreManager: firestoreManager)) {
                             Image(systemName: "house")
                                 .font(.title)
                                 .foregroundColor((cur_screen == .HomeScreen) ? Color.blue : Color.primary)

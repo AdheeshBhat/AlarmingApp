@@ -18,6 +18,7 @@ struct RemindersScreen: View {
     @State private var swipeOffset: Int = 0
     @State private var calendarViewType: String = "month"
     @State private var canResetDate: Bool = false
+    let firestoreManager: FirestoreManager
     
     //create a variable that would change the period depending on the button pressed
     var currentPeriodText: String {
@@ -45,7 +46,7 @@ struct RemindersScreen: View {
                 //NotificationBellExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
                     //.padding(.trailing, 10)
                 HStack {
-                    SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                    SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
                     Spacer()
                 }
                 
@@ -57,7 +58,7 @@ struct RemindersScreen: View {
 
                 HStack {
                     Spacer()
-                    CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                    CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
                 }
             } //ZStack ending
             .padding(.bottom)
@@ -152,7 +153,8 @@ struct RemindersScreen: View {
                             cur_screen: $cur_screen,
                             showEditButton: !isDeleteViewOn,
                             showDeleteButton: isDeleteViewOn,
-                            filteredDay: calculateDateFor()
+                            filteredDay: calculateDateFor(),
+                            firestoreManager: firestoreManager
                         )
                         
                     }
@@ -190,7 +192,7 @@ struct RemindersScreen: View {
             .padding(.leading)
         } //NavigationStack ending
         .navigationDestination(isPresented: $showCalendarView) {
-            CalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, initialViewType: $calendarViewType)
+            CalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, initialViewType: $calendarViewType, firestoreManager: firestoreManager)
                 .onDisappear {
                     if calendarViewType == "week" {
                         filterPeriod = "week"
@@ -219,7 +221,7 @@ struct RemindersScreen: View {
         }
         
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
     
     } //body ending
@@ -324,10 +326,9 @@ struct ReminderRow: View {
     //Used to show "delete" alert
     @State private var showDeleteConfirmation = false
     @Binding var database: Database
-    
-
     var userID: Int
     var dateKey: Date
+    let firestoreManager: FirestoreManager
 
     //Formats 24-hour input time to 12-hour time with AM/PM
     var formattedTime: String {
@@ -383,7 +384,8 @@ struct ReminderRow: View {
                             reminder: Binding(
                                 get: { database.users[userID]![dateKey]! },
                                 set: { database.users[userID]![dateKey]! = $0 }
-                            )
+                            ),
+                            firestoreManager: firestoreManager
                         )) {
                             HStack {
                                 Image(systemName: "pencil")

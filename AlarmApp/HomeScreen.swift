@@ -11,6 +11,7 @@ struct HomeView: View {
     @Binding var DatabaseMock: Database
     @Binding var cur_screen: Screen
     @State var isHideCompletedReminders : Bool = false
+    let firestoreManager: FirestoreManager
     
     var body: some View {
         VStack {
@@ -18,9 +19,9 @@ struct HomeView: View {
             HStack {
                 //NotificationBellExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
                     //.padding(.trailing, 10)
-                SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
                 Spacer()
-                CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
             }
             //.padding(.horizontal)
             //.frame(maxWidth: .infinity, alignment: .topTrailing)
@@ -30,7 +31,7 @@ struct HomeView: View {
         WelcomeExperience()
         
         //Displays today's reminders/"No Pending Tasks"
-        TodayRemindersExperience(cur_database: $DatabaseMock, cur_screen: $cur_screen, isHideCompletedReminders: isHideCompletedReminders)
+        TodayRemindersExperience(cur_database: $DatabaseMock, cur_screen: $cur_screen, isHideCompletedReminders: isHideCompletedReminders, firestoreManager: firestoreManager)
             .padding(.bottom)
         
         VStack {
@@ -44,7 +45,7 @@ struct HomeView: View {
         }
         
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
             
         //.padding(.bottom, 270)

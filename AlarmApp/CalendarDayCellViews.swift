@@ -15,6 +15,7 @@ struct MonthDayCellView: View {
     let isReminderViewOn: Bool
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
+    let firestoreManager: FirestoreManager
 
     // Helper to safely fetch ReminderData for a normalized date
     private func reminderData(for reminder: CalendarReminder) -> ReminderData? {
@@ -70,7 +71,8 @@ struct MonthDayCellView: View {
                             cur_screen: $cur_screen,
                             DatabaseMock: $DatabaseMock,
                             filterPeriod: "today",
-                            dayFilteredDay: reminder.date
+                            dayFilteredDay: reminder.date,
+                            firestoreManager: firestoreManager
                         )
                     ) {
                         Text(reminder.title)
@@ -107,6 +109,7 @@ struct WeekDayCellView: View {
     let cellHeight: CGFloat
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
+    let firestoreManager: FirestoreManager
 
     // Helper to safely fetch ReminderData for a normalized date
     private func reminderData(for reminder: CalendarReminder) -> ReminderData? {
@@ -128,43 +131,13 @@ struct WeekDayCellView: View {
             ScrollView {
                 VStack(spacing: 2) {
                     ForEach(reminders) { reminder in
-                        if let reminderData = reminderData(for: reminder) {
-                            NavigationLink(
-                                destination: EditReminderScreen(
-                                    cur_screen: $cur_screen,
-                                    DatabaseMock: $DatabaseMock,
-                                    reminder: Binding(
-                                        get: { reminderData },
-                                        set: { updated in
-                                            let normalizedDate = normalizeDate(reminder.date)
-                                            if let userReminders = DatabaseMock.users[1] {
-                                                if let key = userReminders.first(where: {
-                                                    normalizeDate($0.value.date) == normalizedDate && $0.value.title == reminder.title
-                                                })?.key {
-                                                    DatabaseMock.users[1]?[key] = updated
-                                                }
-                                            }
-                                        }
-                                    )
-                                )
-                            ) {
-                                Text(reminder.title)
-                                    .font(.system(size: 10))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 4)
-                                    .padding(.vertical, 2)
-                                    .background(RoundedRectangle(cornerRadius: 4).fill(Color.blue))
-                                    .lineLimit(2)
-                            }
-                        } else {
-                            Text(reminder.title)
-                                .font(.system(size: 10))
-                                .foregroundColor(.white)
-                                .padding(.horizontal, 4)
-                                .padding(.vertical, 2)
-                                .background(RoundedRectangle(cornerRadius: 4).fill(Color.gray))
-                                .lineLimit(2)
-                        }
+                        ReminderCell(
+                            reminder: reminder,
+                            reminderData: reminderData(for: reminder),
+                            cur_screen: $cur_screen,
+                            DatabaseMock: $DatabaseMock,
+                            firestoreManager: firestoreManager
+                        )
                     }
                 }
             }
@@ -175,5 +148,57 @@ struct WeekDayCellView: View {
                 .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
         )
         .padding(1)
+    }
+}
+
+/// Extracted subview for clarity and compile speed
+struct ReminderCell: View {
+    let reminder: CalendarReminder
+    let reminderData: ReminderData?
+    @Binding var cur_screen: Screen
+    @Binding var DatabaseMock: Database
+    let firestoreManager: FirestoreManager
+
+    var body: some View {
+        Group {
+            if let reminderData = reminderData {
+                NavigationLink(
+                    destination: EditReminderScreen(
+                        cur_screen: $cur_screen,
+                        DatabaseMock: $DatabaseMock,
+                        reminder: Binding(
+                            get: { reminderData },
+                            set: { updated in
+                                let normalizedDate = normalizeDate(reminder.date)
+                                if let userReminders = DatabaseMock.users[1] {
+                                    if let key = userReminders.first(where: {
+                                        normalizeDate($0.value.date) == normalizedDate && $0.value.title == reminder.title
+                                    })?.key {
+                                        DatabaseMock.users[1]?[key] = updated
+                                    }
+                                }
+                            }
+                        ),
+                        firestoreManager: firestoreManager
+                    )
+                ) {
+                    Text(reminder.title)
+                        .font(.system(size: 10))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(RoundedRectangle(cornerRadius: 4).fill(Color.blue))
+                        .lineLimit(2)
+                }
+            } else {
+                Text(reminder.title)
+                    .font(.system(size: 10))
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .background(RoundedRectangle(cornerRadius: 4).fill(Color.gray))
+                    .lineLimit(2)
+            }
+        }
     }
 }

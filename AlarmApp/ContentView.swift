@@ -27,10 +27,16 @@ enum Screen {
 
 
 struct ContentView: View {
+    init() {
+        FirebaseApp.configure()
+        
+    }
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @Environment(\.presentationMode) private var
         presentationMode: Binding<PresentationMode>
     @State public var cur_screen: Screen = .HomeScreen
+    @StateObject var viewModel = ReminderViewModel()
+    let firestoreManager = FirestoreManager()
     @State public var DatabaseMock =
                         //** Key is date on which the reminder is created
     Database(users: [1: [createDate(year: 2025, month: 8, day: 29, hour: 11, minute: 1, second: 1):
@@ -51,39 +57,39 @@ struct ContentView: View {
                      2: [Date.now:
                             ReminderData(ID: 2, date: Date.now, title: "title reminder", description: "Test description 2", repeatSettings: RepeatSettings(repeat_type: "None", repeat_until_date: "Specific Date"), priority: "Low", isComplete: false, author: "user", isLocked: false)]])
     
-    //let firestoreDB = Firestore.firestore()
-    //firestoreDB.collection("reminder").document("1").setData([author: "Adheesh"])
+
     var body: some View {
         
         NavigationStack {
-            HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen)
+            HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen, firestoreManager: firestoreManager)
         
         }
         
         .onAppear {
             requestNotificationPermission()
             FirebaseApp.configure()
+            //viewModel.addTestReminder()
             
-            let firestoreDB = Firestore.firestore() //this is calling the database (initializing it/making a new variable)
-            //writing will also be its own helper function
-            //this updates existing values, (doesn't create new values for the same key)
-            firestoreDB.collection("reminder").document("1").setData(["author": "Yousif"])
-            //make a helper function for delete field, delete document, delete collection, and update data
-                //for setData and updateData, make 2 helper functions each that pass in the full reminder or a specific field
-            //firestoreDB.collection("reminder").document("1").setData(["author": "Yousif"])
-            //delete/update
-                //different helper function for deleting a field, document, or collection
-            //firestoreDB.collection("reminder").document("1").updateData(["author": FieldValue.delete()])
-            
-            //make this a helper function with "reminder" and "1" as parameters
-                //collection and document are parameter
-            
-            firestoreDB.collection("reminder").document("1").getDocument{document, error in
-                if let document = document, document.exists {
-                    print(document.data()!["author"]!)
-                } else {
-                    print("Document doesn't exist")
-                }}
+//            let firestoreDB = Firestore.firestore() //this is calling the database (initializing it/making a new variable)
+//            //writing will also be its own helper function
+//            //this updates existing values, (doesn't create new values for the same key)
+//            firestoreDB.collection("reminder").document("1").setData(["author": "Yousif"])
+//            //make a helper function for delete field, delete document, delete collection, and update data
+//                //for setData and updateData, make 2 helper functions each that pass in the full reminder or a specific field (one that passes in the full reminder and one that passes in a specific field
+//            //firestoreDB.collection("reminder").document("1").setData(["author": "Yousif"])
+//            //delete/update
+//                //different helper function for deleting a field, document, or collection
+//            //firestoreDB.collection("reminder").document("1").updateData(["author": FieldValue.delete()])
+//            
+//            //make this a helper function with "reminder" (collection) and "1" (document) as parameters
+//                //collection and document are parameters
+//            
+//            firestoreDB.collection("reminder").document("1").getDocument{document, error in
+//                if let document = document, document.exists {
+//                    print(document.data()!["author"]!)
+//                } else {
+//                    print("Document doesn't exist")
+//                }}
 
         }
     } //Body ending

@@ -17,10 +17,11 @@ struct RepeatUntilFlow: View {
     @State var selectedDate: Date
     @Binding var repeatUntil: String
     @State private var repeatUntilOptionSelected: String
+    let firestoreManager: FirestoreManager
     //define a string variable to use to check if specific date is pressed
     
     
-    init(title: String, cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, repeatUntil: Binding<String>) {
+    init(title: String, cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, repeatUntil: Binding<String>, firestoreManager: FirestoreManager) {
         self.title = title
         self._cur_screen = cur_screen
         self._DatabaseMock = DatabaseMock
@@ -32,6 +33,7 @@ struct RepeatUntilFlow: View {
         } else {
             self.selectedDate = Date()
         }
+        self.firestoreManager = firestoreManager
        
     }
 
@@ -116,7 +118,7 @@ struct RepeatUntilFlow: View {
                 }
             }
 
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
     }
 }

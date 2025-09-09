@@ -17,9 +17,10 @@ struct RepeatSettingsFlow: View {
     @Binding var repeatUntil: String
     //local repeatUntil var for repeatSettings screen (2nd local)
     @State private var localRepeatScreenRepeatUntil: String
+    let firestoreManager: FirestoreManager
     
     
-    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, title: String, repeatSetting: Binding<String>, repeatUntil: Binding<String> ) {
+    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, title: String, repeatSetting: Binding<String>, repeatUntil: Binding<String>, firestoreManager: FirestoreManager ) {
         self._cur_screen = cur_screen
         self._DatabaseMock = DatabaseMock
         self.title = title
@@ -28,6 +29,7 @@ struct RepeatSettingsFlow: View {
         //local variables
         self._localRepeatSetting = State(initialValue: repeatSetting.wrappedValue)
         self._localRepeatScreenRepeatUntil = State(initialValue: repeatUntil.wrappedValue)
+        self.firestoreManager = firestoreManager
     }
 
     let options = ["None", "Daily", "Weekly", "Monthly", "Yearly", "Custom"]
@@ -93,7 +95,7 @@ struct RepeatSettingsFlow: View {
             
             //REPEAT UNTIL BUTTON
             if (localRepeatSetting != "None" && localRepeatSetting != nil) {
-                NavigationLink(destination: RepeatUntilFlow(title: title, cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, repeatUntil: $localRepeatScreenRepeatUntil)) {
+                NavigationLink(destination: RepeatUntilFlow(title: title, cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, repeatUntil: $localRepeatScreenRepeatUntil, firestoreManager: firestoreManager)) {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Until")
@@ -140,7 +142,7 @@ struct RepeatSettingsFlow: View {
         .padding()
         
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
     }
 }

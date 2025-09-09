@@ -23,6 +23,7 @@ struct CreateReminderScreen: View {
     @State private var isLocked: Bool = false
     @State private var showReminderNameAlert: Bool = false
     @State var selectedSound: String = "Chord"
+    let firestoreManager: FirestoreManager
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -76,7 +77,8 @@ struct CreateReminderScreen: View {
                             reminderTitle: title,
                             selectedDate: $date,
                             cur_screen: $cur_screen,
-                            DatabaseMock: $DatabaseMock
+                            DatabaseMock: $DatabaseMock,
+                            firestoreManager: firestoreManager
                         )
                     ) {
                         HStack {
@@ -132,7 +134,8 @@ struct CreateReminderScreen: View {
                         DatabaseMock: $DatabaseMock,
                         title: title,
                         repeatSetting: $repeat_setting,
-                        repeatUntil: $repeatUntil
+                        repeatUntil: $repeatUntil,
+                        firestoreManager: firestoreManager
                     )
                 ) {
                     Text(repeat_setting)
@@ -179,7 +182,8 @@ struct CreateReminderScreen: View {
                         DatabaseMock: $DatabaseMock,
                         title: title,
                         priority: $priority,
-                        isLocked: $isLocked)
+                        isLocked: $isLocked,
+                        firestoreManager: firestoreManager)
                 ) {
                     Text(priority)
                         .foregroundColor(.primary)
@@ -225,8 +229,8 @@ struct CreateReminderScreen: View {
                         isLocked: isLocked
                     )
                     let uniqueID = Date.now
-                    addToDatabase(database: &DatabaseMock, userID: userID, date: uniqueID, reminder: reminder)
-                    
+                    //addToDatabase(database: &DatabaseMock, userID: userID, date: uniqueID, reminder: reminder)
+                    //firestoreManager.setReminder(userID: String(userID), reminder: reminder)
 //                    let repository = ReminderRepository()
 //                    repository.addReminder(reminder, userID: String(userID)) { error in
 //                        if let error = error {
@@ -261,7 +265,7 @@ struct CreateReminderScreen: View {
         }
         
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
     }
 }

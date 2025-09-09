@@ -14,6 +14,7 @@ struct SettingsScreen: View {
     
     @State private var isDropdownVisible = false
     @State var selectedSound: String = "Chord"
+    let firestoreManager: FirestoreManager
 
     
 
@@ -125,7 +126,7 @@ struct SettingsScreen: View {
         }
 
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
     } //body ending
 }

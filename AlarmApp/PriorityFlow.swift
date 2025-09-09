@@ -17,10 +17,11 @@ struct PriorityFlow: View {
     @State private var localPriority: String
     @Binding var isLocked: Bool
     @State private var localIsLocked: Bool
+    let firestoreManager: FirestoreManager
     
     
 
-    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, title: String, priority: Binding<String>, isLocked: Binding<Bool>) {
+    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, title: String, priority: Binding<String>, isLocked: Binding<Bool>, firestoreManager: FirestoreManager) {
         self._cur_screen = cur_screen
         self._DatabaseMock = DatabaseMock
         self.title = title
@@ -29,6 +30,7 @@ struct PriorityFlow: View {
         // Initialize local state variables
         self._localPriority = State(initialValue: priority.wrappedValue)
         self._localIsLocked = State(initialValue: isLocked.wrappedValue)
+        self.firestoreManager = firestoreManager
     }
 
     var body: some View {
@@ -169,7 +171,7 @@ struct PriorityFlow: View {
         
         
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
     } //body ending
 }

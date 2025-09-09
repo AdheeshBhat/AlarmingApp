@@ -63,7 +63,7 @@ func filterRemindersForMonth(userData: [Date: ReminderData], filteredDay: Date?)
 //--------------------------------------------------------------- 1
 
 //Returns reminders based on day, week, or month filter
-func showAllReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = false, showDeleteButton: Bool = false, filteredDay: Date?) -> some View {
+func showAllReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = false, showDeleteButton: Bool = false, filteredDay: Date?, firestoreManager: FirestoreManager) -> some View {
     let userData = database.wrappedValue.users[userID] ?? [:]
     
     let filteredUserData: [Date: ReminderData]
@@ -96,7 +96,8 @@ func showAllReminders(database: Binding<Database>, userID: Int, period: String, 
                         showDeleteButton: showDeleteButton,
                         database: database,
                         userID: userID,
-                        dateKey: date
+                        dateKey: date,
+                        firestoreManager: firestoreManager
                     )
                     
                     //Show past reminders that have already been completed
@@ -112,7 +113,7 @@ func showAllReminders(database: Binding<Database>, userID: Int, period: String, 
 //----------------------------------------------------------------- 2
 
 
-func showIncompleteReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = false, showDeleteButton: Bool = false, filteredDay: Date?) -> some View {
+func showIncompleteReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = false, showDeleteButton: Bool = false, filteredDay: Date?, firestoreManager: FirestoreManager) -> some View {
     let userData = database.wrappedValue.users[userID] ?? [:]
     
     let filteredUserData: [Date: ReminderData]
@@ -148,7 +149,8 @@ func showIncompleteReminders(database: Binding<Database>, userID: Int, period: S
                         showDeleteButton: showDeleteButton,
                         database: database,
                         userID: userID,
-                        dateKey: date
+                        dateKey: date,
+                        firestoreManager: firestoreManager
                     ) //ReminderRow ending
                 } //HStack ending
                 //.padding()
@@ -161,7 +163,7 @@ func showIncompleteReminders(database: Binding<Database>, userID: Int, period: S
 //----------------------------------------------------------------- 3
 
 
-func formattedReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = true, showDeleteButton: Bool = false, filteredDay: Date?) -> some View {
+func formattedReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = true, showDeleteButton: Bool = false, filteredDay: Date?, firestoreManager: FirestoreManager) -> some View {
     let userData = database.wrappedValue.users[userID] ?? [:]
     
     let filteredUserData: [Date: ReminderData]
@@ -194,7 +196,8 @@ func formattedReminders(database: Binding<Database>, userID: Int, period: String
                         showDeleteButton: showDeleteButton,
                         database: database,
                         userID: userID,
-                        dateKey: date
+                        dateKey: date,
+                        firestoreManager: firestoreManager
                     )
 
                 } //HStack ending
