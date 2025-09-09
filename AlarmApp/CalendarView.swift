@@ -235,6 +235,66 @@ struct CalendarView: View {
         }
     }
     
+    private var calendarGesture: AnyGesture<Void> {
+        if zoomScale > 1.0 {
+            return AnyGesture(
+                SimultaneousGesture(
+                    MagnificationGesture()
+                        .onChanged { value in
+                            let delta = value / lastZoomScale
+                            lastZoomScale = value
+                            let newScale = zoomScale * delta
+                            zoomScale = min(max(newScale, minZoom), maxZoom)
+                            
+                            if zoomScale <= 1.0 {
+                                offset = .zero
+                                lastOffset = .zero
+                                zoomAnchor = .center
+                            }
+                        }
+                        .onEnded { _ in
+                            lastZoomScale = 1.0
+                            if zoomScale <= 1.0 {
+                                withAnimation(.easeOut(duration: 0.2)) {
+                                    offset = .zero
+                                    lastOffset = .zero
+                                    zoomAnchor = .center
+                                }
+                            }
+                        },
+                    DragGesture()
+                        .onChanged { value in
+                            offset = CGSize(
+                                width: lastOffset.width + value.translation.width,
+                                height: lastOffset.height + value.translation.height
+                            )
+                        }
+                        .onEnded { _ in
+                            lastOffset = offset
+                        }
+                ).map { _ in () }
+            )
+        } else {
+            return AnyGesture(
+                MagnificationGesture()
+                    .onChanged { value in
+                        let delta = value / lastZoomScale
+                        lastZoomScale = value
+                        let newScale = zoomScale * delta
+                        zoomScale = min(max(newScale, minZoom), maxZoom)
+                        
+                        if zoomScale > 1.0 {
+                            zoomAnchor = .center
+                        }
+                    }
+                    .onEnded { _ in
+                        lastZoomScale = 1.0
+                    }
+                    .map { _ in () }
+            )
+        }
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             // MARK: Header
