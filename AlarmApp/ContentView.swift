@@ -27,10 +27,6 @@ enum Screen {
 
 
 struct ContentView: View {
-    init() {
-        FirebaseApp.configure()
-        
-    }
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     @Environment(\.presentationMode) private var
         presentationMode: Binding<PresentationMode>
@@ -67,7 +63,6 @@ struct ContentView: View {
         
         .onAppear {
             requestNotificationPermission()
-            FirebaseApp.configure()
             //viewModel.addTestReminder()
             
 //            let firestoreDB = Firestore.firestore() //this is calling the database (initializing it/making a new variable)

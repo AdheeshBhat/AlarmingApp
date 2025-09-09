@@ -230,7 +230,7 @@ struct CreateReminderScreen: View {
                     )
                     let uniqueID = Date.now
                     //addToDatabase(database: &DatabaseMock, userID: userID, date: uniqueID, reminder: reminder)
-                    //firestoreManager.setReminder(userID: String(userID), reminder: reminder)
+                    firestoreManager.setReminder(userID: String(userID), reminder: reminder)
 //                    let repository = ReminderRepository()
 //                    repository.addReminder(reminder, userID: String(userID)) { error in
 //                        if let error = error {

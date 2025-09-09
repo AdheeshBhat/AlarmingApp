@@ -21,16 +21,14 @@ import FirebaseFirestore
 //}
 
 class FirestoreManager {
-    init() {
-        FirebaseApp.configure()
-    }
+
     
     private let db = Firestore.firestore()
 
     // Create or update a reminder
     func setReminder(userID: String, reminder: ReminderData) {
         do {
-            try db.collection("reminder").document(userID).setData(from: reminder)
+            try db.collection("users").document(userID).collection("reminders").document(getCurrentDateString()).setData(from: reminder)
             
         } catch {
             print("Failed setReminder")
