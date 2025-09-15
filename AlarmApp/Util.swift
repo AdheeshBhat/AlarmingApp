@@ -17,18 +17,13 @@ func createDate(year: Int, month: Int, day: Int, hour: Int, minute: Int, second:
 
 func createDateFromText(dateString: String) -> Date {
     let format = DateFormatter()
-    format.dateFormat = "yyyy-MM-dd HH:mm:ss"
-    //let dateString = "2025-03-13 09:20:00"
     
+    format.dateFormat = "yyyy-MM-dd HH:mm:ss"
     if let date = format.date(from: dateString) {
         return date
-    } else {
-        print("Invalid date format.")
     }
     
-    //if let date = format.date(from: dateString) {
-        //return date
-    //}
+    print("Invalid date format.")
     return Date.now
 }
 
@@ -166,5 +161,6 @@ func yearString(_ date: Date) -> String {
     formatter.dateFormat = "yyyy"
     return formatter.string(from: date)
 }
+
 
 
