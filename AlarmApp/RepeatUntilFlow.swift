@@ -14,7 +14,7 @@ struct RepeatUntilFlow: View {
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
     @Environment(\.presentationMode) var presentationMode
-    @State var selectedDate: Date
+    @State var selectedDate: Date = Date()
     @Binding var repeatUntil: String
     @State private var repeatUntilOptionSelected: String
     let firestoreManager: FirestoreManager
@@ -27,14 +27,14 @@ struct RepeatUntilFlow: View {
         self._DatabaseMock = DatabaseMock
         self._repeatUntil = repeatUntil
         self._repeatUntilOptionSelected = State(initialValue: "")
-        if _repeatUntil.wrappedValue != "Forever" {
-            //SELECTED DATE IS NOT BEING SET CORRECTLY HERE
-            self.selectedDate = createDateFromText(dateString: repeatUntil.wrappedValue)
+        
+        if repeatUntil.wrappedValue != "Forever" {
+            self._selectedDate = State(initialValue: createDateFromText(dateString: repeatUntil.wrappedValue))
         } else {
-            self.selectedDate = Date()
+            self._selectedDate = State(initialValue: Date())
         }
+        
         self.firestoreManager = firestoreManager
-       
     }
 
     var body: some View {
@@ -115,6 +115,7 @@ struct RepeatUntilFlow: View {
                     repeatUntilOptionSelected = repeatUntil
                 } else {
                     repeatUntilOptionSelected = "Specific Date"
+                    selectedDate = createDateFromText(dateString: repeatUntil)
                 }
             }
 
@@ -122,4 +123,5 @@ struct RepeatUntilFlow: View {
         }
     }
 }
+
 
