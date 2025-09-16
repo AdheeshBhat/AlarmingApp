@@ -24,6 +24,12 @@ class FirestoreManager {
 
     
     private let db = Firestore.firestore()
+        
+    func saveUserData(userId: String, data: [String: Any], completion: @escaping (Error?) -> Void) {
+        db.collection("users").document(userId).setData(data) { error in
+            completion(error)
+        }
+    }
 
     // Create or update a reminder
     func setReminder(userID: String, reminder: ReminderData) {
@@ -36,20 +42,30 @@ class FirestoreManager {
     }
 
     // Fetch a reminder
-    func getReminder(userID: String, completion: @escaping (Result<ReminderData, Error>) -> Void) {
-        let docRef = db.collection("reminder").document(userID)
-        docRef.getDocument { document, error in
-            if let document = document, document.exists {
-                if let reminder = try? document.data(as: ReminderData.self) {
-                    completion(.success(reminder))
+    func getReminder(userID: String, dateCreated: String) {
+        do {
+            db.collection("users").document(userID).collection("reminders").document(dateCreated).getDocument { document, error in
+                if let document = document, document.exists {
+                    print("Fetched reminder")
                 } else {
-                    completion(.failure(NSError(domain: "FirestoreManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to decode reminder"])))
-                }
-            } else {
-                completion(.failure(error ?? NSError(domain: "FirestoreManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Document does not exist"])))
-            }
+                    print("Reminder does not exist")
+                }}
+            
         }
     }
+//    func getReminder(userID: String, dateCreated: String, completion: @escaping (Result<ReminderData, Error>) -> Void) {
+//        db.collection("users").document(userID).collection("reminders").document(dateCreated).getDocument { document, error in
+//            if let document = document, document.exists {
+//                if let reminder = try? document.data(as: ReminderData.self) {
+//                    completion(.success(reminder))
+//                } else {
+//                    completion(.failure(NSError(domain: "FirestoreManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to decode reminder"])))
+//                }
+//            } else {
+//                completion(.failure(error ?? NSError(domain: "FirestoreManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Document does not exist"])))
+//            }
+//        }
+//    }
 
     // Update specific fields of a reminder
     func updateReminderFields(userID: String, fields: [String: Any], completion: @escaping (Result<Void, Error>) -> Void) {
@@ -138,16 +154,16 @@ class ReminderViewModel: ObservableObject {
 //        }
 //    }
 
-    func testGetReminder() {
-        firestoreManager.getReminder(userID: "user123") { result in
-            switch result {
-            case .success(let reminder):
-                print("Fetched reminder: \(reminder)")
-            case .failure(let error):
-                print("Error fetching reminder: \(error)")
-            }
-        }
-    }
+//    func testGetReminder() {
+//        firestoreManager.getReminder(userID: "user123") { result in
+//            switch result {
+//            case .success(let reminder):
+//                print("Fetched reminder: \(reminder)")
+//            case .failure(let error):
+//                print("Error fetching reminder: \(error)")
+//            }
+//        }
+//    }
 
     func testUpdateReminderFields() {
         firestoreManager.updateReminderFields(userID: "user123", fields: ["title": "test title"]) { result in

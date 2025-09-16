@@ -349,6 +349,7 @@ struct ReminderRow: View {
                 HStack {
                     //DONE BUTTON
                     Button(action: {
+                        //if firestoreManager.getReminder(userID: String(userID), dateCreated: dateKey)
                         if database.users[userID]?[dateKey]?.isComplete == true {
                             showConfirmation = true
                         } else {
