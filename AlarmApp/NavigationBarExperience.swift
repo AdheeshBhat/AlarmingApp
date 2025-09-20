@@ -75,16 +75,18 @@ struct NavigationBarExperience: View {
                 
                 VStack() {
                     Button(action: {
-                        //presentationMode.wrappedValue.dismiss()
-                        dismiss()
+                        if cur_screen != .HomeScreen {
+                            dismiss()
+                        }
                     }) {
                         Image(systemName: "arrowshape.backward")
                             .font(.title)
-                            .foregroundColor(.primary)
+                            .foregroundColor(cur_screen == .HomeScreen ? .gray : .primary)
                     }
                     .padding(1.5)
-                    .background(RoundedRectangle(cornerRadius: 5).stroke(Color.primary, lineWidth: 1))
+                    .background(RoundedRectangle(cornerRadius: 5).stroke(cur_screen == .HomeScreen ? .gray : .primary, lineWidth: 1))
                     .padding(4)
+                    .disabled(cur_screen == .HomeScreen)
                     Text("Back")
                     
                 } //VStack ending
@@ -93,4 +95,5 @@ struct NavigationBarExperience: View {
         } //VStack ending
     } //body ending
 }
+
 

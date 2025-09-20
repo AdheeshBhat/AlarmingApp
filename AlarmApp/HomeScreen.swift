@@ -36,8 +36,16 @@ struct HomeView: View {
         
         VStack {
             Toggle("Hide Completed Reminders", isOn: $isHideCompletedReminders)
-                .font(.title3)
-                .padding()
+                .font(.headline)
+                .fontWeight(.medium)
+                .padding(16)
+                .background(Color.blue.opacity(0.1))
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                )
+                .padding(.horizontal)
         }
         
         .onAppear {
@@ -52,3 +60,4 @@ struct HomeView: View {
         
     } //body ending
 }
+

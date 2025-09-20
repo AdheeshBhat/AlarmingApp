@@ -48,12 +48,12 @@ struct DateSelectorScreen: View {
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Done")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue.opacity(0.7))
+                    .padding(18)
+                    .background(Color.green)
                     .cornerRadius(12)
             }
             .padding(.horizontal)
@@ -67,3 +67,4 @@ struct DateSelectorScreen: View {
         }
     } //body ending
 }
+

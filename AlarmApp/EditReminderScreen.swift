@@ -19,6 +19,7 @@ struct EditReminderScreen: View {
     @State var localEditScreenIsLocked: Bool
     @State var localEditScreenRepeatSetting: String
     @State var localEditScreenRepeatUntil: String
+    @State var localCustomPatterns: Set<String> = []
     @State private var localDate: Date
     let firestoreManager: FirestoreManager
     var formattedDate: String {
@@ -45,210 +46,186 @@ struct EditReminderScreen: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            TextField("Type Reminder Name...", text: $localTitle)
-                .multilineTextAlignment(.center)
-                .font(.largeTitle)
-                .foregroundColor(.primary)
-                .padding(.horizontal)
-
-
-            // Description
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Description")
-                    .foregroundColor(.primary)
-                    .font(.headline)
-                    .underline()
-                    .padding(.top)
-                    .padding(.leading)
-
-                ZStack(alignment: .topLeading) {
-                    if localDescription.isEmpty {
-                        Text("Add your description here!")
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 2)
-                            .padding(.vertical, 2)
-                    }
-
-                    TextEditor(text: $localDescription)
-                        .frame(height: 100)
-                        .padding(8)
-                        .background(Color.clear)
-                        .cornerRadius(8)
-                        .scrollContentBackground(.hidden)
-                }
-                .padding(.horizontal)
-            } //VStack ending
-            .background(Color.blue.opacity(0.7))
-            .cornerRadius(12)
-            .padding(.horizontal)
-
-            // Date/Time
-            VStack {
-                VStack {
-                    NavigationLink(
-                        destination: DateSelectorScreen(
-                            reminderTitle: reminder.title,
-                            selectedDate: $localDate,
-                            cur_screen: $cur_screen,
-                            DatabaseMock: $DatabaseMock,
-                            firestoreManager: firestoreManager
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    TextField("Type Reminder Name...", text: $localTitle)
+                        .multilineTextAlignment(.center)
+                        .font(.title2)
+                        .foregroundColor(.primary)
+                        .padding()
+                        .background(Color(.systemBackground))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.blue.opacity(0.4), lineWidth: 2)
                         )
-                    ) {
-                        HStack {
-                            Text(formattedDate)
-                                .foregroundColor(.primary)
-                                .padding(.leading)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.primary)
-                                .padding(.trailing)
+
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Description")
+                            .foregroundColor(.primary)
+                            .font(.headline)
+                            .fontWeight(.medium)
+
+                        ZStack(alignment: .topLeading) {
+                            if localDescription.isEmpty {
+                                Text("Add your description here!")
+                                    .foregroundColor(.secondary)
+                                    .padding(8)
+                            }
+                            TextEditor(text: $localDescription)
+                                .frame(height: 80)
+                                .padding(8)
+                                .background(Color(.systemBackground))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                                )
+                                .scrollContentBackground(.hidden)
                         }
-                        .frame(height: 40)
-                        .background(Color.gray.opacity(0.7))
-                        .cornerRadius(8)
-                        .padding(.horizontal)
-                        //.padding(.bottom)
-                    } //Navigation Link ending
-                }
-                
-                VStack {
-                    DatePicker("", selection: $localDate, displayedComponents: [.hourAndMinute])
-                        .labelsHidden()
-                        .scaleEffect(0.97)
-                        .frame(height: 190)
-                        .clipped()
-                        .datePickerStyle(.wheel)
-                }
-                
-            }
-            .background(Color.blue.opacity(0.7))
-            .cornerRadius(12)
-            .padding(.horizontal)
-
-            // Repeat
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Repeat")
-                        .foregroundColor(.primary)
-                        .font(.title3)
-                        .underline()
-                }
-                .padding(.vertical)
-                .padding(.leading)
-                
-                Image(systemName: "arrow.2.circlepath")
-                    .foregroundColor(.primary)
-                    .padding(.leading, 6)
-                
-                NavigationLink(
-                    destination: RepeatSettingsFlow(
-                        cur_screen: $cur_screen,
-                        DatabaseMock: $DatabaseMock,
-                        title: localTitle,
-                        repeatSetting: $localEditScreenRepeatSetting,
-                        repeatUntil: $localEditScreenRepeatUntil,
-                        firestoreManager: firestoreManager
-                    )
-                ) {
-                    Text(localEditScreenRepeatSetting)
-                        .foregroundColor(.primary)
-                        .font(.title3)
-                        .padding(.leading, 75)
-                }
-                .disabled(localTitle.isEmpty)
-                .simultaneousGesture(TapGesture().onEnded {
-                    if localTitle.isEmpty {
-                        showReminderNameAlert = true
                     }
-                })
-
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.black)
-                    .padding(.trailing)
-            } //HStack ending
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.blue.opacity(0.7))
-            .cornerRadius(12)
-            .padding(.horizontal)
-
-            // Priority
-            HStack {
-                VStack(alignment: .leading) {
-                    Text("Priority")
-                        .foregroundColor(.primary)
-                        .font(.title3)
-                        .underline()
-                }
-                .padding(.vertical)
-                .padding(.leading)
-                
-                Image(systemName: "exclamationmark.triangle")
-                    .foregroundColor(.primary)
-                    .padding(.leading, 6)
-
-                NavigationLink(
-                    destination: PriorityFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: localTitle, priority: $localEditScreenPriority, isLocked: $localEditScreenIsLocked, firestoreManager: firestoreManager)
-                ) {
-                    Text(localEditScreenPriority)
-                        .foregroundColor(.primary)
-                        .font(.title3)
-                        .padding(.leading, 75)
-                }
-                .disabled(localTitle.isEmpty)
-                .simultaneousGesture(TapGesture().onEnded {
-                    if localTitle.isEmpty {
-                        showReminderNameAlert = true
-                    }
-                })
-
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .foregroundColor(.black)
-                    .padding(.trailing)
-            } //HStack ending
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.blue.opacity(0.7))
-            .cornerRadius(12)
-            .padding(.horizontal)
-
-
-            Spacer()
-
-            // SAVE CHANGES BUTTON
-            Button(action: {
-                reminder.title = localTitle
-                reminder.description = localDescription
-                reminder.priority = localEditScreenPriority
-                reminder.isLocked = localEditScreenIsLocked
-                reminder.repeatSettings.repeat_type = localEditScreenRepeatSetting
-                reminder.repeatSettings.repeat_until_date = localEditScreenRepeatUntil
-                reminder.date = localDate
-                presentationMode.wrappedValue.dismiss()
-            }) {
-                Text("Save Changes")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue.opacity(0.7))
+                    .padding(16)
+                    .background(Color.blue.opacity(0.1))
                     .cornerRadius(12)
-                    .padding(.horizontal)
+
+                    VStack(spacing: 16) {
+                        NavigationLink(
+                            destination: DateSelectorScreen(
+                                reminderTitle: reminder.title,
+                                selectedDate: $localDate,
+                                cur_screen: $cur_screen,
+                                DatabaseMock: $DatabaseMock,
+                                firestoreManager: firestoreManager
+                            )
+                        ) {
+                            HStack {
+                                Text(formattedDate)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.blue)
+                            }
+                            .padding()
+                            .background(Color(.systemBackground))
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                            )
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        
+                        Divider()
+                        
+                        DatePicker("", selection: $localDate, displayedComponents: [.hourAndMinute])
+                            .labelsHidden()
+                            .datePickerStyle(.wheel)
+                            .frame(height: 150)
+                            .clipped()
+                    }
+                    .padding(16)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(12)
+
+                    HStack {
+                        Image(systemName: "arrow.2.circlepath")
+                            .foregroundColor(.blue)
+                        Text("Repeat")
+                            .foregroundColor(.primary)
+                            .font(.headline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        NavigationLink(
+                            destination: RepeatSettingsFlow(
+                                cur_screen: $cur_screen,
+                                DatabaseMock: $DatabaseMock,
+                                title: localTitle,
+                                repeatSetting: $localEditScreenRepeatSetting,
+                                repeatUntil: $localEditScreenRepeatUntil,
+                                customPatterns: $localCustomPatterns,
+                                firestoreManager: firestoreManager
+                            )
+                        ) {
+                            HStack {
+                                Text(localEditScreenRepeatSetting)
+                                    .foregroundColor(.primary)
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .disabled(localTitle.isEmpty)
+                        .simultaneousGesture(TapGesture().onEnded {
+                            if localTitle.isEmpty {
+                                showReminderNameAlert = true
+                            }
+                        })
+                    }
+                    .padding(16)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(12)
+
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle")
+                            .foregroundColor(.blue)
+                        Text("Priority")
+                            .foregroundColor(.primary)
+                            .font(.headline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        NavigationLink(
+                            destination: PriorityFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: localTitle, priority: $localEditScreenPriority, isLocked: $localEditScreenIsLocked, firestoreManager: firestoreManager)
+                        ) {
+                            HStack {
+                                Text(localEditScreenPriority)
+                                    .foregroundColor(.primary)
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.blue)
+                            }
+                        }
+                        .disabled(localTitle.isEmpty)
+                        .simultaneousGesture(TapGesture().onEnded {
+                            if localTitle.isEmpty {
+                                showReminderNameAlert = true
+                            }
+                        })
+                    }
+                    .padding(16)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(12)
+
+                    Button(action: {
+                        reminder.title = localTitle
+                        reminder.description = localDescription
+                        reminder.priority = localEditScreenPriority
+                        reminder.isLocked = localEditScreenIsLocked
+                        reminder.repeatSettings.repeat_type = localEditScreenRepeatSetting
+                        reminder.repeatSettings.repeat_until_date = localEditScreenRepeatUntil
+                        reminder.date = localDate
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Text("Save Changes")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(18)
+                            .background(Color.green)
+                            .cornerRadius(12)
+                    }
+                    .padding(.top, 10)
+                }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
             }
             
-            .onAppear {
-                cur_screen = .EditScreen
-            }
-            
-            VStack {
-                NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
-            }
-        } //VStack ending
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+        }
+        .background(Color(.systemBackground))
         .alert("Please type the reminder name first.", isPresented: $showReminderNameAlert) {
             Button("OK", role: .cancel) {}
         }
-    } //body ending
+        .onAppear {
+            cur_screen = .EditScreen
+        }
+    }
 }
+
 

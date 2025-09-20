@@ -34,9 +34,10 @@ struct PriorityFlow: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 18) {
             Text(title)
-                .font(.largeTitle)
+                .font(.title)
+                .fontWeight(.medium)
                 .frame(maxWidth: .infinity, alignment: .center)
                 .padding()
 
@@ -44,8 +45,8 @@ struct PriorityFlow: View {
                 HStack {
                     Text("Priority")
                         .foregroundColor(.primary)
-                        .font(.title3)
-                        .underline()
+                        .font(.headline)
+                        .fontWeight(.medium)
                     Image(systemName: "exclamationmark.triangle")
                         .foregroundColor(.primary)
                         .padding(.leading, 6)
@@ -60,22 +61,24 @@ struct PriorityFlow: View {
                     HStack {
                         Text("Low")
                             .foregroundColor(.primary)
-                            .font(.title3)
-                            .padding(.leading)
+                            .font(.headline)
+                            .fontWeight(.medium)
+                            .padding(.leading, 16)
                         Spacer()
                         if localPriority == "Low" {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 30, weight: .bold))
-                                .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
-                                .padding(.trailing)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.green)
+                                .padding(.trailing, 16)
                         }
                     }
-                    .padding(.vertical, 14)
+                    .padding(.vertical, 16)
                 }
 
                 Divider()
-                    .background(Color.gray)
-                    .padding(.horizontal, 20)
+                    .background(Color.blue.opacity(0.3))
+                    .padding(.horizontal, 16)
 
                 Button(action: {
                     localPriority = "High"
@@ -83,21 +86,27 @@ struct PriorityFlow: View {
                     HStack {
                         Text("High")
                             .foregroundColor(.primary)
-                            .font(.title3)
-                            .padding(.leading)
+                            .font(.headline)
+                            .fontWeight(.medium)
+                            .padding(.leading, 16)
                         Spacer()
                         if localPriority == "High" {
                             Image(systemName: "checkmark")
-                                .font(.system(size: 30, weight: .bold))
-                                .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
-                                .padding(.trailing)
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.green)
+                                .padding(.trailing, 16)
                         }
                     }
-                    .padding(.vertical, 14)
+                    .padding(.vertical, 16)
                 }
                 
             }
-            .background(Color.blue.opacity(0.7))
+            .background(Color.blue.opacity(0.1))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+            )
             .cornerRadius(12)
 
             if localPriority == "Low" {
@@ -126,16 +135,21 @@ struct PriorityFlow: View {
                 HStack {
                     Text(localIsLocked ? "Locked Reminder" : "Unlocked Reminder")
                         .foregroundColor(.primary)
-                        .font(.title3)
-                        .padding(.leading)
+                        .font(.headline)
+                        .fontWeight(.medium)
+                        .padding(.leading, 16)
                     Spacer()
                     Image(systemName: localIsLocked ? "lock.fill" : "lock.open.fill")
-                        .font(.title)
+                        .font(.title2)
                         .foregroundColor(.primary)
-                        .padding(.trailing)
+                        .padding(.trailing, 16)
                 }
-                .padding(.vertical, 14)
-                .background(Color.blue.opacity(0.7))
+                .padding(.vertical, 16)
+                .background(Color.blue.opacity(0.1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                )
                 .cornerRadius(12)
             }
             .padding(.top)
@@ -150,12 +164,12 @@ struct PriorityFlow: View {
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Done")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
+                    .font(.headline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue.opacity(0.7))
+                    .padding(16)
+                    .background(.green)
                     .cornerRadius(12)
             }
             .padding(.top)
@@ -175,4 +189,5 @@ struct PriorityFlow: View {
         }
     } //body ending
 }
+
 

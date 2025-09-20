@@ -20,49 +20,115 @@ struct LoginScreen: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                TextField("Email", text: $email)
-                    .autocapitalization(.none)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-
-                SecureField("Password", text: $password)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .textContentType(.password)
-
-                if !errorMessage.isEmpty {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                }
-
-                Button(action: {
-                    login()
-                }) {
-                    Text("Login")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-                
-                Button(action: {
-                    showRegistration.toggle()
-                }) {
-                    Text("Register")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
+            ScrollView {
+                VStack(spacing: 30) {
+                    Spacer(minLength: 60)
+                    
+                    // to do i hardcoded icon, but we should put img of our logo
+                    VStack(spacing: 16) {
+                        Text("🌟")
+                            .font(.system(size: 80))
+                        
+                        Text("Hello there!") // To Do some welcome msg
+                            .font(.title)
+                            .fontWeight(.medium)
+                            .foregroundColor(.blue)
+                        
+                        Text("decide name lol") // to DO
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                            .foregroundColor(.primary)
+                        
+                        Text("something we can say here if we want") // To DO
+                            .font(.title3)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
+                    .padding(.bottom, 20)
+                    
+                    // Login Form
+                    VStack(spacing: 20) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Email")
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .foregroundColor(.primary)
+                            
+                            TextField("Enter your email", text: $email)
+                                .font(.title3)
+                                .autocapitalization(.none)
+                                .padding(16)
+                                .background(Color(.systemBackground))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.blue.opacity(0.4), lineWidth: 2)
+                                )
+                                .textContentType(.emailAddress)
+                                .keyboardType(.emailAddress)
+                        }
+                        
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Password")
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .foregroundColor(.primary)
+                            
+                            SecureField("Enter your password", text: $password)
+                                .font(.title3)
+                                .padding(16)
+                                .background(Color(.systemBackground))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .stroke(Color.blue.opacity(0.4), lineWidth: 2)
+                                )
+                                .textContentType(.password)
+                        }
+                        
+                        if !errorMessage.isEmpty {
+                            Text(errorMessage)
+                                .font(.title3)
+                                .foregroundColor(.red)
+                                .padding(.horizontal)
+                                .multilineTextAlignment(.center)
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    
+                    // Buttons
+                    VStack(spacing: 16) {
+                        Button(action: {
+                            login()
+                        }) {
+                            Text("Sign In")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(18)
+                                .background(Color.green)
+                                .cornerRadius(12)
+                        }
+                        
+                        Button(action: {
+                            showRegistration.toggle()
+                        }) {
+                            Text("Create New Account")
+                                .font(.title3)
+                                .fontWeight(.medium)
+                                .foregroundColor(.blue)
+                                .frame(maxWidth: .infinity)
+                                .padding(16)
+                                .background(Color.blue.opacity(0.15))
+                                .cornerRadius(12)
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                    
+                    Spacer(minLength: 40)
                 }
             }
-            .padding()
+            .background(Color(.systemBackground))
             .navigationDestination(isPresented: $navigateToHome) {
                 HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen, firestoreManager: firestoreManager)
             }
@@ -184,3 +250,4 @@ struct RegistrationScreen: View {
         }
     }
 }
+

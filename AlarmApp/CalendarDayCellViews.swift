@@ -64,39 +64,30 @@ struct MonthDayCellView: View {
 
     private func reminderList(for reminders: [CalendarReminder]) -> some View {
         VStack(spacing: 1) {
-            ForEach(Array(reminders.prefix(min(3, reminders.count))), id: \.id) { reminder in
-                if reminderData(for: reminder) != nil {
-                    NavigationLink(
-                        destination: RemindersScreen(
-                            cur_screen: $cur_screen,
-                            DatabaseMock: $DatabaseMock,
-                            filterPeriod: "today",
-                            dayFilteredDay: reminder.date,
-                            firestoreManager: firestoreManager
-                        )
-                    ) {
-                        Text(reminder.title)
-                            .font(.system(size: 8))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 2)
-                            .padding(.vertical, 1)
-                            .background(RoundedRectangle(cornerRadius: 2).fill(Color.blue))
-                            .lineLimit(1)
-                    }
-                } else {
-                    Text(reminder.title)
-                        .font(.system(size: 8))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 2)
-                        .padding(.vertical, 1)
-                        .background(RoundedRectangle(cornerRadius: 2).fill(Color.gray))
-                        .lineLimit(1)
-                }
+            ForEach(isReminderViewOn ? reminders : Array(reminders.prefix(3)), id: \.id) { reminder in
+                ReminderCell(
+                    reminder: reminder,
+                    reminderData: reminderData(for: reminder),
+                    cur_screen: $cur_screen,
+                    DatabaseMock: $DatabaseMock,
+                    firestoreManager: firestoreManager
+                )
             }
-            if reminders.count > 3 {
-                Text("+\(reminders.count - 3)")
-                    .font(.system(size: 6))
-                    .foregroundColor(.secondary)
+            if !isReminderViewOn && reminders.count > 3 {
+                NavigationLink(
+                    destination: RemindersScreen(
+                        cur_screen: $cur_screen,
+                        DatabaseMock: $DatabaseMock,
+                        filterPeriod: "today",
+                        dayFilteredDay: date,
+                        firestoreManager: firestoreManager
+                    )
+                ) {
+                    Text("+\(reminders.count - 3)")
+                        .font(.system(size: 6))
+                        .foregroundColor(.blue)
+                        .fontWeight(.medium)
+                }
             }
         }
     }
@@ -107,6 +98,7 @@ struct WeekDayCellView: View {
     let reminders: [CalendarReminder]
     let cellWidth: CGFloat
     let cellHeight: CGFloat
+    let isReminderViewOn: Bool
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
     let firestoreManager: FirestoreManager
@@ -128,18 +120,24 @@ struct WeekDayCellView: View {
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.primary)
 
-            ScrollView {
-                VStack(spacing: 2) {
-                    ForEach(reminders) { reminder in
-                        ReminderCell(
-                            reminder: reminder,
-                            reminderData: reminderData(for: reminder),
-                            cur_screen: $cur_screen,
-                            DatabaseMock: $DatabaseMock,
-                            firestoreManager: firestoreManager
-                        )
+            if isReminderViewOn {
+                ScrollView {
+                    VStack(spacing: 2) {
+                        ForEach(reminders) { reminder in
+                            ReminderCell(
+                                reminder: reminder,
+                                reminderData: reminderData(for: reminder),
+                                cur_screen: $cur_screen,
+                                DatabaseMock: $DatabaseMock,
+                                firestoreManager: firestoreManager
+                            )
+                        }
                     }
                 }
+            } else if !reminders.isEmpty {
+                Circle()
+                    .fill(reminders.count == 1 ? .green : (reminders.count <= 3 ? .yellow : .red))
+                    .frame(width: 8, height: 8)
             }
         }
         .frame(width: cellWidth, height: cellHeight)
@@ -163,22 +161,11 @@ struct ReminderCell: View {
         Group {
             if let reminderData = reminderData {
                 NavigationLink(
-                    destination: EditReminderScreen(
+                    destination: RemindersScreen(
                         cur_screen: $cur_screen,
                         DatabaseMock: $DatabaseMock,
-                        reminder: Binding(
-                            get: { reminderData },
-                            set: { updated in
-                                let normalizedDate = normalizeDate(reminder.date)
-                                if let userReminders = DatabaseMock.users[1] {
-                                    if let key = userReminders.first(where: {
-                                        normalizeDate($0.value.date) == normalizedDate && $0.value.title == reminder.title
-                                    })?.key {
-                                        DatabaseMock.users[1]?[key] = updated
-                                    }
-                                }
-                            }
-                        ),
+                        filterPeriod: "today",
+                        dayFilteredDay: reminder.date,
                         firestoreManager: firestoreManager
                     )
                 ) {
@@ -202,3 +189,4 @@ struct ReminderCell: View {
         }
     }
 }
+

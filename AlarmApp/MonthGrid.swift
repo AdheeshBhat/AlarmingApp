@@ -13,6 +13,8 @@ struct MonthGrid: View {
     let cellHeight: CGFloat
     let date: Date
     let viewModel: CalendarViewModel
+    let zoomScale: CGFloat
+    let isReminderViewOn: Bool
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
     let firestoreManager: FirestoreManager
@@ -29,8 +31,8 @@ struct MonthGrid: View {
                             date: day,
                             reminders: viewModel.remindersOnGivenDay(for: day ?? Date()),
                             cellHeight: cellHeight,
-                            zoomScale: 1.0,
-                            isReminderViewOn: false,
+                            zoomScale: zoomScale,
+                            isReminderViewOn: isReminderViewOn,
                             cur_screen: $cur_screen,
                             DatabaseMock: $DatabaseMock,
                             firestoreManager: firestoreManager
@@ -42,3 +44,4 @@ struct MonthGrid: View {
         }
     }
 }
+

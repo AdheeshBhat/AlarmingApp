@@ -16,22 +16,22 @@ struct CalendarReminder: Identifiable {
 
 class CalendarHelper {
     let calendar = Calendar.current
-    
+
     func plusMonth(_ date: Date) -> Date {
         calendar.date(byAdding: .month, value: 1, to: date) ?? date
     }
-    
+
     func minusMonth(_ date: Date) -> Date {
         calendar.date(byAdding: .month, value: -1, to: date) ?? date
     }
-    
+
     func getNumberOfDaysInMonth(date: Date) -> Int {
         guard let range = calendar.range(of: .day, in: .month, for: date) else {
             return 0
         }
         return range.count
     }
-    
+
     func getSpecificDay(day: Int, from date: Date) -> Date {
         let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
         let maxDays = getNumberOfDaysInMonth(date: startOfMonth)
@@ -39,7 +39,7 @@ class CalendarHelper {
         let validDay = min(day, maxDays - 1)
         return calendar.date(byAdding: .day, value: validDay, to: startOfMonth)!
     }
-    
+
     func findOffset(_ date: Date) -> Int {
         let firstOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: date))!
         let weekday = calendar.component(.weekday, from: firstOfMonth)
@@ -51,14 +51,14 @@ class CalendarHelper {
         let startOfWeek = calendar.date(from: calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date))!
         return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: startOfWeek) }
     }
-    
+
     func generateCalendarDays(for date: Date) -> [Date?] {
         var days: [Date?] = []
         let helper = CalendarHelper()
         let firstOfMonth = Calendar.current.date(from: Calendar.current.dateComponents([.year, .month], from: date))!
         let numberOfDays = helper.getNumberOfDaysInMonth(date: date)
         let startingOffset = helper.findOffset(date)
-        
+
         for i in 0..<42 {
             if i < startingOffset || i >= startingOffset + numberOfDays {
                 days.append(nil)
@@ -77,21 +77,21 @@ func normalizeDate(_ date: Date) -> Date {
 class CalendarViewModel: ObservableObject {
     @Published var selectedDate: Date = Date()
     @Published var remindersByDate: [Date: [CalendarReminder]] = [:]
-    
+
     func remindersOnGivenDay(for date: Date) -> [CalendarReminder] {
         remindersByDate[normalizeDate(date)] ?? []
     }
-    
+
     func loadReminders(from allReminders: [Date: ReminderData]) {
         var grouped: [Date: [CalendarReminder]] = [:]
-        
+
         for (_, reminder) in allReminders {
             let dateKey = normalizeDate(reminder.date)
             let simpleReminder = CalendarReminder(id: UUID(), title: reminder.title, date: reminder.date)
-            
+
             grouped[dateKey, default: []].append(simpleReminder)
         }
-        
+
         remindersByDate = grouped
     }
 }
@@ -108,6 +108,8 @@ struct CalendarGrid: View {
     let cellHeight: CGFloat
     let swipeOffset: Int
     let viewModel: CalendarViewModel
+    let zoomScale: CGFloat
+    let isReminderViewOn: Bool
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
     let firestoreManager: FirestoreManager
@@ -120,6 +122,8 @@ struct CalendarGrid: View {
                 cellHeight: cellHeight,
                 date: calculateDateFor(),
                 viewModel: viewModel,
+                zoomScale: zoomScale,
+                isReminderViewOn: isReminderViewOn,
                 cur_screen: $cur_screen,
                 DatabaseMock: $DatabaseMock,
                 firestoreManager: firestoreManager
@@ -131,13 +135,14 @@ struct CalendarGrid: View {
                 cellHeight: cellHeight,
                 date: calculateDateFor(),
                 viewModel: viewModel,
+                isReminderViewOn: isReminderViewOn,
                 cur_screen: $cur_screen,
                 DatabaseMock: $DatabaseMock,
                 firestoreManager: firestoreManager
             )
         }
     }
-    
+
 
     private func calculateDateFor() -> Date {
         if calendarViewType == "month" {
@@ -154,7 +159,7 @@ struct CalendarView: View {
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
     @Binding var initialViewType: String
-    
+
     @StateObject var viewModel = CalendarViewModel()
     let helper = CalendarHelper()
     @State private var calendarViewType: String = "month"
@@ -171,11 +176,11 @@ struct CalendarView: View {
     @State private var swipeOffset: Int = 0
     @State private var canResetDate: Bool = false
     let firestoreManager: FirestoreManager
-    
+
     let minZoom: CGFloat = 1.0
     let maxZoom: CGFloat = 3.0
-    
-    
+
+
     private var calendarGesture: AnyGesture<Void> {
         if zoomScale > 1.0 {
             return AnyGesture(
@@ -186,7 +191,7 @@ struct CalendarView: View {
                             lastZoomScale = value
                             let newScale = zoomScale * delta
                             zoomScale = min(max(newScale, minZoom), maxZoom)
-                            
+
                             if zoomScale <= 1.0 {
                                 offset = .zero
                                 lastOffset = .zero
@@ -223,7 +228,7 @@ struct CalendarView: View {
                         lastZoomScale = value
                         let newScale = zoomScale * delta
                         zoomScale = min(max(newScale, minZoom), maxZoom)
-                        
+
                         if zoomScale > 1.0 {
                             zoomAnchor = .center
                         }
@@ -235,7 +240,7 @@ struct CalendarView: View {
             )
         }
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // MARK: Header
@@ -248,13 +253,13 @@ struct CalendarView: View {
                     )
                     Spacer()
                 }
-                
+
                 Text("Calendar")
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.top)
-                
+
                 HStack {
                     Spacer()
                     CreateReminderExperience(
@@ -265,28 +270,32 @@ struct CalendarView: View {
                 }
             }
             .padding(.bottom)
-            
+
             // MARK: Week/Month Toggle
-            HStack(spacing: 0) {
+            HStack(spacing: 4) {
                 Button(action: { calendarViewType = "week" }) {
                     Text("Week")
-                        .font(.title)
+                        .font(.headline)
+                        .fontWeight(.medium)
                         .frame(maxWidth: .infinity)
-                        .foregroundColor(calendarViewType == "week" ? .white : .primary)
-                        .padding(.vertical)
-                        .background(calendarViewType == "week" ? Color.blue : Color(.systemGray3))
+                        .padding(.vertical, 16)
+                        .background(calendarViewType == "week" ? Color.blue : Color.blue.opacity(0.1))
+                        .foregroundColor(calendarViewType == "week" ? .white : .blue)
+                        .cornerRadius(12)
                 }
                 Button(action: { calendarViewType = "month" }) {
                     Text("Month")
-                        .font(.title)
+                        .font(.headline)
+                        .fontWeight(.medium)
                         .frame(maxWidth: .infinity)
-                        .foregroundColor(calendarViewType == "month" ? .white : .primary)
-                        .padding(.vertical)
-                        .background(calendarViewType == "month" ? Color.blue : Color(.systemGray3))
+                        .padding(.vertical, 16)
+                        .background(calendarViewType == "month" ? Color.blue : Color.blue.opacity(0.1))
+                        .foregroundColor(calendarViewType == "month" ? .white : .blue)
+                        .cornerRadius(12)
                 }
             }
-            .font(.headline)
-            
+            .padding(.horizontal)
+
             // MARK: Month/Year Selector
             HStack(spacing: 8) {
                 if calendarViewType == "month" {
@@ -301,7 +310,7 @@ struct CalendarView: View {
                         .font(.title)
                         .foregroundColor(.primary)
                 }
-                
+
                 if canResetDate {
                     Button(action: {
                         swipeOffset = 0
@@ -309,16 +318,18 @@ struct CalendarView: View {
                         monthFilteredDay = Date.now
                         canResetDate = false
                     }) {
-                        Text("Reset")
-                            .font(.caption)
-                            .padding(6)
-                            .background(Color.blue)
+                        Text("Today")
+                            .font(.title2)
+                            .fontWeight(.semibold)
                             .foregroundColor(.white)
-                            .cornerRadius(6)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 12)
+                            .background(Color.green)
+                            .cornerRadius(12)
                     }
                 }
             }
-            
+
             // MARK: Calendar Grid
             GeometryReader { geometry in
                 VStack(spacing: 0) {
@@ -331,10 +342,10 @@ struct CalendarView: View {
                                 .frame(width: geometry.size.width / 7, height: 30)
                         }
                     }
-                    
+
                     let cellWidth = geometry.size.width / 7
                     let cellHeight = (geometry.size.height - 30) / (calendarViewType == "month" ? 6 : 1)
-                    
+
                     TabView(selection: $swipeOffset) {
                         ForEach(-6...6, id: \.self) { index in
                             CalendarGrid(
@@ -344,6 +355,8 @@ struct CalendarView: View {
                                 cellHeight: cellHeight,
                                 swipeOffset: index,
                                 viewModel: viewModel,
+                                zoomScale: zoomScale,
+                                isReminderViewOn: isReminderViewOn,
                                 cur_screen: $cur_screen,
                                 DatabaseMock: $DatabaseMock,
                                 firestoreManager: firestoreManager
@@ -355,7 +368,7 @@ struct CalendarView: View {
                     .onChange(of: swipeOffset) { _, _ in
                         updateFilteredDay()
                     }
-                    
+
                     if zoomScale > 1.0 {
                         HStack {
                             Spacer()
@@ -388,28 +401,36 @@ struct CalendarView: View {
                 }
                 .clipped()
             }
-            
+
             // MARK: Bottom Controls
-            VStack {
+            VStack(spacing: 12) {
                 Toggle(isOn: $isReminderViewOn) {
-                    Text("Reminder View").font(.title3)
+                    Text("Reminder View")
+                        .font(.headline)
+                        .fontWeight(.medium)
                 }
-                .padding(.horizontal)
-                .padding(.bottom)
-                
+
                 Toggle(isOn: $isCalendarViewOn) {
-                    Text("Calendar View").font(.title3)
+                    Text("Calendar View")
+                        .font(.headline)
+                        .fontWeight(.medium)
                 }
-                .padding(.horizontal)
                 .onChange(of: isCalendarViewOn) { _, newValue in
                     if !newValue {
                         presentationMode.wrappedValue.dismiss()
                     }
                 }
             }
-            .padding(.leading)
+            .padding(16)
+            .background(Color.blue.opacity(0.1))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+            )
+            .padding(.horizontal)
             .padding(.bottom)
-            
+
             NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
         .onAppear {
@@ -432,7 +453,7 @@ struct CalendarView: View {
             }
         }
     }
-    
+
     private func updateFilteredDay() {
         if calendarViewType == "month" {
             let base = monthFilteredDay ?? Date()
@@ -441,13 +462,13 @@ struct CalendarView: View {
             let base = weekFilteredDay ?? Date()
             weekFilteredDay = Calendar.current.date(byAdding: .weekOfYear, value: swipeOffset, to: base)
         }
-        
+
         if swipeOffset != 0 {
             canResetDate = true
         }
         swipeOffset = 0
     }
-    
+
     private var currentPeriodText: String {
         let today: Date
         if calendarViewType == "month" {
@@ -471,7 +492,7 @@ struct CalendarView: View {
 //    @Binding var cur_screen: Screen
 //    @Binding var DatabaseMock: Database
 //    @Binding var initialViewType: String
-//    
+//
 //    @StateObject var viewModel = CalendarViewModel()
 //    let helper = CalendarHelper()
 //    @State private var calendarViewType: String = "month"
@@ -488,11 +509,11 @@ struct CalendarView: View {
 //    @State private var swipeOffset: Int = 0
 //    @State private var canResetDate: Bool = false
 //    let firestoreManager: FirestoreManager
-//    
+//
 //    let minZoom: CGFloat = 1.0
 //    let maxZoom: CGFloat = 3.0
 //    let columns = Array(repeating: GridItem(.flexible(), spacing: 1), count: 7)
-//    
+//
 //    private var calendarGesture: AnyGesture<Void> {
 //        if zoomScale > 1.0 {
 //            return AnyGesture(
@@ -503,7 +524,7 @@ struct CalendarView: View {
 //                            lastZoomScale = value
 //                            let newScale = zoomScale * delta
 //                            zoomScale = min(max(newScale, minZoom), maxZoom)
-//                            
+//
 //                            if zoomScale <= 1.0 {
 //                                offset = .zero
 //                                lastOffset = .zero
@@ -540,7 +561,7 @@ struct CalendarView: View {
 //                        lastZoomScale = value
 //                        let newScale = zoomScale * delta
 //                        zoomScale = min(max(newScale, minZoom), maxZoom)
-//                        
+//
 //                        if zoomScale > 1.0 {
 //                            zoomAnchor = .center
 //                        }
@@ -552,7 +573,7 @@ struct CalendarView: View {
 //            )
 //        }
 //    } //AnyGesture ending
-//   
+//
 //    var body: some View {
 //        VStack(spacing: 0) {
 //            // Header
@@ -561,20 +582,20 @@ struct CalendarView: View {
 //                    SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
 //                    Spacer()
 //                }
-//                
+//
 //                Text("Calendar")
 //                    .font(.largeTitle)
 //                    .fontWeight(.bold)
 //                    .frame(maxWidth: .infinity, alignment: .center)
 //                    .padding(.top)
-//                
+//
 //                HStack {
 //                    Spacer()
 //                    CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
 //                }
 //            }
 //            .padding(.bottom)
-//            
+//
 //            // Week/Month Toggle
 //            HStack(spacing: 0) {
 //                Button(action: { calendarViewType = "week" }) {
@@ -595,7 +616,7 @@ struct CalendarView: View {
 //                }
 //            }
 //            .font(.headline)
-//            
+//
 //            // Month/Year Selector
 //            HStack(spacing: 8) {
 //                if calendarViewType == "month" {
@@ -629,7 +650,7 @@ struct CalendarView: View {
 //                    }
 //                } //if statement ending
 //            }
-//            
+//
 //            // Calendar Grid - Takes remaining space
 //            GeometryReader { geometry in
 //                VStack(spacing: 0) {
@@ -717,10 +738,10 @@ struct CalendarView: View {
 //                .scaleEffect(zoomScale, anchor: zoomAnchor)
 //                .offset(offset)
 //                .animation(.easeOut(duration: 0.1), value: zoomScale)
-//                
+//
 //                // ZOOM/SWIPE
 //                .gesture(calendarGesture)
-//                
+//
 //                .onTapGesture(count: 2) {
 //                    withAnimation(.easeInOut(duration: 0.3)) {
 //                        zoomScale = 1.0
@@ -730,7 +751,7 @@ struct CalendarView: View {
 //                }
 //                .clipped()
 //            } //Geometry Reader ending
-//            
+//
 //            // Bottom Controls
 //            VStack {
 //                Toggle(isOn: $isReminderViewOn) {
@@ -739,7 +760,7 @@ struct CalendarView: View {
 //                }
 //                .padding(.horizontal)
 //                .padding(.bottom)
-//                
+//
 //                Toggle(isOn: $isCalendarViewOn) {
 //                    Text("Calendar View")
 //                        .font(.title3)
@@ -753,7 +774,7 @@ struct CalendarView: View {
 //            }
 //            .padding(.leading)
 //            .padding(.bottom)
-//            
+//
 //            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
 //        }
 //        .onAppear {
@@ -799,7 +820,7 @@ struct CalendarView: View {
 //            let base = weekFilteredDay ?? Date()
 //            weekFilteredDay = Calendar.current.date(byAdding: .weekOfYear, value: swipeOffset, to: base)
 //        }
-//        
+//
 //        if swipeOffset != 0 {
 //            canResetDate = true
 //        }
@@ -819,3 +840,5 @@ struct CalendarView: View {
 //        }
 //    }
 //}
+
+
