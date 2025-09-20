@@ -74,6 +74,7 @@ struct LoginScreen: View {
 
     private func login() {
         errorMessage = ""
+        
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
             if let error = error {
                 errorMessage = error.localizedDescription
@@ -82,6 +83,7 @@ struct LoginScreen: View {
                 // Navigate to HomeScreen
                 cur_screen = .HomeScreen
                 navigateToHome = true
+                
             }
         }
     }

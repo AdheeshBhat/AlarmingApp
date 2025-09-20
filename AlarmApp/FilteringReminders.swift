@@ -163,8 +163,8 @@ func showIncompleteReminders(database: Binding<Database>, userID: Int, period: S
 //----------------------------------------------------------------- 3
 
 
-func formattedReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = true, showDeleteButton: Bool = false, filteredDay: Date?, firestoreManager: FirestoreManager) -> some View {
-    let userData = database.wrappedValue.users[userID] ?? [:]
+func formattedReminders(database: Binding<Database>, userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = true, showDeleteButton: Bool = false, filteredDay: Date?, firestoreManager: FirestoreManager, userData: [String: ReminderData]) -> some View {
+    //let userData = database.wrappedValue.users[userID] ?? [:]
     
     let filteredUserData: [Date: ReminderData]
     if period == "today" {

@@ -1,4 +1,5 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct RemindersScreen: View {
     //@Environment(\.dismiss) var dismiss also works for back button
@@ -10,6 +11,7 @@ struct RemindersScreen: View {
     @State private var isDeleteViewOn : Bool = false
     @Binding var cur_screen: Screen
     @Binding var DatabaseMock: Database
+    
     @State var filterPeriod : String
     @State var dayFilteredDay: Date? = Date()
     @State private var weekFilteredDay: Date? = Date()
@@ -18,6 +20,7 @@ struct RemindersScreen: View {
     @State private var swipeOffset: Int = 0
     @State private var calendarViewType: String = "month"
     @State private var canResetDate: Bool = false
+    var remindersForUser: [String: ReminderData]
     let firestoreManager: FirestoreManager
     
     //create a variable that would change the period depending on the button pressed
@@ -36,6 +39,14 @@ struct RemindersScreen: View {
             
         default:
             return ""
+        }
+    }
+    
+    init() {
+        firestoreManager.getRemindersForUser() { documents in
+            if let documents {
+                self.remindersForUser = documents
+            }
         }
     }
     
@@ -154,7 +165,8 @@ struct RemindersScreen: View {
                             showEditButton: !isDeleteViewOn,
                             showDeleteButton: isDeleteViewOn,
                             filteredDay: calculateDateFor(),
-                            firestoreManager: firestoreManager
+                            firestoreManager: firestoreManager,
+                            userData: remindersForUser
                         )
                         
                     }
@@ -329,6 +341,14 @@ struct ReminderRow: View {
     var userID: Int
     var dateKey: Date
     let firestoreManager: FirestoreManager
+    @State private var curReminderDoc: DocumentSnapshot?
+    //var curReminder: DocumentSnapshot
+    
+//    init() {
+//        if let curReminder = document {
+//          self.curReminder =
+    
+//    }
 
     //Formats 24-hour input time to 12-hour time with AM/PM
     var formattedTime: String {
@@ -349,17 +369,37 @@ struct ReminderRow: View {
                 HStack {
                     //DONE BUTTON
                     Button(action: {
-                        //if firestoreManager.getReminder(userID: String(userID), dateCreated: dateKey)
-                        if database.users[userID]?[dateKey]?.isComplete == true {
-                            showConfirmation = true
-                        } else {
-                            database.users[userID]![dateKey]!.isComplete.toggle()
+                        if let curReminder = curReminderDoc {
+                            let isComplete = curReminder.data()?["isComplete"] as? Bool ?? false
+                            if isComplete {
+                                showConfirmation = true
+                            } else {
+                                firestoreManager.updateReminderFields(
+                                    dateCreated: createUniqueIDFromDate(date: dateKey),
+                                    fields: ["isComplete": true]
+                                )
+                            }
                         }
+//                        firestoreManager.getReminder(userID: String(userID), dateCreated: createUniqueIDFromDate(date: dateKey)) { document in
+//                            if let curReminder = document {
+//                                if curReminder.data()?["isComplete"] as? Bool?? == true {
+//                                    showConfirmation = true
+//                                } else {
+//                                    let isComplete = curReminder.data()?["isComplete"] as? Bool ?? false
+//                                    firestoreManager.updateReminderFields(dateCreated: createUniqueIDFromDate(date: dateKey), fields: ["isComplete": isComplete])
+//                                }
+//                                
+//                            }
+//                        }
                     }) {
                         HStack {
-                            Image(systemName: database.users[userID]?[dateKey]?.isComplete == true ? "checkmark.circle.fill" : "circle")
+                            let isComplete = curReminderDoc?.data()?["isComplete"] as? Bool ?? false
+                            Image(systemName: isComplete ? "checkmark.circle.fill" : "circle")
+//                            Image(systemName: database.users[userID]?[dateKey]?.isComplete == true ? "checkmark.circle.fill" : "circle")
                                 .font(.title)
-                                .foregroundColor(database.users[userID]?[dateKey]?.isComplete == true ? .green : .gray)
+                                //.foregroundColor(database.users[userID]?[dateKey]?.isComplete == true ? .green : .gray)
+                                .foregroundColor(isComplete ? .green : .gray)
+
                             Text("Done")
                                 .font(.title3)
                                 .bold()
@@ -370,7 +410,11 @@ struct ReminderRow: View {
                     
                     .alert("Are you sure you want to mark this reminder as incomplete?", isPresented: $showConfirmation) {
                         Button("Yes", role: .destructive) {
-                            database.users[userID]![dateKey]!.isComplete = false
+                            firestoreManager.updateReminderFields(
+                                dateCreated: createUniqueIDFromDate(date: dateKey),
+                                fields: ["isComplete": false]
+                            )
+                            //database.users[userID]![dateKey]!.isComplete = false
                         }
                         Button("Nevermind", role: .cancel) {}
                     } // Alert ending
@@ -382,6 +426,7 @@ struct ReminderRow: View {
                         NavigationLink(destination: EditReminderScreen(
                             cur_screen: $cur_screen,
                             DatabaseMock: $database,
+                            //reminderDoc: curReminderDoc,
                             reminder: Binding(
                                 get: { database.users[userID]![dateKey]! },
                                 set: { database.users[userID]![dateKey]! = $0 }
@@ -416,7 +461,11 @@ struct ReminderRow: View {
                         }
                         .alert("Are you sure you want to delete this reminder?", isPresented: $showDeleteConfirmation) {
                             Button("Yes", role: .destructive) {
-                                deleteFromDatabase(database: &database, userID: userID, date: dateKey)
+                                //deleteFromDatabase(database: &database, userID: userID, date: dateKey)
+                                firestoreManager.deleteReminder(
+                                    userID: String(userID),
+                                    dateCreated: createUniqueIDFromDate(date: dateKey)
+                                )
                             }
                             Button("Nevermind", role: .cancel) {}
                         }
@@ -436,6 +485,14 @@ struct ReminderRow: View {
         } // HStack ending
         .padding()
         .background(RoundedRectangle(cornerRadius: 12).stroke(Color.primary, lineWidth: 1))
+        .onAppear {
+            firestoreManager.getReminder(
+                userID: String(userID),
+                dateCreated: createUniqueIDFromDate(date: dateKey)
+            ) { document in
+                self.curReminderDoc = document
+            }
+        }
     }
 }
 

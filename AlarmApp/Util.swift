@@ -18,6 +18,18 @@ func createDate(year: Int, month: Int, day: Int, hour: Int, minute: Int, second:
 func createDateFromText(dateString: String) -> Date {
     let format = DateFormatter()
     
+    format.dateFormat = "yyyy-MM-dd"
+    if let date = format.date(from: dateString) {
+        return date
+    }
+    
+    print("Invalid date format.")
+    return Date.now
+}
+
+func createExactDateFromText(dateString: String) -> Date {
+    let format = DateFormatter()
+    
     format.dateFormat = "yyyy-MM-dd HH:mm:ss"
     if let date = format.date(from: dateString) {
         return date
@@ -92,6 +104,12 @@ func getRepeatTypeFromReminder(reminder: ReminderData) -> String {
 //func getMaxRepeatDateFromReminder(reminder: ReminderData) -> Date {
 //    return reminder.repeatSettings.repeat_until_date ?? Date.now
 //}
+
+func getExactCurrentDateString() -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "EEEE, MMM d HH:mm:ss"
+    return formatter.string(from: Date())
+}
 
 func getCurrentDateString() -> String {
     let formatter = DateFormatter()
