@@ -17,15 +17,17 @@ struct RepeatSettingsFlow: View {
     @Binding var repeatUntil: String
     //local repeatUntil var for repeatSettings screen (2nd local)
     @State private var localRepeatScreenRepeatUntil: String
+    @Binding var customPatterns: Set<String>
     let firestoreManager: FirestoreManager
     
     
-    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, title: String, repeatSetting: Binding<String>, repeatUntil: Binding<String>, firestoreManager: FirestoreManager ) {
+    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, title: String, repeatSetting: Binding<String>, repeatUntil: Binding<String>, customPatterns: Binding<Set<String>>, firestoreManager: FirestoreManager ) {
         self._cur_screen = cur_screen
         self._DatabaseMock = DatabaseMock
         self.title = title
         self._repeatSetting = repeatSetting
         self._repeatUntil = repeatUntil
+        self._customPatterns = customPatterns
         //local variables
         self._localRepeatSetting = State(initialValue: repeatSetting.wrappedValue)
         self._localRepeatScreenRepeatUntil = State(initialValue: repeatUntil.wrappedValue)
@@ -35,10 +37,11 @@ struct RepeatSettingsFlow: View {
     let options = ["None", "Daily", "Weekly", "Monthly", "Yearly", "Custom"]
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: 18) {
             //TITLE
             Text(title)
-                .font(.largeTitle)
+                .font(.title)
+                .fontWeight(.medium)
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .center)
 
@@ -46,8 +49,8 @@ struct RepeatSettingsFlow: View {
             HStack {
                 Text("Repeat")
                     .foregroundColor(.primary)
-                    .font(.title3)
-                    .underline()
+                    .font(.headline)
+                    .fontWeight(.medium)
                 Image(systemName: "arrow.2.circlepath")
                     .foregroundColor(.primary)
                     .padding(.leading, 6)
@@ -57,39 +60,66 @@ struct RepeatSettingsFlow: View {
             //None, Daily, Weekly, Monthly, Yearly, Custom BUTTONS
             VStack(spacing: 0) {
                 ForEach(options.indices, id: \.self) { index in
-                    Button(action: {
-                        localRepeatSetting = options[index]
-                    }) {
-                        HStack {
-                            Text(options[index])
-                                .foregroundColor(.primary)
-                                .font(.title3)
-                                .padding(.leading)
-                            Spacer()
-                            if options[index] == "Custom" {
+                    if options[index] == "Custom" {
+                        NavigationLink(destination: CustomRepeatCalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: title, repeatSetting: Binding(
+                            get: { localRepeatSetting ?? "None" },
+                            set: { localRepeatSetting = $0 }
+                        ), customPatterns: $customPatterns, firestoreManager: firestoreManager)) {
+                            HStack {
+                                Text(options[index])
+                                    .foregroundColor(.primary)
+                                    .font(.headline)
+                                    .fontWeight(.medium)
+                                    .padding(.leading, 16)
+                                Spacer()
                                 Image(systemName: "chevron.right")
                                     .foregroundColor(.primary)
-                                    .padding(.trailing)
+                                    .padding(.trailing, 16)
+                                if (localRepeatSetting == nil && repeatSetting == options[index]) || (localRepeatSetting == options[index]){
+                                    Image(systemName: "checkmark")
+                                        .font(.title2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.green)
+                                        .padding(.trailing, 16)
+                                }
                             }
-                            if (localRepeatSetting == nil && repeatSetting == options[index]) || (localRepeatSetting == options[index]){
-                                Image(systemName: "checkmark")
-                                    .font(.title)
-                                    .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
-                                    .padding(.trailing)
+                            .padding(.vertical, 16)
+                        }
+                    } else {
+                        Button(action: {
+                            localRepeatSetting = options[index]
+                        }) {
+                            HStack {
+                                Text(options[index])
+                                    .foregroundColor(.primary)
+                                    .font(.headline)
+                                    .fontWeight(.medium)
+                                    .padding(.leading, 16)
+                                Spacer()
+                                if (localRepeatSetting == nil && repeatSetting == options[index]) || (localRepeatSetting == options[index]){
+                                    Image(systemName: "checkmark")
+                                        .font(.title2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.green)
+                                        .padding(.trailing, 16)
+                                }
                             }
-                        } //HStack ending
-                        .padding(.vertical, 14)
-                    } //Button ending
+                            .padding(.vertical, 16)
+                        }
+                    }
 
                     if index < options.count - 1 {
                         Divider()
-                            .foregroundColor(Color(red: 255, green: 255, blue: 255))
-                            //.background(Color(red: 255, green: 255, blue: 255))
-                            .padding(.horizontal, 20)
+                            .background(Color.blue.opacity(0.3))
+                            .padding(.horizontal, 16)
                     }
                 } //For loop ending
             } //VStack ending
-            .background(Color.blue.opacity(0.7))
+            .background(Color.blue.opacity(0.1))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+            )
             .cornerRadius(12)
 
             
@@ -100,19 +130,24 @@ struct RepeatSettingsFlow: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Until")
                                 .foregroundColor(.primary)
-                                .font(.title3)
+                                .font(.headline)
+                                .fontWeight(.medium)
                             Text(localRepeatScreenRepeatUntil)
-                                .foregroundColor(.white)
-                                .font(.title3)
+                                .foregroundColor(.secondary)
+                                .font(.headline)
                         }
-                        .padding(.leading)
+                        .padding(.leading, 16)
                         Spacer()
                         Image(systemName: "chevron.right")
                             .foregroundColor(.primary)
-                            .padding(.trailing)
+                            .padding(.trailing, 16)
                     }
                     .frame(maxWidth: .infinity, minHeight: 80)
-                    .background(Color.blue.opacity(0.7))
+                    .background(Color.blue.opacity(0.1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.blue.opacity(0.3), lineWidth: 1)
+                    )
                     .cornerRadius(12)
                     .padding(.top, 8)
                 }
@@ -122,17 +157,21 @@ struct RepeatSettingsFlow: View {
             Button(action: {
                 if localRepeatSetting != nil {
                     repeatSetting = localRepeatSetting!
+                    // Clear custom patterns if switching away from Custom
+                    if localRepeatSetting != "Custom" {
+                        customPatterns.removeAll()
+                    }
                 }
                 repeatUntil = localRepeatScreenRepeatUntil
                 presentationMode.wrappedValue.dismiss()
             }) {
                 Text("Done")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color(red: 0.0, green: 1, blue: 0.0))
+                    .font(.headline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
                     .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue.opacity(0.7))
+                    .padding(16)
+                    .background(.green)
                     .cornerRadius(12)
             }
             .padding(.top)
@@ -146,4 +185,5 @@ struct RepeatSettingsFlow: View {
         }
     }
 }
+
 

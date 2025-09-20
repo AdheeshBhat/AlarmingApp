@@ -51,11 +51,9 @@ struct RemindersScreen: View {
     }
     
     var body: some View {
-        //TITLE + CREATE REMINDER BUTTON
-        VStack {
+        VStack(spacing: 0) {
+            // Header - Fixed height
             ZStack {
-                //NotificationBellExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
-                    //.padding(.trailing, 10)
                 HStack {
                     SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
                     Spacer()
@@ -64,145 +62,163 @@ struct RemindersScreen: View {
                 Text("Reminders")
                     .font(.largeTitle)
                     .fontWeight(.bold)
+                    .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.top)
 
                 HStack {
                     Spacer()
                     CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
                 }
-            } //ZStack ending
-            .padding(.bottom)
-        } //VStack ending
-        
-        
-        VStack {
-            //REMINDER FILTERS
-            HStack(spacing: 0) {
-                //DAY
-                Button(action: {
-                    filterPeriod = "today"
-                }) {
-                    Text("Day")
-                        .font(.title)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical)
-                        .background(filterPeriod == "today" ? Color.blue : Color(.systemGray3))
-                        .foregroundColor(filterPeriod == "today" ? .white : .primary)
-                }
-
-                //WEEK
-                Button(action: {
-                    filterPeriod = "week"
-                }) {
-                    Text("Week")
-                        .font(.title)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical)
-                        .background(filterPeriod == "week" ? Color.blue : Color(.systemGray3))
-                        .foregroundColor(filterPeriod == "week" ? .white : .primary)
-                }
-
-                //MONTH
-                Button(action: {
-                    filterPeriod = "month"
-                }) {
-                    Text("Month")
-                        .font(.title)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical)
-                        .background(filterPeriod == "month" ? Color.blue : Color(.systemGray3))
-                        .foregroundColor(filterPeriod == "month" ? .white : .primary)
-                }
-
-            } //HStack ending (filters)
-            .font(.headline)
+            }
+            .padding(.horizontal)
+            .padding(.vertical, 8)
+            .background(Color(.systemBackground))
             
-            
-            //Displays current period right below filters
-            if filterPeriod == "month" {
-                MonthYearSelector(
-                    filteredDay: $monthFilteredDay,
-                    isEditingMonthYear: $isEditingMonthYear,
-                    currentPeriodText: currentPeriodText,
-                    onDone: {
-                        isEditingMonthYear = false
-                        swipeOffset = 0
+            // Filter buttons - Fixed height
+            VStack(spacing: 8) {
+                HStack(spacing: 4) {
+                    Button(action: {
+                        filterPeriod = "today"
+                    }) {
+                        Text("Day")
+                            .font(.body)
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(filterPeriod == "today" ? Color.blue : Color.blue.opacity(0.1))
+                            .foregroundColor(filterPeriod == "today" ? .white : .blue)
+                            .cornerRadius(8)
                     }
-                )
-            } else {
-                Text(currentPeriodText)
-                    .font(.title)
-                    .foregroundColor(.primary)
-            }
-            //RESET BUTTON
-            if canResetDate == true {
-                Button("Reset") {
-                    swipeOffset = 0
-                    dayFilteredDay = Date.now
-                    weekFilteredDay = Date.now
-                    monthFilteredDay = Date.now
-                    canResetDate = false
+
+                    Button(action: {
+                        filterPeriod = "week"
+                    }) {
+                        Text("Week")
+                            .font(.body)
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(filterPeriod == "week" ? Color.blue : Color.blue.opacity(0.1))
+                            .foregroundColor(filterPeriod == "week" ? .white : .blue)
+                            .cornerRadius(8)
+                    }
+
+                    Button(action: {
+                        filterPeriod = "month"
+                    }) {
+                        Text("Month")
+                            .font(.body)
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .background(filterPeriod == "month" ? Color.blue : Color.blue.opacity(0.1))
+                            .foregroundColor(filterPeriod == "month" ? .white : .blue)
+                            .cornerRadius(8)
+                    }
                 }
-                .font(.title2)
-                .bold()
-                .foregroundColor(.blue)
-                .padding(.top, 5)
+                .padding(.horizontal)
+                
+                VStack(spacing: 4) {
+                    if filterPeriod == "month" {
+                        MonthYearSelector(
+                            filteredDay: $monthFilteredDay,
+                            isEditingMonthYear: $isEditingMonthYear,
+                            currentPeriodText: currentPeriodText,
+                            onDone: {
+                                isEditingMonthYear = false
+                                swipeOffset = 0
+                            }
+                        )
+                    } else {
+                        Text(currentPeriodText)
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                    }
+                    
+                    if canResetDate == true {
+                        Button("Today") {
+                            swipeOffset = 0
+                            dayFilteredDay = Date.now
+                            weekFilteredDay = Date.now
+                            monthFilteredDay = Date.now
+                            canResetDate = false
+                        }
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 6)
+                        .background(Color.green)
+                        .cornerRadius(16)
+                    }
+                }
+                .padding(.horizontal)
             }
             
-        } //VStack ending
-        
-        VStack {
-            //REMINDERS
+            // Reminders list - Flexible height
             TabView(selection: $swipeOffset) {
                 ForEach(-6...6, id: \.self) { index in
                     ScrollView {
-                        formattedReminders(
-                            database: $DatabaseMock,
-                            userID: 1,
-                            period: filterPeriod,
-                            cur_screen: $cur_screen,
-                            showEditButton: !isDeleteViewOn,
-                            showDeleteButton: isDeleteViewOn,
-                            filteredDay: calculateDateFor(),
-                            firestoreManager: firestoreManager,
-                            userData: remindersForUser
-                        )
-                        
+                        LazyVStack(spacing: 12) {
+                            formattedReminders(
+                                database: $DatabaseMock,
+                                userID: 1,
+                                period: filterPeriod,
+                                cur_screen: $cur_screen,
+                                showEditButton: !isDeleteViewOn,
+                                showDeleteButton: isDeleteViewOn,
+                                filteredDay: calculateDateFor(),
+                                firestoreManager: firestoreManager
+                            )
+                        }
+                        .padding(.horizontal)
+                        .padding(.bottom, 20)
                     }
                     .tag(index)
                 }
             }
-            .background(RoundedRectangle(cornerRadius: 12).stroke(Color.primary, lineWidth: 2))
-            .padding(.horizontal)
             .tabViewStyle(.page(indexDisplayMode: .never))
             .onChange(of: swipeOffset) { _, _ in
                 updateFilteredDay()
             }
-            //.frame(height: 400) // adjust as needed
-        } //VStack ending
-        Spacer()
-        NavigationStack {
-            VStack {
-                //TOGGLES
+            
+            Divider()
+                .background(Color.blue)
+                .frame(height: 2)
+            
+            // Toggles - Fixed height
+            VStack(spacing: 12) {
                 Toggle("Delete View", isOn: $isDeleteViewOn)
                     .font(.title3)
-                    .padding(.horizontal)
-                HStack {
-                    Toggle(isOn: $showCalendarView) {
-                        Text("Calendar View")
-                            .font(.title3)
-                    }
-                    .onChange(of: showCalendarView) { _, newValue in
-                        if newValue {
-                            calendarViewType = filterPeriod == "today" ? "week" : filterPeriod
-                        }
+                    .fontWeight(.semibold)
+                    .toggleStyle(SwitchToggleStyle(tint: .red))
+                
+                Toggle(isOn: $showCalendarView) {
+                    Text("Calendar View")
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                }
+                .toggleStyle(SwitchToggleStyle(tint: .green))
+                .onChange(of: showCalendarView) { _, newValue in
+                    if newValue {
+                        calendarViewType = filterPeriod == "today" ? "week" : filterPeriod
                     }
                 }
-                .padding()
-            } //VStack ending
-            .padding(.leading)
-        } //NavigationStack ending
+            }
+            .padding(16)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.blue.opacity(0.5), lineWidth: 2)
+            )
+            .padding(.horizontal)
+            .padding(.top, 8)
+            
+            // Navigation bar - Fixed height
+            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+        }
         .navigationDestination(isPresented: $showCalendarView) {
             CalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, initialViewType: $calendarViewType, firestoreManager: firestoreManager)
                 .onDisappear {
@@ -230,10 +246,6 @@ struct RemindersScreen: View {
         }
         .onChange(of: filterPeriod) { _, _ in
             canResetDate = displayedPeriodDiffersFromToday()
-        }
-        
-        VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
     
     } //body ending
@@ -362,11 +374,12 @@ struct ReminderRow: View {
 
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
                 Text(title)
                     .font(.title2)
-                HStack {
+                    .lineLimit(2)
+                HStack(spacing: 12) {
                     //DONE BUTTON
                     Button(action: {
                         if let curReminder = curReminderDoc {
@@ -392,19 +405,18 @@ struct ReminderRow: View {
 //                            }
 //                        }
                     }) {
-                        HStack {
-                            let isComplete = curReminderDoc?.data()?["isComplete"] as? Bool ?? false
-                            Image(systemName: isComplete ? "checkmark.circle.fill" : "circle")
-//                            Image(systemName: database.users[userID]?[dateKey]?.isComplete == true ? "checkmark.circle.fill" : "circle")
-                                .font(.title)
-                                //.foregroundColor(database.users[userID]?[dateKey]?.isComplete == true ? .green : .gray)
-                                .foregroundColor(isComplete ? .green : .gray)
-
+                        HStack(spacing: 6) {
+                            Image(systemName: database.users[userID]?[dateKey]?.isComplete == true ? "checkmark.circle.fill" : "circle")
+                                .font(.title2)
+                                .foregroundColor(database.users[userID]?[dateKey]?.isComplete == true ? .green : .gray)
                             Text("Done")
                                 .font(.title3)
                                 .bold()
                                 .foregroundColor(.primary)
                         }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .fixedSize()
                         
                     } // Button ending
                     
@@ -421,8 +433,6 @@ struct ReminderRow: View {
 
                     //EDIT BUTTON
                     if showEditButton {
-                        Spacer().frame(width: 20)
-
                         NavigationLink(destination: EditReminderScreen(
                             cur_screen: $cur_screen,
                             DatabaseMock: $database,
@@ -433,32 +443,35 @@ struct ReminderRow: View {
                             ),
                             firestoreManager: firestoreManager
                         )) {
-                            HStack {
+                            HStack(spacing: 6) {
                                 Image(systemName: "pencil")
-                                    .font(.title3)
+                                    .font(.title2)
                                 Text("Edit")
                                     .font(.title3)
                                     .bold()
                                     .foregroundColor(.primary)
                             }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
                         }
+                        .fixedSize()
                         
                       // DELETE BUTTON
                     } else if showDeleteButton {
-                        Spacer().frame(width: 20)
                         Button(action: {
                             showDeleteConfirmation = true
                         }) {
-                            HStack {
+                            HStack(spacing: 6) {
                                 Image(systemName: "trash")
-                                    .font(.title3)
+                                    .font(.title2)
                                     .foregroundColor(.red)
                                 Text("Delete")
-                                    .font(.title3)
+                                    .font(.body)
                                     .bold()
                                     .foregroundColor(.primary)
                             }
                         }
+                        .fixedSize()
                         .alert("Are you sure you want to delete this reminder?", isPresented: $showDeleteConfirmation) {
                             Button("Yes", role: .destructive) {
                                 //deleteFromDatabase(database: &database, userID: userID, date: dateKey)
@@ -470,17 +483,18 @@ struct ReminderRow: View {
                             Button("Nevermind", role: .cancel) {}
                         }
                     } // else if ending
-                    Spacer()
                 } // HStack ending
             } // VStack ending
-            Spacer()
-            //Spacer()
-            VStack {
+            
+            Spacer(minLength: 8)
+            
+            VStack(alignment: .trailing, spacing: 4) {
                 Text(formattedTime)
                     .font(.title2)
                     .fontWeight(.semibold)
                 Text(date)
-                    .foregroundColor(.primary)
+                    .font(.body)
+                    .foregroundColor(.secondary)
             }
         } // HStack ending
         .padding()
@@ -500,3 +514,4 @@ struct ReminderRow: View {
 #Preview {
     ContentView()
 }
+
