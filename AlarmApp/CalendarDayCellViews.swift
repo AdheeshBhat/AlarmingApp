@@ -80,7 +80,9 @@ struct MonthDayCellView: View {
                         DatabaseMock: $DatabaseMock,
                         filterPeriod: "today",
                         dayFilteredDay: date,
+                        remindersForUser: [:],
                         firestoreManager: firestoreManager
+                        
                     )
                 ) {
                     Text("+\(reminders.count - 3)")
@@ -149,7 +151,7 @@ struct WeekDayCellView: View {
     }
 }
 
-/// Extracted subview for clarity and compile speed
+// Extracted subview for clarity and compile speed
 struct ReminderCell: View {
     let reminder: CalendarReminder
     let reminderData: ReminderData?
@@ -159,33 +161,25 @@ struct ReminderCell: View {
 
     var body: some View {
         Group {
-            if let reminderData = reminderData {
-                NavigationLink(
-                    destination: RemindersScreen(
-                        cur_screen: $cur_screen,
-                        DatabaseMock: $DatabaseMock,
-                        filterPeriod: "today",
-                        dayFilteredDay: reminder.date,
-                        firestoreManager: firestoreManager
-                    )
-                ) {
-                    Text(reminder.title)
-                        .font(.system(size: 10))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 2)
-                        .background(RoundedRectangle(cornerRadius: 4).fill(Color.blue))
-                        .lineLimit(2)
-                }
-            } else {
+            NavigationLink(
+                destination: RemindersScreen(
+                    cur_screen: $cur_screen,
+                    DatabaseMock: $DatabaseMock,
+                    filterPeriod: "today",
+                    dayFilteredDay: reminder.date,
+                    remindersForUser: [:],
+                    firestoreManager: firestoreManager
+                )
+            ) {
                 Text(reminder.title)
                     .font(.system(size: 10))
                     .foregroundColor(.white)
                     .padding(.horizontal, 4)
                     .padding(.vertical, 2)
-                    .background(RoundedRectangle(cornerRadius: 4).fill(Color.gray))
+                    .background(RoundedRectangle(cornerRadius: 4).fill(Color.blue))
                     .lineLimit(2)
             }
+            
         }
     }
 }

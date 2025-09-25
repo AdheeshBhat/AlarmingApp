@@ -22,13 +22,14 @@ struct EditReminderScreen: View {
     @State var localCustomPatterns: Set<String> = []
     @State private var localDate: Date
     let firestoreManager: FirestoreManager
+    let reminderID: String
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: localDate)
     }
 
-    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, reminder: Binding<ReminderData>, firestoreManager: FirestoreManager) {
+    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, reminder: Binding<ReminderData>, firestoreManager: FirestoreManager, reminderID: String) {
         self._cur_screen = cur_screen
         self._DatabaseMock = DatabaseMock
         self._reminder = reminder
@@ -42,6 +43,7 @@ struct EditReminderScreen: View {
         self._localEditScreenRepeatUntil = State(initialValue: reminder.wrappedValue.repeatSettings.repeat_until_date)
         self._localDate = State(initialValue: reminder.wrappedValue.date)
         self.firestoreManager = firestoreManager
+        self.reminderID = reminderID
         
     }
     
@@ -191,6 +193,7 @@ struct EditReminderScreen: View {
                     .background(Color.blue.opacity(0.1))
                     .cornerRadius(12)
 
+                    //SAVE BUTTON
                     Button(action: {
                         reminder.title = localTitle
                         reminder.description = localDescription
@@ -199,6 +202,11 @@ struct EditReminderScreen: View {
                         reminder.repeatSettings.repeat_type = localEditScreenRepeatSetting
                         reminder.repeatSettings.repeat_until_date = localEditScreenRepeatUntil
                         reminder.date = localDate
+                        
+                        print("reminder ID is \(reminderID)")
+                        firestoreManager.updateReminderFields(dateCreated: reminderID, fields: ["title": reminder.title, "description": reminder.description, "priority": reminder.priority, "isLocked": reminder.isLocked, "repeat_type": reminder.repeatSettings.repeat_type, "repeat_until_date": reminder.repeatSettings.repeat_until_date, "date": reminder.date])
+                        //firestoreManager.setReminder(reminderID: reminderID, reminder: reminder)
+                        
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Text("Save Changes")

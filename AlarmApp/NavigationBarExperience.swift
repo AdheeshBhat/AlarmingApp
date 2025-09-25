@@ -29,7 +29,14 @@ struct NavigationBarExperience: View {
                 //REMINDERS BUTTON
                 VStack() {
                     if cur_screen != .RemindersScreen {
-                        NavigationLink(destination: RemindersScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, filterPeriod: "week", firestoreManager: firestoreManager)) {
+                        NavigationLink(
+                            destination:RemindersScreen(
+                                cur_screen: $cur_screen,
+                                DatabaseMock: $DatabaseMock,
+                                filterPeriod: "week",
+                                remindersForUser: [:],
+                                firestoreManager: firestoreManager
+                            )) {
                             Image(systemName: "list.bullet")
                                 .font(.title)
                                 .padding(7)

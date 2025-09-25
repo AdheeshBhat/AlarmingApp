@@ -29,7 +29,7 @@ struct RepeatUntilFlow: View {
         self._repeatUntilOptionSelected = State(initialValue: "")
         
         if repeatUntil.wrappedValue != "Forever" {
-            self._selectedDate = State(initialValue: createDateFromText(dateString: repeatUntil.wrappedValue))
+            self._selectedDate = State(initialValue: createDateFromString(dateString: repeatUntil.wrappedValue))
         } else {
             self._selectedDate = State(initialValue: Date())
         }
@@ -89,7 +89,7 @@ struct RepeatUntilFlow: View {
             //DONE BUTTON
             Button(action: {
                 if repeatUntilOptionSelected == "Specific Date" {
-                    repeatUntil = createTextFromDate(date: selectedDate)
+                    repeatUntil = createStringFromDate(date: selectedDate)
                 } else {
                     repeatUntil = repeatUntilOptionSelected
                 }
@@ -115,7 +115,7 @@ struct RepeatUntilFlow: View {
                     repeatUntilOptionSelected = repeatUntil
                 } else {
                     repeatUntilOptionSelected = "Specific Date"
-                    selectedDate = createDateFromText(dateString: repeatUntil)
+                    selectedDate = createDateFromString(dateString: repeatUntil)
                 }
             }
 

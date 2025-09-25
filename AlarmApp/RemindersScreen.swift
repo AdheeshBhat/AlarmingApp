@@ -20,7 +20,7 @@ struct RemindersScreen: View {
     @State private var swipeOffset: Int = 0
     @State private var calendarViewType: String = "month"
     @State private var canResetDate: Bool = false
-    var remindersForUser: [String: ReminderData]
+    @State var remindersForUser: [Date: ReminderData]
     let firestoreManager: FirestoreManager
     
     //create a variable that would change the period depending on the button pressed
@@ -42,199 +42,37 @@ struct RemindersScreen: View {
         }
     }
     
-    init() {
-        firestoreManager.getRemindersForUser() { documents in
-            if let documents {
-                self.remindersForUser = documents
-            }
-        }
-    }
+//    init() {
+//        firestoreManager.getRemindersForUser() { documents in
+//            if let documents {
+//                self.remindersForUser = documents
+//            }
+//        }
+//    }
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header - Fixed height
-            ZStack {
-                HStack {
-                    SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
-                    Spacer()
-                }
-                
-                Text("Reminders")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primary)
-                    .frame(maxWidth: .infinity, alignment: .center)
-
-                HStack {
-                    Spacer()
-                    CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
-                }
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
-            .background(Color(.systemBackground))
-            
-            // Filter buttons - Fixed height
-            VStack(spacing: 8) {
-                HStack(spacing: 4) {
-                    Button(action: {
-                        filterPeriod = "today"
-                    }) {
-                        Text("Day")
-                            .font(.body)
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(filterPeriod == "today" ? Color.blue : Color.blue.opacity(0.1))
-                            .foregroundColor(filterPeriod == "today" ? .white : .blue)
-                            .cornerRadius(8)
-                    }
-
-                    Button(action: {
-                        filterPeriod = "week"
-                    }) {
-                        Text("Week")
-                            .font(.body)
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(filterPeriod == "week" ? Color.blue : Color.blue.opacity(0.1))
-                            .foregroundColor(filterPeriod == "week" ? .white : .blue)
-                            .cornerRadius(8)
-                    }
-
-                    Button(action: {
-                        filterPeriod = "month"
-                    }) {
-                        Text("Month")
-                            .font(.body)
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(filterPeriod == "month" ? Color.blue : Color.blue.opacity(0.1))
-                            .foregroundColor(filterPeriod == "month" ? .white : .blue)
-                            .cornerRadius(8)
-                    }
-                }
-                .padding(.horizontal)
-                
-                VStack(spacing: 4) {
-                    if filterPeriod == "month" {
-                        MonthYearSelector(
-                            filteredDay: $monthFilteredDay,
-                            isEditingMonthYear: $isEditingMonthYear,
-                            currentPeriodText: currentPeriodText,
-                            onDone: {
-                                isEditingMonthYear = false
-                                swipeOffset = 0
-                            }
-                        )
-                    } else {
-                        Text(currentPeriodText)
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                            .foregroundColor(.primary)
-                    }
-                    
-                    if canResetDate == true {
-                        Button("Today") {
-                            swipeOffset = 0
-                            dayFilteredDay = Date.now
-                            weekFilteredDay = Date.now
-                            monthFilteredDay = Date.now
-                            canResetDate = false
-                        }
-                        .font(.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 6)
-                        .background(Color.green)
-                        .cornerRadius(16)
-                    }
-                }
-                .padding(.horizontal)
-            }
-            
-            // Reminders list - Flexible height
-            TabView(selection: $swipeOffset) {
-                ForEach(-6...6, id: \.self) { index in
-                    ScrollView {
-                        LazyVStack(spacing: 12) {
-                            formattedReminders(
-                                database: $DatabaseMock,
-                                userID: 1,
-                                period: filterPeriod,
-                                cur_screen: $cur_screen,
-                                showEditButton: !isDeleteViewOn,
-                                showDeleteButton: isDeleteViewOn,
-                                filteredDay: calculateDateFor(),
-                                firestoreManager: firestoreManager
-                            )
-                        }
-                        .padding(.horizontal)
-                        .padding(.bottom, 20)
-                    }
-                    .tag(index)
-                }
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .onChange(of: swipeOffset) { _, _ in
-                updateFilteredDay()
-            }
-            
+            header
+            filterButtons
+            remindersList
             Divider()
                 .background(Color.blue)
                 .frame(height: 2)
-            
-            // Toggles - Fixed height
-            VStack(spacing: 12) {
-                Toggle("Delete View", isOn: $isDeleteViewOn)
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .toggleStyle(SwitchToggleStyle(tint: .red))
-                
-                Toggle(isOn: $showCalendarView) {
-                    Text("Calendar View")
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                }
-                .toggleStyle(SwitchToggleStyle(tint: .green))
-                .onChange(of: showCalendarView) { _, newValue in
-                    if newValue {
-                        calendarViewType = filterPeriod == "today" ? "week" : filterPeriod
-                    }
-                }
-            }
-            .padding(16)
-            .background(Color(.systemGray6))
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.blue.opacity(0.5), lineWidth: 2)
-            )
-            .padding(.horizontal)
-            .padding(.top, 8)
-            
-            // Navigation bar - Fixed height
+            footerToggles
             NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
         }
         .navigationDestination(isPresented: $showCalendarView) {
-            CalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, initialViewType: $calendarViewType, firestoreManager: firestoreManager)
-                .onDisappear {
-                    if calendarViewType == "week" {
-                        filterPeriod = "week"
-                    } else if calendarViewType == "month" {
-                        filterPeriod = "month"
-                    }
-                }
+            calendarView
         }
-        
         .onAppear {
             cur_screen = .RemindersScreen
             canResetDate = displayedPeriodDiffersFromToday()
+            
+            firestoreManager.getRemindersForUser() { reminders in
+                self.remindersForUser = reminders ?? [:]
+                
+            }
         }
-        
         .onChange(of: dayFilteredDay) { _, _ in
             canResetDate = displayedPeriodDiffersFromToday()
         }
@@ -247,8 +85,177 @@ struct RemindersScreen: View {
         .onChange(of: filterPeriod) { _, _ in
             canResetDate = displayedPeriodDiffersFromToday()
         }
-    
-    } //body ending
+    }
+
+    // MARK: - Subviews split for type-checking
+    private var header: some View {
+        ZStack {
+            HStack {
+                SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+                Spacer()
+            }
+            Text("Reminders")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity, alignment: .center)
+            HStack {
+                Spacer()
+                CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+            }
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(Color(.systemBackground))
+    }
+
+    private var filterButtons: some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 4) {
+                Button(action: {
+                    filterPeriod = "today"
+                }) {
+                    Text("Day")
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(filterPeriod == "today" ? Color.blue : Color.blue.opacity(0.1))
+                        .foregroundColor(filterPeriod == "today" ? .white : .blue)
+                        .cornerRadius(8)
+                }
+                Button(action: {
+                    filterPeriod = "week"
+                }) {
+                    Text("Week")
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(filterPeriod == "week" ? Color.blue : Color.blue.opacity(0.1))
+                        .foregroundColor(filterPeriod == "week" ? .white : .blue)
+                        .cornerRadius(8)
+                }
+                Button(action: {
+                    filterPeriod = "month"
+                }) {
+                    Text("Month")
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(filterPeriod == "month" ? Color.blue : Color.blue.opacity(0.1))
+                        .foregroundColor(filterPeriod == "month" ? .white : .blue)
+                        .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal)
+            VStack(spacing: 4) {
+                if filterPeriod == "month" {
+                    MonthYearSelector(
+                        filteredDay: $monthFilteredDay,
+                        isEditingMonthYear: $isEditingMonthYear,
+                        currentPeriodText: currentPeriodText,
+                        onDone: {
+                            isEditingMonthYear = false
+                            swipeOffset = 0
+                        }
+                    )
+                } else {
+                    Text(currentPeriodText)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .foregroundColor(.primary)
+                }
+                if canResetDate == true {
+                    Button("Today") {
+                        swipeOffset = 0
+                        dayFilteredDay = Date.now
+                        weekFilteredDay = Date.now
+                        monthFilteredDay = Date.now
+                        canResetDate = false
+                    }
+                    .font(.body)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 6)
+                    .background(Color.green)
+                    .cornerRadius(16)
+                }
+            }
+            .padding(.horizontal)
+        }
+    }
+
+    private var remindersList: some View {
+        TabView(selection: $swipeOffset) {
+            ForEach(-6...6, id: \.self) { index in
+                ScrollView {
+                    LazyVStack(spacing: 12) {
+                        formattedReminders(
+                            database: $DatabaseMock,
+                            userID: 1,
+                            period: filterPeriod,
+                            cur_screen: $cur_screen,
+                            showEditButton: !isDeleteViewOn,
+                            showDeleteButton: isDeleteViewOn,
+                            filteredDay: calculateDateFor(),
+                            firestoreManager: firestoreManager,
+                            userData: remindersForUser
+                        )
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 20)
+                }
+                .tag(index)
+            }
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        .onChange(of: swipeOffset) { _, _ in
+            updateFilteredDay()
+        }
+    }
+
+    private var footerToggles: some View {
+        VStack(spacing: 12) {
+            Toggle("Delete View", isOn: $isDeleteViewOn)
+                .font(.title3)
+                .fontWeight(.semibold)
+                .toggleStyle(SwitchToggleStyle(tint: .red))
+            Toggle(isOn: $showCalendarView) {
+                Text("Calendar View")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+            }
+            .toggleStyle(SwitchToggleStyle(tint: .green))
+            .onChange(of: showCalendarView) { _, newValue in
+                if newValue {
+                    calendarViewType = filterPeriod == "today" ? "week" : filterPeriod
+                }
+            }
+        }
+        .padding(16)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.blue.opacity(0.5), lineWidth: 2)
+        )
+        .padding(.horizontal)
+        .padding(.top, 8)
+    }
+
+    private var calendarView: some View {
+        CalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, initialViewType: $calendarViewType, firestoreManager: firestoreManager)
+            .onDisappear {
+                if calendarViewType == "week" {
+                    filterPeriod = "week"
+                } else if calendarViewType == "month" {
+                    filterPeriod = "month"
+                }
+            }
+    }
     
     func updateFilteredDay() {
         let calendar = Calendar.current
@@ -340,7 +347,7 @@ struct ReminderRow: View {
     @Binding var cur_screen: Screen
     var title: String
     var time: String
-    var date: String
+    var reminderDate: String
     // Remove local copy of reminder
     @State var reminder: ReminderData
     var showEditButton: Bool = false
@@ -354,6 +361,7 @@ struct ReminderRow: View {
     var dateKey: Date
     let firestoreManager: FirestoreManager
     @State private var curReminderDoc: DocumentSnapshot?
+    //let reminderID: Date
     //var curReminder: DocumentSnapshot
     
 //    init() {
@@ -405,10 +413,11 @@ struct ReminderRow: View {
 //                            }
 //                        }
                     }) {
+                        //database.users[userID]?[dateKey]?.isComplete == true
                         HStack(spacing: 6) {
-                            Image(systemName: database.users[userID]?[dateKey]?.isComplete == true ? "checkmark.circle.fill" : "circle")
+                            Image(systemName: (curReminderDoc?.data()?["isComplete"] as? Bool ?? false) ? "checkmark.circle.fill" : "circle")
                                 .font(.title2)
-                                .foregroundColor(database.users[userID]?[dateKey]?.isComplete == true ? .green : .gray)
+                                .foregroundColor((curReminderDoc?.data()?["isComplete"] as? Bool ?? false) ? .green : .gray)
                             Text("Done")
                                 .font(.title3)
                                 .bold()
@@ -432,17 +441,39 @@ struct ReminderRow: View {
                     } // Alert ending
 
                     //EDIT BUTTON
+                    Button(action: {
+                        print("dateKey is \(dateKey)")
+                    }) {
+                        VStack {
+                            Text("DATEKEY PRINT")
+                        }
+                    }
                     if showEditButton {
                         NavigationLink(destination: EditReminderScreen(
                             cur_screen: $cur_screen,
                             DatabaseMock: $database,
                             //reminderDoc: curReminderDoc,
                             reminder: Binding(
-                                get: { database.users[userID]![dateKey]! },
-                                set: { database.users[userID]![dateKey]! = $0 }
+                                get: { reminder }, // local reminder copy
+                                set: { newValue in
+                                    // Update Firestore
+                                    firestoreManager.updateReminderFields(
+                                        dateCreated: createUniqueIDFromDate(date: dateKey),
+                                        fields: [
+                                            "title": newValue.title,
+                                            "description": newValue.description,
+                                            "priority": newValue.priority,
+                                            "isComplete": newValue.isComplete,
+                                            "isLocked": newValue.isLocked
+                                        ]
+                                    )
+                                }
                             ),
-                            firestoreManager: firestoreManager
+                            firestoreManager: firestoreManager,
+                            reminderID: createExactStringFromDate(date: dateKey)
+                            //reminderID: createUniqueIDFromDate(date: dateKey)
                         )) {
+                            
                             HStack(spacing: 6) {
                                 Image(systemName: "pencil")
                                     .font(.title2)
@@ -492,7 +523,7 @@ struct ReminderRow: View {
                 Text(formattedTime)
                     .font(.title2)
                     .fontWeight(.semibold)
-                Text(date)
+                Text(reminderDate)
                     .font(.body)
                     .foregroundColor(.secondary)
             }

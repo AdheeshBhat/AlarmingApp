@@ -14,6 +14,7 @@ struct CreateReminderScreen: View {
     @State private var title: String = ""
     @State private var description: String = ""
     @State private var date: Date = Date()
+    //GET RID OF USERID COMPELTELY
     @State private var userID: Int = 1
     @State private var repeat_setting: String = "None"
     @State private var repeatUntil: String = "Forever"
@@ -199,7 +200,7 @@ struct CreateReminderScreen: View {
                                 isLocked: isLocked
                             )
                             let uniqueID = Date.now
-                            firestoreManager.setReminder(userID: String(userID), reminder: reminder)
+                            firestoreManager.setReminder(reminderID: getExactStringFromCurrentDate(), reminder: reminder)
                             presentationMode.wrappedValue.dismiss()
                             setAlarm(dateAndTime: date, title: title, description: description, repeat_setting: reminder.repeatSettings.repeat_type, uniqueDate: uniqueID, soundType: selectedSound)
                         }

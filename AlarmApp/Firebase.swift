@@ -8,6 +8,7 @@
 import FirebaseCore
 import FirebaseFirestore
 import FirebaseAuth
+import SwiftUI
 
 //struct Reminder: Codable {
 //    var ID: Int
@@ -35,11 +36,12 @@ class FirestoreManager {
         
     }
 
-    // Create or update a reminder
-    func setReminder(userID: String, reminder: ReminderData) {
+    // Create a reminder
+    func setReminder(reminderID: String, reminder: ReminderData) {
         if let currentUser = Auth.auth().currentUser {
             do {
-                try db.collection("users").document(currentUser.uid).collection("reminders").document(getExactCurrentDateString()).setData(from: reminder)
+                //try db.collection("users").document(currentUser.uid).collection("reminders").document(getExactStringFromCurrentDate()).setData(from: reminder)
+                try db.collection("users").document(currentUser.uid).collection("reminders").document(reminderID).setData(from: reminder)
                 
             } catch {
                 print("Failed setReminder")
@@ -50,6 +52,8 @@ class FirestoreManager {
     }
 
     // Fetch a reminder
+    
+    //GET RID OF USERID
     func getReminder(userID: String, dateCreated: String, completion: @escaping (DocumentSnapshot?) -> Void) {
         if let currentUser = Auth.auth().currentUser {
             do {
@@ -66,27 +70,100 @@ class FirestoreManager {
         }
     }
     
-    func getRemindersForUser(completion: @escaping ([Date: ReminderData]?) -> Void) {
-        if let currentUser = Auth.auth().currentUser {
 
-                db.collection("users").document(currentUser.uid).collection("reminders").getDocuments { querySnapshot, error in
-                    if let documents = querySnapshot?.documents, !documents.isEmpty {
-                        print("Fetched reminders for user")
-                        var remindersDict: [Date: ReminderData] = [:]
-                        for doc in documents {
-                            let data = doc.data()
-                            //make a separate variable for repeatSettings + all other fields) and then pass them all in
-                            remindersDict[CreateExactDateFromText(dateString: doc.documentID)] = ReminderData(ID: data["ID"], date: data["date"], title: data["title"], description: data["title"], repeatSettings: data["repeatSettings"], priority: data["priority"], isComplete: data["isComplete"], author: data["author"], isLocked: data["isLocked"])
-                        }
-                        completion(remindersDict)
-                    } else {
-                        print("Reminders for user does not exist")
-                        completion(nil)
-                    }}
-                
-            
+    func getRemindersForUser(completion: @escaping ([Date: ReminderData]?) -> Void) {
+        // ensures that the user is logged in
+        guard let currentUser = Auth.auth().currentUser else {
+            DispatchQueue.main.async { completion(nil) }
+            return
         }
+
+        db.collection("users")
+          .document(currentUser.uid)
+          .collection("reminders")
+          .getDocuments { querySnapshot, error in
+              // if Firestore query fails
+              if let error = error {
+                  print("Error fetching reminders for user: \(error)")
+                  DispatchQueue.main.async { completion(nil) }
+                  return
+              }
+              //case where no documents exist
+              guard let documents = querySnapshot?.documents else {
+                  print("Reminders for user does not exist")
+                  DispatchQueue.main.async { completion([:]) } // empty dict
+                  return
+              }
+
+              var remindersDict: [Date: ReminderData] = [:]
+              
+              //loops through every reminder document
+              for doc in documents {
+                  let data = doc.data()
+
+                  // ID
+                  let id: Int = {
+                      if let v = data["ID"] as? Int { return v }
+                      return 0
+                  }()
+
+                  let title = data["title"] as? String ?? ""
+                  let description = data["description"] as? String ?? ""
+                  let priority = data["priority"] as? String ?? "Low"
+                  let author = data["author"] as? String ?? "user"
+
+                  let isComplete = data["isComplete"] as? Bool ?? false
+                  let isLocked = data["isLocked"] as? Bool ?? false
+
+                  let dateFromField: Date? = {
+                      if let ts = data["date"] as? Timestamp {
+                          return ts.dateValue()
+                      }
+                      return nil
+                  }()
+
+                  // repeatSettings
+                  let repeatSettings: RepeatSettings = {
+                      if let rsMap = data["repeatSettings"] as? [String: Any] {
+                          let repeatType = rsMap["repeat_type"] as? String ?? (data["repeat_type"] as? String ?? "None")
+                          let repeatUntil = rsMap["repeat_until_date"] as? String ?? (data["repeat_until_date"] as? String ?? "")
+                          return RepeatSettings(repeat_type: repeatType, repeat_until_date: repeatUntil)
+                      } else {
+                          let repeatType = data["repeat_type"] as? String ?? "None"
+                          let repeatUntil = data["repeat_until_date"] as? String ?? ""
+                          return RepeatSettings(repeat_type: repeatType, repeat_until_date: repeatUntil)
+                      }
+                  }()
+
+                  // Build ReminderData (matches your initializer)
+                  let reminder = ReminderData(
+                      ID: id,
+                      date: dateFromField ?? Date(),
+                      title: title,
+                      description: description,
+                      repeatSettings: repeatSettings,
+                      priority: priority,
+                      isComplete: isComplete,
+                      author: author,
+                      isLocked: isLocked
+                  )
+
+                  // Key by a Date that the rest of your app expects. Use the doc ID -> Date helper so it matches your previous mock-keying.
+                  if let validDate = dateFromField {
+                      remindersDict[validDate] = reminder
+                  } else {
+                      print("Warning: Reminder missing date field, using current Date() as fallback")
+                          remindersDict[Date()] = reminder
+                  }
+//                  let keyDate = createExactDateFromString(dateString: doc.documentID)
+//                  remindersDict[keyDate] = reminder
+              }
+
+              // return on main thread
+              DispatchQueue.main.async { completion(remindersDict) }
+          }
     }
+    
 //    func getReminder(userID: String, dateCreated: String, completion: @escaping (Result<ReminderData, Error>) -> Void) {
 //        db.collection("users").document(userID).collection("reminders").document(dateCreated).getDocument { document, error in
 //            if let document = document, document.exists {
@@ -104,14 +181,14 @@ class FirestoreManager {
     // Update specific fields of a reminder
     func updateReminderFields(dateCreated: String, fields: [String: Any]) {
         if let currentUser = Auth.auth().currentUser {
-            do {
-                try db.collection("users").document(currentUser.uid).collection("reminders").document(dateCreated).updateData(fields)
-            } catch {
-                print("Failed updateReminderFields")
+            db.collection("users").document(currentUser.uid).collection("reminders").document(dateCreated).updateData(fields) { error in
+                if let error = error {
+                    print("Failed to update reminder fields: \(error.localizedDescription)")
+                } else {
+                    print("Successfully updated reminder fields")
+                }
             }
-        
         }
-        
     }
 
     // Delete a specific field from a reminder
@@ -257,6 +334,44 @@ class ReminderViewModel: ObservableObject {
                 print("Successfully deleted reminder collection")
             case .failure(let error):
                 print("Error deleting reminder: \(error)")
+            }
+        }
+    }
+}
+
+struct TestRemindersView: View {
+    @State private var reminders: [Date: ReminderData] = [:]
+    private let firestoreManager = FirestoreManager()
+    
+    var body: some View {
+        VStack {
+            Text("Reminders Test")
+                .font(.title)
+            
+            List {
+                ForEach(reminders.keys.sorted(), id: \.self) { date in
+                    if let reminder = reminders[date] {
+                        VStack(alignment: .leading) {
+                            Text(reminder.title)
+                                .font(.headline)
+                            Text("Date: \(reminder.date)")
+                            Text("Complete: \(reminder.isComplete ? "Yes" : "No")")
+                        }
+                    }
+                }
+            }
+        }
+        .onAppear {
+            firestoreManager.getRemindersForUser { fetchedReminders in
+                if let fetchedReminders = fetchedReminders {
+                    print("Fetched \(fetchedReminders.count) reminders:")
+                    for (date, reminder) in fetchedReminders {
+                        print("Date: \(date), Title: \(reminder.title), Complete: \(reminder.isComplete)")
+                    }
+                    reminders = fetchedReminders
+                } else {
+                    print("No reminders fetched")
+                }
             }
         }
     }

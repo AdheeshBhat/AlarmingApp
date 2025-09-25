@@ -14,7 +14,7 @@ func WelcomeExperience() -> some View {
             .fontWeight(.bold)
             .padding(.bottom, 1)
              
-        Text(getCurrentDateString())
+        Text(getStringFromCurrentDate())
             .font(.title)
             .padding(.bottom)
     } //VStack ending

@@ -7,6 +7,9 @@
 
 import SwiftUI
 
+
+//DATE RELATED FUNCTIONS
+
 func createDate(year: Int, month: Int, day: Int, hour: Int, minute: Int, second: Int) -> Date {
     var calendar = Calendar.current
     calendar.timeZone = TimeZone(identifier: "America/Los_Angeles")!
@@ -15,7 +18,7 @@ func createDate(year: Int, month: Int, day: Int, hour: Int, minute: Int, second:
     
 }
 
-func createDateFromText(dateString: String) -> Date {
+func createDateFromString(dateString: String) -> Date {
     let format = DateFormatter()
     
     format.dateFormat = "yyyy-MM-dd"
@@ -27,30 +30,86 @@ func createDateFromText(dateString: String) -> Date {
     return Date.now
 }
 
-func createExactDateFromText(dateString: String) -> Date {
-    let format = DateFormatter()
+//func createExactDateFromText(dateString: String) -> Date {
+//    let format = DateFormatter()
+//    
+//    format.dateFormat = "yyyy-MM-dd HH:mm:ss"
+//    if let date = format.date(from: dateString) {
+//        return date
+//    }
+//    
+//    print("Invalid date format.")
+//    return Date.now
+//}
+func createExactDateFromString(dateString: String) -> Date {
+    let formatter = DateFormatter()
+    formatter.timeZone = TimeZone(identifier: "America/Los_Angeles")!
     
-    format.dateFormat = "yyyy-MM-dd HH:mm:ss"
-    if let date = format.date(from: dateString) {
+    // Try full timestamp format first
+    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+    if let date = formatter.date(from: dateString) {
         return date
     }
     
-    print("Invalid date format.")
+//    if let isoDate = ISO8601DateFormatter().date(from: dateString) {
+//        return isoDate
+//    }
+    
+    // (e.g., Monday, Sep 15)
+    formatter.dateFormat = "EEEE, MMM d"
+    if let date = formatter.date(from: dateString) {
+        return date
+    }
+    
+    // (e.g., Monday, Sep 15 18:44:24)
+    formatter.dateFormat = "EEEE, MMM d HH:mm:ss"
+    if let date = formatter.date(from: dateString) {
+        return date
+    }
+    
+    print("Invalid date format for string: \(dateString), returning current date as fallback")
     return Date.now
 }
 
-func createTextFromDate(date: Date) -> String {
+func createStringFromDate(date: Date) -> String {
     let format = DateFormatter()
     format.dateFormat = "yyyy-MM-dd"
     return format.string(from: date)
 }
 
+func createExactStringFromDate(date: Date) -> String {
+    let format = DateFormatter()
+    format.dateFormat = "EEEE, MMM d HH:mm:ss"
+    return format.string(from: date)
+
+}
+
+//UNIQUE ID
 func createUniqueIDFromDate(date: Date) -> String {
     let format = DateFormatter()
     format.dateFormat = "yyyy-MM-dd HH:mm:ss"
     return format.string(from: date)
 }
 
+//CURRENT
+func getExactStringFromCurrentDate() -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "EEEE, MMM d HH:mm:ss"
+    return formatter.string(from: Date())
+}
+
+//CURRENT
+func getStringFromCurrentDate() -> String {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "EEEE, MMM d"
+    return formatter.string(from: Date())
+}
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//DATABASE RELATED FUNCTIONS
 
 func getTitle(reminder: ReminderData) -> String {
     return reminder.title
@@ -105,17 +164,7 @@ func getRepeatTypeFromReminder(reminder: ReminderData) -> String {
 //    return reminder.repeatSettings.repeat_until_date ?? Date.now
 //}
 
-func getExactCurrentDateString() -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "EEEE, MMM d HH:mm:ss"
-    return formatter.string(from: Date())
-}
 
-func getCurrentDateString() -> String {
-    let formatter = DateFormatter()
-    formatter.dateFormat = "EEEE, MMM d"
-    return formatter.string(from: Date())
-}
 
 func getRepeatIntervalsFromReminder(reminder: ReminderData) -> CustomRepeatType {
     return reminder.repeatSettings.repeatIntervals ?? CustomRepeatType(days: "Monday", weeks: [0], months: [0])
