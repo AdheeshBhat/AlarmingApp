@@ -10,7 +10,6 @@ import SwiftUI
 struct PriorityFlow: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     
     var title: String
     @Binding var priority: String
@@ -21,9 +20,8 @@ struct PriorityFlow: View {
     
     
 
-    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, title: String, priority: Binding<String>, isLocked: Binding<Bool>, firestoreManager: FirestoreManager) {
+    init(cur_screen: Binding<Screen>, title: String, priority: Binding<String>, isLocked: Binding<Bool>, firestoreManager: FirestoreManager) {
         self._cur_screen = cur_screen
-        self._DatabaseMock = DatabaseMock
         self.title = title
         self._priority = priority
         self._isLocked = isLocked
@@ -185,7 +183,7 @@ struct PriorityFlow: View {
         
         
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+            NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
         }
     } //body ending
 }

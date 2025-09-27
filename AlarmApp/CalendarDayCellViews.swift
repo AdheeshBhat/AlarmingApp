@@ -14,19 +14,17 @@ struct MonthDayCellView: View {
     let zoomScale: CGFloat
     let isReminderViewOn: Bool
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
+    @State private var remindersForUser: [Date: ReminderData] = [:]
+
     let firestoreManager: FirestoreManager
 
     // Helper to safely fetch ReminderData for a normalized date
     private func reminderData(for reminder: CalendarReminder) -> ReminderData? {
         let normalizedDate = normalizeDate(reminder.date)
-        if let userReminders = DatabaseMock.users[1] {
-            // Find the ReminderData with the same normalized date and matching title
-            return userReminders.first(where: {
-                normalizeDate($0.value.date) == normalizedDate && $0.value.title == reminder.title
-            })?.value
-        }
-        return nil
+        return remindersForUser.first(where: {
+            normalizeDate($0.value.date) == normalizedDate &&
+            $0.value.title == reminder.title
+        })?.value
     }
 
     var body: some View {
@@ -60,7 +58,13 @@ struct MonthDayCellView: View {
             RoundedRectangle(cornerRadius: 4)
                 .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
         )
+        .onAppear {
+            firestoreManager.getRemindersForUser { fetched in
+                remindersForUser = fetched ?? [:]
+            }
+        }
     }
+    
 
     private func reminderList(for reminders: [CalendarReminder]) -> some View {
         VStack(spacing: 1) {
@@ -69,7 +73,6 @@ struct MonthDayCellView: View {
                     reminder: reminder,
                     reminderData: reminderData(for: reminder),
                     cur_screen: $cur_screen,
-                    DatabaseMock: $DatabaseMock,
                     firestoreManager: firestoreManager
                 )
             }
@@ -77,7 +80,6 @@ struct MonthDayCellView: View {
                 NavigationLink(
                     destination: RemindersScreen(
                         cur_screen: $cur_screen,
-                        DatabaseMock: $DatabaseMock,
                         filterPeriod: "today",
                         dayFilteredDay: date,
                         remindersForUser: [:],
@@ -102,18 +104,17 @@ struct WeekDayCellView: View {
     let cellHeight: CGFloat
     let isReminderViewOn: Bool
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
+    @State private var remindersForUser: [Date: ReminderData] = [:]
+
     let firestoreManager: FirestoreManager
 
     // Helper to safely fetch ReminderData for a normalized date
     private func reminderData(for reminder: CalendarReminder) -> ReminderData? {
         let normalizedDate = normalizeDate(reminder.date)
-        if let userReminders = DatabaseMock.users[1] {
-            return userReminders.first(where: {
-                normalizeDate($0.value.date) == normalizedDate && $0.value.title == reminder.title
-            })?.value
-        }
-        return nil
+        return remindersForUser.first(where: {
+            normalizeDate($0.value.date) == normalizedDate &&
+            $0.value.title == reminder.title
+        })?.value
     }
 
     var body: some View {
@@ -130,7 +131,6 @@ struct WeekDayCellView: View {
                                 reminder: reminder,
                                 reminderData: reminderData(for: reminder),
                                 cur_screen: $cur_screen,
-                                DatabaseMock: $DatabaseMock,
                                 firestoreManager: firestoreManager
                             )
                         }
@@ -148,6 +148,11 @@ struct WeekDayCellView: View {
                 .stroke(Color.gray.opacity(0.3), lineWidth: 0.5)
         )
         .padding(1)
+        .onAppear {
+            firestoreManager.getRemindersForUser { fetched in
+                remindersForUser = fetched ?? [:]
+            }
+        }
     }
 }
 
@@ -156,7 +161,6 @@ struct ReminderCell: View {
     let reminder: CalendarReminder
     let reminderData: ReminderData?
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     let firestoreManager: FirestoreManager
 
     var body: some View {
@@ -164,7 +168,6 @@ struct ReminderCell: View {
             NavigationLink(
                 destination: RemindersScreen(
                     cur_screen: $cur_screen,
-                    DatabaseMock: $DatabaseMock,
                     filterPeriod: "today",
                     dayFilteredDay: reminder.date,
                     remindersForUser: [:],

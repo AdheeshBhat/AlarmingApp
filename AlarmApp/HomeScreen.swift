@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct HomeView: View {
-    @Binding var DatabaseMock: Database
     @Binding var cur_screen: Screen
     @State var isHideCompletedReminders : Bool = false
     let firestoreManager: FirestoreManager
@@ -17,21 +16,19 @@ struct HomeView: View {
         VStack {
             //Top bar with notification bell and create reminder button
             HStack {
-                //NotificationBellExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
-                    //.padding(.trailing, 10)
-                SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+
+                SettingsExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
                 Spacer()
-                CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+                CreateReminderExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
             }
-            //.padding(.horizontal)
-            //.frame(maxWidth: .infinity, alignment: .topTrailing)
+
         }
         
         //"Welcome [user]" & today's date
         WelcomeExperience()
         
         //Displays today's reminders/"No Pending Tasks"
-        TodayRemindersExperience(cur_database: $DatabaseMock, cur_screen: $cur_screen, isHideCompletedReminders: isHideCompletedReminders, firestoreManager: firestoreManager)
+        TodayRemindersExperience(cur_screen: $cur_screen, isHideCompletedReminders: isHideCompletedReminders, firestoreManager: firestoreManager)
             .padding(.bottom)
         
         VStack {
@@ -53,11 +50,10 @@ struct HomeView: View {
         }
         
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+            NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
         }
             
-        //.padding(.bottom, 270)
         
-    } //body ending
+    }
 }
 

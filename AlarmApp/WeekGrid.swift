@@ -15,7 +15,6 @@ struct WeekGrid: View {
     let viewModel: CalendarViewModel
     let isReminderViewOn: Bool
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     let firestoreManager: FirestoreManager
 
     var body: some View {
@@ -29,7 +28,6 @@ struct WeekGrid: View {
                     cellHeight: cellHeight,
                     isReminderViewOn: true,
                     cur_screen: $cur_screen,
-                    DatabaseMock: $DatabaseMock,
                     firestoreManager: firestoreManager
                 )
             }

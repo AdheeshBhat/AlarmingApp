@@ -10,7 +10,6 @@ import SwiftUI
 struct CustomRepeatCalendarView: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     @State var title: String
     @State private var selectedDays: Set<String> = []
     @Binding var repeatSetting: String
@@ -173,7 +172,7 @@ struct CustomRepeatCalendarView: View {
         }
         
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+            NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
         }
     }
 }

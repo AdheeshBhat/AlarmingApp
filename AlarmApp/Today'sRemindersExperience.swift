@@ -14,7 +14,6 @@ func filterReminders(userData: [Date: ReminderData], period: String, filteredDay
 }
 
 struct TodayRemindersExperience: View {
-    @Binding var cur_database: Database
     @Binding var cur_screen: Screen
     var isHideCompletedReminders: Bool
     var firestoreManager: FirestoreManager
@@ -45,7 +44,6 @@ struct TodayRemindersExperience: View {
                 ScrollView {
                     if isHideCompletedReminders {
                         showIncompleteReminders(
-                            database: $cur_database,
                             userID: 1,
                             period: "today",
                             cur_screen: $cur_screen,
@@ -57,7 +55,6 @@ struct TodayRemindersExperience: View {
                         )
                     } else {
                         showAllReminders(
-                            database: $cur_database,
                             userID: 1,
                             period: "today",
                             cur_screen: $cur_screen,

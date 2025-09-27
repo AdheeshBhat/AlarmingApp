@@ -10,7 +10,6 @@ import SwiftUI
 struct CreateReminderScreen: View {
     @Environment(\.presentationMode) private var presentationMode
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     @State private var title: String = ""
     @State private var description: String = ""
     @State private var date: Date = Date()
@@ -80,7 +79,6 @@ struct CreateReminderScreen: View {
                                 reminderTitle: title,
                                 selectedDate: $date,
                                 cur_screen: $cur_screen,
-                                DatabaseMock: $DatabaseMock,
                                 firestoreManager: firestoreManager
                             )
                         ) {
@@ -123,7 +121,6 @@ struct CreateReminderScreen: View {
                         NavigationLink(
                             destination: RepeatSettingsFlow(
                                 cur_screen: $cur_screen,
-                                DatabaseMock: $DatabaseMock,
                                 title: title,
                                 repeatSetting: $repeat_setting,
                                 repeatUntil: $repeatUntil,
@@ -160,7 +157,6 @@ struct CreateReminderScreen: View {
                         NavigationLink(
                             destination: PriorityFlow(
                                 cur_screen: $cur_screen,
-                                DatabaseMock: $DatabaseMock,
                                 title: title,
                                 priority: $priority,
                                 isLocked: $isLocked,
@@ -220,7 +216,7 @@ struct CreateReminderScreen: View {
                 .padding(.bottom, 20)
             }
             
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+            NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
         }
         .background(Color(.systemBackground))
         .alert("Please type the reminder name first.", isPresented: $showReminderNameAlert) {

@@ -53,8 +53,7 @@ class FirestoreManager {
 
     // Fetch a reminder
     
-    //GET RID OF USERID
-    func getReminder(userID: String, dateCreated: String, completion: @escaping (DocumentSnapshot?) -> Void) {
+    func getReminder(dateCreated: String, completion: @escaping (DocumentSnapshot?) -> Void) {
         if let currentUser = Auth.auth().currentUser {
             do {
                 db.collection("users").document(currentUser.uid).collection("reminders").document(dateCreated).getDocument { document, error in
@@ -164,19 +163,6 @@ class FirestoreManager {
           }
     }
     
-//    func getReminder(userID: String, dateCreated: String, completion: @escaping (Result<ReminderData, Error>) -> Void) {
-//        db.collection("users").document(userID).collection("reminders").document(dateCreated).getDocument { document, error in
-//            if let document = document, document.exists {
-//                if let reminder = try? document.data(as: ReminderData.self) {
-//                    completion(.success(reminder))
-//                } else {
-//                    completion(.failure(NSError(domain: "FirestoreManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Failed to decode reminder"])))
-//                }
-//            } else {
-//                completion(.failure(error ?? NSError(domain: "FirestoreManager", code: -1, userInfo: [NSLocalizedDescriptionKey: "Document does not exist"])))
-//            }
-//        }
-//    }
 
     // Update specific fields of a reminder
     func updateReminderFields(dateCreated: String, fields: [String: Any]) {
@@ -192,24 +178,28 @@ class FirestoreManager {
     }
 
     // Delete a specific field from a reminder
-    func deleteReminderField(userID: String, field: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        db.collection("reminder").document(userID).updateData([field: FieldValue.delete()]) { error in
-            if let error = error {
-                completion(.failure(error))
-            } else {
-                completion(.success(()))
+    func deleteReminderField(field: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        if let currentUser = Auth.auth().currentUser {
+            db.collection("users").document(currentUser.uid).updateData([field: FieldValue.delete()]) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
             }
         }
+        
     }
     
     //Delete a reminder document (a whole reminder, with all the fields)
-    func deleteReminder(userID: String, dateCreated: String, completion: ((Error?) -> Void)? = nil) {
+    func deleteReminder(dateCreated: String, completion: ((Error?) -> Void)? = nil) {
         if let currentUser = Auth.auth().currentUser {
             db.collection("users").document(currentUser.uid).collection("reminders").document(dateCreated).delete { error in
                 if let error = error {
                     print("Error deleting reminder: \(error)")
                 } else {
                     print("Reminder deleted successfully")
+                    print(dateCreated)
                 }
                 completion?(error)
             }
@@ -303,16 +293,16 @@ class ReminderViewModel: ObservableObject {
 //        }
 //    }
 
-    func testDeleteReminderField() {
-        firestoreManager.deleteReminderField(userID: "user123", field: "newField") { result in
-            switch result {
-            case .success:
-                print("Successfully deleted field 'priority'")
-            case .failure(let error):
-                print("Error deleting field: \(error)")
-            }
-        }
-    }
+//    func testDeleteReminderField() {
+//        firestoreManager.deleteReminderField(userID: "user123", field: "newField") { result in
+//            switch result {
+//            case .success:
+//                print("Successfully deleted field 'priority'")
+//            case .failure(let error):
+//                print("Error deleting field: \(error)")
+//            }
+//        }
+//    }
     
 
 //    func testDeleteReminderDocument() {

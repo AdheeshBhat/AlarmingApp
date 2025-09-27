@@ -63,12 +63,6 @@ struct ReminderData: Codable {
 }
 
 
-//for user in DatabaseMock.users {
-//    for this_date in DatabaseMock.users[user[1]].userData {
-//        print(this_date)
-//    }
-//}
-
 
 struct Database {
     var users: [Int: [Date: ReminderData]]

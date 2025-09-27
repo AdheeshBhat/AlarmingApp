@@ -8,7 +8,6 @@ import SwiftUI
 
 struct NotificationBellExperience: View {
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     var body: some View {
         //NOTIFICATION BUTTON
         VStack {

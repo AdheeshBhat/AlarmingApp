@@ -12,7 +12,6 @@ import SwiftUI
 struct RepeatUntilFlow: View {
     var title: String = "New Reminder"
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     @Environment(\.presentationMode) var presentationMode
     @State var selectedDate: Date = Date()
     @Binding var repeatUntil: String
@@ -21,10 +20,9 @@ struct RepeatUntilFlow: View {
     //define a string variable to use to check if specific date is pressed
     
     
-    init(title: String, cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, repeatUntil: Binding<String>, firestoreManager: FirestoreManager) {
+    init(title: String, cur_screen: Binding<Screen>, repeatUntil: Binding<String>, firestoreManager: FirestoreManager) {
         self.title = title
         self._cur_screen = cur_screen
-        self._DatabaseMock = DatabaseMock
         self._repeatUntil = repeatUntil
         self._repeatUntilOptionSelected = State(initialValue: "")
         
@@ -119,7 +117,7 @@ struct RepeatUntilFlow: View {
                 }
             }
 
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+            NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
         }
     }
 }

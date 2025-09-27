@@ -119,9 +119,9 @@ func getUserData(cur_database: Database, userID: Int) -> [Date: ReminderData] {
     return cur_database.users[userID] ?? [:]
 }
 
-func getReminderFromDate(userData: [Date: ReminderData], date: Date) -> ReminderData {
-    return userData[date] ?? ReminderData(ID: 1, date: createDate(year: 2025, month: 1, day: 1, hour: 1, minute: 1, second: 1), title: "undefined", description: "1/1/2025", repeatSettings: RepeatSettings(repeat_type: "None", repeat_until_date: "Specific Date"), priority: "Low", isComplete: false, author: "user", isLocked: false)
-}
+//func getReminderFromDate(userData: [Date: ReminderData], date: Date) -> ReminderData {
+//    return userData[date] ?? ReminderData(ID: 1, date: createDate(year: 2025, month: 1, day: 1, hour: 1, minute: 1, second: 1), title: "undefined", description: "1/1/2025", repeatSettings: RepeatSettings(repeat_type: "None", repeat_until_date: "Specific Date"), priority: "Low", isComplete: false, author: "user", isLocked: false)
+//}
 
 func getDescriptionFromReminder(reminder: ReminderData) -> String {
     return reminder.description
@@ -187,6 +187,10 @@ func deleteFromDatabase(database: inout Database, userID: Int, date: Date) {
     }
 }
 
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+// OTHER
 
 func timeAsDate(_ timeString: String) -> Date? {
     let formatter = DateFormatter()

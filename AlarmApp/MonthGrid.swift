@@ -16,7 +16,6 @@ struct MonthGrid: View {
     let zoomScale: CGFloat
     let isReminderViewOn: Bool
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     let firestoreManager: FirestoreManager
 
     var body: some View {
@@ -34,7 +33,6 @@ struct MonthGrid: View {
                             zoomScale: zoomScale,
                             isReminderViewOn: isReminderViewOn,
                             cur_screen: $cur_screen,
-                            DatabaseMock: $DatabaseMock,
                             firestoreManager: firestoreManager
                         )
                         .frame(width: cellWidth, height: cellHeight)

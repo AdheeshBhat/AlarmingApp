@@ -9,11 +9,10 @@ import SwiftUI
 
 struct CreateReminderExperience: View {
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     let firestoreManager: FirestoreManager
 
     var body: some View {
-        NavigationLink(destination: CreateReminderScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)) {
+        NavigationLink(destination: CreateReminderScreen(cur_screen: $cur_screen, firestoreManager: firestoreManager)) {
             Image(systemName: "plus")
                 .font(.title3)
                 .fontWeight(.bold)

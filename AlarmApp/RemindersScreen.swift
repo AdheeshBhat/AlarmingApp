@@ -10,7 +10,6 @@ struct RemindersScreen: View {
     @State private var showCalendarView : Bool = false
     @State private var isDeleteViewOn : Bool = false
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     
     @State var filterPeriod : String
     @State var dayFilteredDay: Date? = Date()
@@ -42,13 +41,6 @@ struct RemindersScreen: View {
         }
     }
     
-//    init() {
-//        firestoreManager.getRemindersForUser() { documents in
-//            if let documents {
-//                self.remindersForUser = documents
-//            }
-//        }
-//    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -59,7 +51,7 @@ struct RemindersScreen: View {
                 .background(Color.blue)
                 .frame(height: 2)
             footerToggles
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+            NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
         }
         .navigationDestination(isPresented: $showCalendarView) {
             calendarView
@@ -91,7 +83,7 @@ struct RemindersScreen: View {
     private var header: some View {
         ZStack {
             HStack {
-                SettingsExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+                SettingsExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
                 Spacer()
             }
             Text("Reminders")
@@ -101,7 +93,7 @@ struct RemindersScreen: View {
                 .frame(maxWidth: .infinity, alignment: .center)
             HStack {
                 Spacer()
-                CreateReminderExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+                CreateReminderExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
             }
         }
         .padding(.horizontal)
@@ -194,7 +186,6 @@ struct RemindersScreen: View {
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         formattedReminders(
-                            database: $DatabaseMock,
                             userID: 1,
                             period: filterPeriod,
                             cur_screen: $cur_screen,
@@ -247,7 +238,7 @@ struct RemindersScreen: View {
     }
 
     private var calendarView: some View {
-        CalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, initialViewType: $calendarViewType, firestoreManager: firestoreManager)
+        CalendarView(cur_screen: $cur_screen, initialViewType: $calendarViewType, firestoreManager: firestoreManager)
             .onDisappear {
                 if calendarViewType == "week" {
                     filterPeriod = "week"
@@ -356,19 +347,10 @@ struct ReminderRow: View {
     @State private var showConfirmation = false
     //Used to show "delete" alert
     @State private var showDeleteConfirmation = false
-    @Binding var database: Database
     var userID: Int
     var dateKey: Date
     let firestoreManager: FirestoreManager
     @State private var curReminderDoc: DocumentSnapshot?
-    //let reminderID: Date
-    //var curReminder: DocumentSnapshot
-    
-//    init() {
-//        if let curReminder = document {
-//          self.curReminder =
-    
-//    }
 
     //Formats 24-hour input time to 12-hour time with AM/PM
     var formattedTime: String {
@@ -396,22 +378,12 @@ struct ReminderRow: View {
                                 showConfirmation = true
                             } else {
                                 firestoreManager.updateReminderFields(
-                                    dateCreated: createUniqueIDFromDate(date: dateKey),
+                                    dateCreated: createExactStringFromDate(date: dateKey),
                                     fields: ["isComplete": true]
                                 )
                             }
                         }
-//                        firestoreManager.getReminder(userID: String(userID), dateCreated: createUniqueIDFromDate(date: dateKey)) { document in
-//                            if let curReminder = document {
-//                                if curReminder.data()?["isComplete"] as? Bool?? == true {
-//                                    showConfirmation = true
-//                                } else {
-//                                    let isComplete = curReminder.data()?["isComplete"] as? Bool ?? false
-//                                    firestoreManager.updateReminderFields(dateCreated: createUniqueIDFromDate(date: dateKey), fields: ["isComplete": isComplete])
-//                                }
-//                                
-//                            }
-//                        }
+
                     }) {
                         //database.users[userID]?[dateKey]?.isComplete == true
                         HStack(spacing: 6) {
@@ -432,7 +404,7 @@ struct ReminderRow: View {
                     .alert("Are you sure you want to mark this reminder as incomplete?", isPresented: $showConfirmation) {
                         Button("Yes", role: .destructive) {
                             firestoreManager.updateReminderFields(
-                                dateCreated: createUniqueIDFromDate(date: dateKey),
+                                dateCreated: createExactStringFromDate(date: dateKey),
                                 fields: ["isComplete": false]
                             )
                             //database.users[userID]![dateKey]!.isComplete = false
@@ -442,7 +414,8 @@ struct ReminderRow: View {
 
                     //EDIT BUTTON
                     Button(action: {
-                        print("dateKey is \(dateKey)")
+                        print("dateKey is \(createExactStringFromDate(date: dateKey))")
+                        print(reminder)
                     }) {
                         VStack {
                             Text("DATEKEY PRINT")
@@ -451,14 +424,13 @@ struct ReminderRow: View {
                     if showEditButton {
                         NavigationLink(destination: EditReminderScreen(
                             cur_screen: $cur_screen,
-                            DatabaseMock: $database,
                             //reminderDoc: curReminderDoc,
                             reminder: Binding(
                                 get: { reminder }, // local reminder copy
                                 set: { newValue in
                                     // Update Firestore
                                     firestoreManager.updateReminderFields(
-                                        dateCreated: createUniqueIDFromDate(date: dateKey),
+                                        dateCreated: createExactStringFromDate(date: dateKey),
                                         fields: [
                                             "title": newValue.title,
                                             "description": newValue.description,
@@ -507,8 +479,7 @@ struct ReminderRow: View {
                             Button("Yes", role: .destructive) {
                                 //deleteFromDatabase(database: &database, userID: userID, date: dateKey)
                                 firestoreManager.deleteReminder(
-                                    userID: String(userID),
-                                    dateCreated: createUniqueIDFromDate(date: dateKey)
+                                    dateCreated: createExactStringFromDate(date: dateKey)
                                 )
                             }
                             Button("Nevermind", role: .cancel) {}
@@ -532,8 +503,7 @@ struct ReminderRow: View {
         .background(RoundedRectangle(cornerRadius: 12).stroke(Color.primary, lineWidth: 1))
         .onAppear {
             firestoreManager.getReminder(
-                userID: String(userID),
-                dateCreated: createUniqueIDFromDate(date: dateKey)
+                dateCreated: createExactStringFromDate(date: dateKey)
             ) { document in
                 self.curReminderDoc = document
             }

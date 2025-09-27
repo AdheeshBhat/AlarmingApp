@@ -10,7 +10,6 @@ import FirebaseAuth
 
 struct LoginScreen: View {
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     @State private var email: String = ""
     @State private var password: String = ""
     @State private var errorMessage: String = ""
@@ -130,10 +129,10 @@ struct LoginScreen: View {
             }
             .background(Color(.systemBackground))
             .navigationDestination(isPresented: $navigateToHome) {
-                HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen, firestoreManager: firestoreManager)
+                HomeView(cur_screen: $cur_screen, firestoreManager: firestoreManager)
             }
             .navigationDestination(isPresented: $showRegistration) {
-                RegistrationScreen(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+                RegistrationScreen(cur_screen: $cur_screen)
             }
         }
     }
@@ -157,7 +156,6 @@ struct LoginScreen: View {
 
 struct RegistrationScreen: View {
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     @State private var email: String = ""
     @State private var name: String = ""
     @State private var password: String = ""
@@ -217,7 +215,7 @@ struct RegistrationScreen: View {
         }
         .padding()
         .navigationDestination(isPresented: $navigateToHome) {
-            HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen, firestoreManager: firestoreManager)
+            HomeView(cur_screen: $cur_screen, firestoreManager: firestoreManager)
         }
     }
 

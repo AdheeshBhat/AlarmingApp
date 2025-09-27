@@ -12,7 +12,6 @@ struct NavigationBarExperience: View {
         //presentationMode: Binding<PresentationMode>
     @Environment(\.dismiss) var dismiss
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     let firestoreManager: FirestoreManager
     
     var body: some View {
@@ -32,7 +31,6 @@ struct NavigationBarExperience: View {
                         NavigationLink(
                             destination:RemindersScreen(
                                 cur_screen: $cur_screen,
-                                DatabaseMock: $DatabaseMock,
                                 filterPeriod: "week",
                                 remindersForUser: [:],
                                 firestoreManager: firestoreManager
@@ -60,7 +58,7 @@ struct NavigationBarExperience: View {
 
                 VStack() {
                     if cur_screen != .HomeScreen {
-                        NavigationLink(destination: HomeView(DatabaseMock: $DatabaseMock, cur_screen: $cur_screen, firestoreManager: firestoreManager)) {
+                        NavigationLink(destination: HomeView(cur_screen: $cur_screen, firestoreManager: firestoreManager)) {
                             Image(systemName: "house")
                                 .font(.title)
                                 .foregroundColor((cur_screen == .HomeScreen) ? Color.blue : Color.primary)

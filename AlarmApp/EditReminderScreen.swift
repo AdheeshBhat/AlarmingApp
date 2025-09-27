@@ -10,7 +10,6 @@ import SwiftUI
 struct EditReminderScreen: View {
     @Environment(\.presentationMode) private var presentationMode
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     @Binding var reminder: ReminderData
     @State var showReminderNameAlert: Bool = false
     @State var localTitle: String
@@ -29,9 +28,8 @@ struct EditReminderScreen: View {
         return formatter.string(from: localDate)
     }
 
-    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, reminder: Binding<ReminderData>, firestoreManager: FirestoreManager, reminderID: String) {
+    init(cur_screen: Binding<Screen>, reminder: Binding<ReminderData>, firestoreManager: FirestoreManager, reminderID: String) {
         self._cur_screen = cur_screen
-        self._DatabaseMock = DatabaseMock
         self._reminder = reminder
         //local variables
         self._localTitle = State(initialValue: reminder.wrappedValue.title)
@@ -95,7 +93,6 @@ struct EditReminderScreen: View {
                                 reminderTitle: reminder.title,
                                 selectedDate: $localDate,
                                 cur_screen: $cur_screen,
-                                DatabaseMock: $DatabaseMock,
                                 firestoreManager: firestoreManager
                             )
                         ) {
@@ -138,7 +135,6 @@ struct EditReminderScreen: View {
                         NavigationLink(
                             destination: RepeatSettingsFlow(
                                 cur_screen: $cur_screen,
-                                DatabaseMock: $DatabaseMock,
                                 title: localTitle,
                                 repeatSetting: $localEditScreenRepeatSetting,
                                 repeatUntil: $localEditScreenRepeatUntil,
@@ -173,7 +169,7 @@ struct EditReminderScreen: View {
                             .fontWeight(.medium)
                         Spacer()
                         NavigationLink(
-                            destination: PriorityFlow(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: localTitle, priority: $localEditScreenPriority, isLocked: $localEditScreenIsLocked, firestoreManager: firestoreManager)
+                            destination: PriorityFlow(cur_screen: $cur_screen, title: localTitle, priority: $localEditScreenPriority, isLocked: $localEditScreenIsLocked, firestoreManager: firestoreManager)
                         ) {
                             HStack {
                                 Text(localEditScreenPriority)
@@ -205,7 +201,6 @@ struct EditReminderScreen: View {
                         
                         print("reminder ID is \(reminderID)")
                         firestoreManager.updateReminderFields(dateCreated: reminderID, fields: ["title": reminder.title, "description": reminder.description, "priority": reminder.priority, "isLocked": reminder.isLocked, "repeat_type": reminder.repeatSettings.repeat_type, "repeat_until_date": reminder.repeatSettings.repeat_until_date, "date": reminder.date])
-                        //firestoreManager.setReminder(reminderID: reminderID, reminder: reminder)
                         
                         presentationMode.wrappedValue.dismiss()
                     }) {
@@ -224,7 +219,7 @@ struct EditReminderScreen: View {
                 .padding(.bottom, 20)
             }
             
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+            NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
         }
         .background(Color(.systemBackground))
         .alert("Please type the reminder name first.", isPresented: $showReminderNameAlert) {

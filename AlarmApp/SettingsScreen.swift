@@ -11,8 +11,6 @@ import FirebaseAuth
 struct SettingsScreen: View {
     @Environment(\.presentationMode) private var presentationMode
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
-    
     @State private var isDropdownVisible = false
     @State var selectedSound: String = "Chord"
     @State private var showLogoutAlert = false
@@ -45,7 +43,7 @@ struct SettingsScreen: View {
         
         //Notification Settings
         HStack {
-            NotificationBellExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock)
+            NotificationBellExperience(cur_screen: $cur_screen)
             Text("Notifications")
                 .font(.title3)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -155,7 +153,7 @@ struct SettingsScreen: View {
         }
 
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+            NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
         }
     } //body ending
     

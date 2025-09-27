@@ -10,7 +10,6 @@ import SwiftUI
 struct RepeatSettingsFlow: View {
     @Environment(\.presentationMode) var presentationMode
     @Binding var cur_screen: Screen
-    @Binding var DatabaseMock: Database
     @State var title: String
     @Binding var repeatSetting: String
     @State private var localRepeatSetting: String? = nil
@@ -21,9 +20,8 @@ struct RepeatSettingsFlow: View {
     let firestoreManager: FirestoreManager
     
     
-    init(cur_screen: Binding<Screen>, DatabaseMock: Binding<Database>, title: String, repeatSetting: Binding<String>, repeatUntil: Binding<String>, customPatterns: Binding<Set<String>>, firestoreManager: FirestoreManager ) {
+    init(cur_screen: Binding<Screen>, title: String, repeatSetting: Binding<String>, repeatUntil: Binding<String>, customPatterns: Binding<Set<String>>, firestoreManager: FirestoreManager ) {
         self._cur_screen = cur_screen
-        self._DatabaseMock = DatabaseMock
         self.title = title
         self._repeatSetting = repeatSetting
         self._repeatUntil = repeatUntil
@@ -61,7 +59,7 @@ struct RepeatSettingsFlow: View {
             VStack(spacing: 0) {
                 ForEach(options.indices, id: \.self) { index in
                     if options[index] == "Custom" {
-                        NavigationLink(destination: CustomRepeatCalendarView(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, title: title, repeatSetting: Binding(
+                        NavigationLink(destination: CustomRepeatCalendarView(cur_screen: $cur_screen, title: title, repeatSetting: Binding(
                             get: { localRepeatSetting ?? "None" },
                             set: { localRepeatSetting = $0 }
                         ), customPatterns: $customPatterns, firestoreManager: firestoreManager)) {
@@ -125,7 +123,7 @@ struct RepeatSettingsFlow: View {
             
             //REPEAT UNTIL BUTTON
             if (localRepeatSetting != "None" && localRepeatSetting != nil) {
-                NavigationLink(destination: RepeatUntilFlow(title: title, cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, repeatUntil: $localRepeatScreenRepeatUntil, firestoreManager: firestoreManager)) {
+                NavigationLink(destination: RepeatUntilFlow(title: title, cur_screen: $cur_screen, repeatUntil: $localRepeatScreenRepeatUntil, firestoreManager: firestoreManager)) {
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Until")
@@ -181,7 +179,7 @@ struct RepeatSettingsFlow: View {
         .padding()
         
         VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, DatabaseMock: $DatabaseMock, firestoreManager: firestoreManager)
+            NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
         }
     }
 }
