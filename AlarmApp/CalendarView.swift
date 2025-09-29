@@ -82,7 +82,7 @@ class CalendarViewModel: ObservableObject {
         remindersByDate[normalizeDate(date)] ?? []
     }
 
-    func loadReminders(from allReminders: [Date: ReminderData]) {
+    func loadReminders(from allReminders: [String: ReminderData]) {
         var grouped: [Date: [CalendarReminder]] = [:]
 
         for (_, reminder) in allReminders {

@@ -19,7 +19,7 @@ struct RemindersScreen: View {
     @State private var swipeOffset: Int = 0
     @State private var calendarViewType: String = "month"
     @State private var canResetDate: Bool = false
-    @State var remindersForUser: [Date: ReminderData]
+    @State var remindersForUser: [String: ReminderData]
     let firestoreManager: FirestoreManager
     
     //create a variable that would change the period depending on the button pressed
@@ -349,6 +349,7 @@ struct ReminderRow: View {
     @State private var showDeleteConfirmation = false
     var userID: Int
     var dateKey: Date
+    var documentID: String
     let firestoreManager: FirestoreManager
     @State private var curReminderDoc: DocumentSnapshot?
 
@@ -378,7 +379,7 @@ struct ReminderRow: View {
                                 showConfirmation = true
                             } else {
                                 firestoreManager.updateReminderFields(
-                                    dateCreated: createExactStringFromDate(date: dateKey),
+                                    dateCreated: documentID,
                                     fields: ["isComplete": true]
                                 )
                             }
@@ -404,7 +405,7 @@ struct ReminderRow: View {
                     .alert("Are you sure you want to mark this reminder as incomplete?", isPresented: $showConfirmation) {
                         Button("Yes", role: .destructive) {
                             firestoreManager.updateReminderFields(
-                                dateCreated: createExactStringFromDate(date: dateKey),
+                                dateCreated: documentID,
                                 fields: ["isComplete": false]
                             )
                             //database.users[userID]![dateKey]!.isComplete = false
@@ -412,13 +413,14 @@ struct ReminderRow: View {
                         Button("Nevermind", role: .cancel) {}
                     } // Alert ending
 
-                    //EDIT BUTTON
+                    //DEBUG BUTTON
                     Button(action: {
+                        print("documentID is \(documentID)")
                         print("dateKey is \(createExactStringFromDate(date: dateKey))")
                         print(reminder)
                     }) {
                         VStack {
-                            Text("DATEKEY PRINT")
+                            Text("DEBUG")
                         }
                     }
                     if showEditButton {
@@ -430,7 +432,7 @@ struct ReminderRow: View {
                                 set: { newValue in
                                     // Update Firestore
                                     firestoreManager.updateReminderFields(
-                                        dateCreated: createExactStringFromDate(date: dateKey),
+                                        dateCreated: documentID,
                                         fields: [
                                             "title": newValue.title,
                                             "description": newValue.description,
@@ -442,8 +444,7 @@ struct ReminderRow: View {
                                 }
                             ),
                             firestoreManager: firestoreManager,
-                            reminderID: createExactStringFromDate(date: dateKey)
-                            //reminderID: createUniqueIDFromDate(date: dateKey)
+                            reminderID: documentID
                         )) {
                             
                             HStack(spacing: 6) {
@@ -479,7 +480,7 @@ struct ReminderRow: View {
                             Button("Yes", role: .destructive) {
                                 //deleteFromDatabase(database: &database, userID: userID, date: dateKey)
                                 firestoreManager.deleteReminder(
-                                    dateCreated: createExactStringFromDate(date: dateKey)
+                                    dateCreated: documentID
                                 )
                             }
                             Button("Nevermind", role: .cancel) {}
@@ -503,7 +504,7 @@ struct ReminderRow: View {
         .background(RoundedRectangle(cornerRadius: 12).stroke(Color.primary, lineWidth: 1))
         .onAppear {
             firestoreManager.getReminder(
-                dateCreated: createExactStringFromDate(date: dateKey)
+                dateCreated: documentID
             ) { document in
                 self.curReminderDoc = document
             }

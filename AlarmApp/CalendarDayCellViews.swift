@@ -14,17 +14,17 @@ struct MonthDayCellView: View {
     let zoomScale: CGFloat
     let isReminderViewOn: Bool
     @Binding var cur_screen: Screen
-    @State private var remindersForUser: [Date: ReminderData] = [:]
+    @State private var remindersForUser: [String: ReminderData] = [:]
 
     let firestoreManager: FirestoreManager
 
     // Helper to safely fetch ReminderData for a normalized date
     private func reminderData(for reminder: CalendarReminder) -> ReminderData? {
         let normalizedDate = normalizeDate(reminder.date)
-        return remindersForUser.first(where: {
-            normalizeDate($0.value.date) == normalizedDate &&
-            $0.value.title == reminder.title
-        })?.value
+        return remindersForUser.values.first(where: {
+            normalizeDate($0.date) == normalizedDate &&
+            $0.title == reminder.title
+        })
     }
 
     var body: some View {
@@ -104,17 +104,17 @@ struct WeekDayCellView: View {
     let cellHeight: CGFloat
     let isReminderViewOn: Bool
     @Binding var cur_screen: Screen
-    @State private var remindersForUser: [Date: ReminderData] = [:]
+    @State private var remindersForUser: [String: ReminderData] = [:]
 
     let firestoreManager: FirestoreManager
 
     // Helper to safely fetch ReminderData for a normalized date
     private func reminderData(for reminder: CalendarReminder) -> ReminderData? {
         let normalizedDate = normalizeDate(reminder.date)
-        return remindersForUser.first(where: {
-            normalizeDate($0.value.date) == normalizedDate &&
-            $0.value.title == reminder.title
-        })?.value
+        return remindersForUser.values.first(where: {
+            normalizeDate($0.date) == normalizedDate &&
+            $0.title == reminder.title
+        })
     }
 
     var body: some View {

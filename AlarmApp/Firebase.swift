@@ -70,7 +70,7 @@ class FirestoreManager {
     }
     
 
-    func getRemindersForUser(completion: @escaping ([Date: ReminderData]?) -> Void) {
+    func getRemindersForUser(completion: @escaping ([String: ReminderData]?) -> Void) {
         // ensures that the user is logged in
         guard let currentUser = Auth.auth().currentUser else {
             DispatchQueue.main.async { completion(nil) }
@@ -94,11 +94,12 @@ class FirestoreManager {
                   return
               }
 
-              var remindersDict: [Date: ReminderData] = [:]
+              var remindersDict: [String: ReminderData] = [:]
               
               //loops through every reminder document
               for doc in documents {
                   let data = doc.data()
+                  let documentID = doc.documentID
 
                   // ID
                   let id: Int = {
@@ -147,15 +148,8 @@ class FirestoreManager {
                       isLocked: isLocked
                   )
 
-                  // Key by a Date that the rest of your app expects. Use the doc ID -> Date helper so it matches your previous mock-keying.
-                  if let validDate = dateFromField {
-                      remindersDict[validDate] = reminder
-                  } else {
-                      print("Warning: Reminder missing date field, using current Date() as fallback")
-                          remindersDict[Date()] = reminder
-                  }
-//                  let keyDate = createExactDateFromString(dateString: doc.documentID)
-//                  remindersDict[keyDate] = reminder
+                  // Use document ID as key instead of date
+                  remindersDict[documentID] = reminder
               }
 
               // return on main thread
@@ -167,11 +161,21 @@ class FirestoreManager {
     // Update specific fields of a reminder
     func updateReminderFields(dateCreated: String, fields: [String: Any]) {
         if let currentUser = Auth.auth().currentUser {
-            db.collection("users").document(currentUser.uid).collection("reminders").document(dateCreated).updateData(fields) { error in
-                if let error = error {
-                    print("Failed to update reminder fields: \(error.localizedDescription)")
+            let docRef = db.collection("users").document(currentUser.uid).collection("reminders").document(dateCreated)
+            
+            // First check if document exists
+            docRef.getDocument { document, error in
+                if let document = document, document.exists {
+                    print("DEBUG: Document exists, updating...")
+                    docRef.updateData(fields) { error in
+                        if let error = error {
+                            print("ERROR: Update failed: \(error)")
+                        } else {
+                            print("SUCCESS: Document updated")
+                        }
+                    }
                 } else {
-                    print("Successfully updated reminder fields")
+                    print("ERROR: Document '\(dateCreated)' does not exist")
                 }
             }
         }
@@ -330,7 +334,7 @@ class ReminderViewModel: ObservableObject {
 }
 
 struct TestRemindersView: View {
-    @State private var reminders: [Date: ReminderData] = [:]
+    @State private var reminders: [String: ReminderData] = [:]
     private let firestoreManager = FirestoreManager()
     
     var body: some View {
@@ -339,14 +343,13 @@ struct TestRemindersView: View {
                 .font(.title)
             
             List {
-                ForEach(reminders.keys.sorted(), id: \.self) { date in
-                    if let reminder = reminders[date] {
-                        VStack(alignment: .leading) {
-                            Text(reminder.title)
-                                .font(.headline)
-                            Text("Date: \(reminder.date)")
-                            Text("Complete: \(reminder.isComplete ? "Yes" : "No")")
-                        }
+                ForEach(reminders.sorted(by: { $0.value.date < $1.value.date }), id: \.key) { (documentID, reminder) in
+                    VStack(alignment: .leading) {
+                        Text(reminder.title)
+                            .font(.headline)
+                        Text("Date: \(reminder.date)")
+                        Text("Complete: \(reminder.isComplete ? "Yes" : "No")")
+                        Text("ID: \(documentID)")
                     }
                 }
             }
@@ -355,8 +358,8 @@ struct TestRemindersView: View {
             firestoreManager.getRemindersForUser { fetchedReminders in
                 if let fetchedReminders = fetchedReminders {
                     print("Fetched \(fetchedReminders.count) reminders:")
-                    for (date, reminder) in fetchedReminders {
-                        print("Date: \(date), Title: \(reminder.title), Complete: \(reminder.isComplete)")
+                    for (documentID, reminder) in fetchedReminders {
+                        print("DocumentID: \(documentID), Title: \(reminder.title), Complete: \(reminder.isComplete)")
                     }
                     reminders = fetchedReminders
                 } else {

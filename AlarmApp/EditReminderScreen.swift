@@ -6,6 +6,7 @@
 ////
 
 import SwiftUI
+import FirebaseFirestore
 
 struct EditReminderScreen: View {
     @Environment(\.presentationMode) private var presentationMode
@@ -199,8 +200,9 @@ struct EditReminderScreen: View {
                         reminder.repeatSettings.repeat_until_date = localEditScreenRepeatUntil
                         reminder.date = localDate
                         
-                        print("reminder ID is \(reminderID)")
-                        firestoreManager.updateReminderFields(dateCreated: reminderID, fields: ["title": reminder.title, "description": reminder.description, "priority": reminder.priority, "isLocked": reminder.isLocked, "repeat_type": reminder.repeatSettings.repeat_type, "repeat_until_date": reminder.repeatSettings.repeat_until_date, "date": reminder.date])
+                        print("DEBUG: Updating reminder with ID: \(reminderID)")
+                        print("DEBUG: New title: \(reminder.title)")
+                        firestoreManager.updateReminderFields(dateCreated: reminderID, fields: ["title": reminder.title, "description": reminder.description, "priority": reminder.priority, "isLocked": reminder.isLocked, "repeat_type": reminder.repeatSettings.repeat_type, "repeat_until_date": reminder.repeatSettings.repeat_until_date, "date": Timestamp(date: reminder.date)])
                         
                         presentationMode.wrappedValue.dismiss()
                     }) {
