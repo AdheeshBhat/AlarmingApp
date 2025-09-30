@@ -59,11 +59,10 @@ struct RemindersScreen: View {
         .onAppear {
             cur_screen = .RemindersScreen
             canResetDate = displayedPeriodDiffersFromToday()
-            
-            firestoreManager.getRemindersForUser() { reminders in
-                self.remindersForUser = reminders ?? [:]
-                
-            }
+            loadReminders()
+        }
+        .refreshable {
+            loadReminders()
         }
         .onChange(of: dayFilteredDay) { _, _ in
             canResetDate = displayedPeriodDiffersFromToday()
@@ -327,6 +326,12 @@ struct RemindersScreen: View {
             return calculatedDate
         default:
             return Date()
+        }
+    }
+    
+    private func loadReminders() {
+        firestoreManager.getRemindersForUser() { reminders in
+            self.remindersForUser = reminders ?? [:]
         }
     }
     

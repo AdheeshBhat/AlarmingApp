@@ -192,17 +192,19 @@ struct EditReminderScreen: View {
 
                     //SAVE BUTTON
                     Button(action: {
-                        reminder.title = localTitle
-                        reminder.description = localDescription
-                        reminder.priority = localEditScreenPriority
-                        reminder.isLocked = localEditScreenIsLocked
-                        reminder.repeatSettings.repeat_type = localEditScreenRepeatSetting
-                        reminder.repeatSettings.repeat_until_date = localEditScreenRepeatUntil
-                        reminder.date = localDate
-                        
-                        print("DEBUG: Updating reminder with ID: \(reminderID)")
-                        print("DEBUG: New title: \(reminder.title)")
-                        firestoreManager.updateReminderFields(dateCreated: reminderID, fields: ["title": reminder.title, "description": reminder.description, "priority": reminder.priority, "isLocked": reminder.isLocked, "repeat_type": reminder.repeatSettings.repeat_type, "repeat_until_date": reminder.repeatSettings.repeat_until_date, "date": Timestamp(date: reminder.date)])
+                        firestoreManager.updateReminderFields(dateCreated: reminderID, fields: ["title": localTitle, "description": localDescription, "priority": localEditScreenPriority, "isLocked": localEditScreenIsLocked, "repeat_type": localEditScreenRepeatSetting, "repeat_until_date": localEditScreenRepeatUntil, "date": Timestamp(date: localDate)]) { success in
+                            if success {
+                                DispatchQueue.main.async {
+                                    reminder.title = localTitle
+                                    reminder.description = localDescription
+                                    reminder.priority = localEditScreenPriority
+                                    reminder.isLocked = localEditScreenIsLocked
+                                    reminder.repeatSettings.repeat_type = localEditScreenRepeatSetting
+                                    reminder.repeatSettings.repeat_until_date = localEditScreenRepeatUntil
+                                    reminder.date = localDate
+                                }
+                            }
+                        }
                         
                         presentationMode.wrappedValue.dismiss()
                     }) {
@@ -229,6 +231,9 @@ struct EditReminderScreen: View {
         }
         .onAppear {
             cur_screen = .EditScreen
+        }
+        .onChange(of: reminder.date) { newDate in
+            localDate = newDate
         }
     }
 }

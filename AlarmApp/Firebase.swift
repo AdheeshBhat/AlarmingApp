@@ -159,25 +159,28 @@ class FirestoreManager {
     
 
     // Update specific fields of a reminder
-    func updateReminderFields(dateCreated: String, fields: [String: Any]) {
+    func updateReminderFields(dateCreated: String, fields: [String: Any], completion: @escaping (Bool) -> Void = { _ in }) {
         if let currentUser = Auth.auth().currentUser {
             let docRef = db.collection("users").document(currentUser.uid).collection("reminders").document(dateCreated)
             
-            // First check if document exists
             docRef.getDocument { document, error in
                 if let document = document, document.exists {
-                    print("DEBUG: Document exists, updating...")
                     docRef.updateData(fields) { error in
                         if let error = error {
                             print("ERROR: Update failed: \(error)")
+                            completion(false)
                         } else {
                             print("SUCCESS: Document updated")
+                            completion(true)
                         }
                     }
                 } else {
                     print("ERROR: Document '\(dateCreated)' does not exist")
+                    completion(false)
                 }
             }
+        } else {
+            completion(false)
         }
     }
 
