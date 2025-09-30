@@ -74,7 +74,8 @@ struct TodayRemindersExperience: View {
                                 userID: 1,
                                 dateKey: reminder.date,
                                 documentID: documentID,
-                                firestoreManager: firestoreManager
+                                firestoreManager: firestoreManager,
+                                onUpdate: nil
                             )
                         }
                     }

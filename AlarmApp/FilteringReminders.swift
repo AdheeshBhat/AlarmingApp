@@ -97,7 +97,8 @@ func showAllReminders(userID: Int, period: String, cur_screen: Binding<Screen>, 
                         userID: userID,
                         dateKey: date,
                         documentID: createExactStringFromDate(date: date),
-                        firestoreManager: firestoreManager
+                        firestoreManager: firestoreManager,
+                        onUpdate: nil
                     )
                     
                     //Show past reminders that have already been completed
@@ -150,7 +151,8 @@ func showIncompleteReminders(userID: Int, period: String, cur_screen: Binding<Sc
                         userID: userID,
                         dateKey: date,
                         documentID: createExactStringFromDate(date: date),
-                        firestoreManager: firestoreManager
+                        firestoreManager: firestoreManager,
+                        onUpdate: nil
                     ) //ReminderRow ending
                 } //HStack ending
                 //.padding()
@@ -163,7 +165,7 @@ func showIncompleteReminders(userID: Int, period: String, cur_screen: Binding<Sc
 //----------------------------------------------------------------- 3
 
 
-func formattedReminders(userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = true, showDeleteButton: Bool = false, filteredDay: Date?, firestoreManager: FirestoreManager, userData: [String: ReminderData]) -> some View {
+func formattedReminders(userID: Int, period: String, cur_screen: Binding<Screen>, showEditButton: Bool = true, showDeleteButton: Bool = false, filteredDay: Date?, firestoreManager: FirestoreManager, userData: [String: ReminderData], onUpdate: (() -> Void)? = nil) -> some View {
     
     let filteredUserData = userData.filter { (documentID, reminder) in
         let reminderDate = reminder.date
@@ -205,7 +207,8 @@ func formattedReminders(userID: Int, period: String, cur_screen: Binding<Screen>
                     userID: userID,
                     dateKey: reminder.date,
                     documentID: documentID,
-                    firestoreManager: firestoreManager
+                    firestoreManager: firestoreManager,
+                    onUpdate: onUpdate
                 )
             }
         }

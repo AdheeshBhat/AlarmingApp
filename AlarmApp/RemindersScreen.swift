@@ -192,7 +192,8 @@ struct RemindersScreen: View {
                             showDeleteButton: isDeleteViewOn,
                             filteredDay: calculateDateFor(),
                             firestoreManager: firestoreManager,
-                            userData: remindersForUser
+                            userData: remindersForUser,
+                            onUpdate: loadReminders
                         )
                     }
                     .padding(.horizontal)
@@ -357,6 +358,7 @@ struct ReminderRow: View {
     var documentID: String
     let firestoreManager: FirestoreManager
     @State private var curReminderDoc: DocumentSnapshot?
+    let onUpdate: (() -> Void)?
 
     //Formats 24-hour input time to 12-hour time with AM/PM
     var formattedTime: String {
@@ -439,12 +441,7 @@ struct ReminderRow: View {
                             ),
                             firestoreManager: firestoreManager,
                             reminderID: documentID,
-                            onUpdate: {
-                                // Refresh the reminder from Firebase
-                                firestoreManager.getReminder(dateCreated: documentID) { document in
-                                    self.curReminderDoc = document
-                                }
-                            }
+                            onUpdate: onUpdate
                         )) {
                             
                             HStack(spacing: 6) {
