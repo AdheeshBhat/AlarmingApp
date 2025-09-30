@@ -127,7 +127,19 @@ class FirestoreManager {
                       if let rsMap = data["repeatSettings"] as? [String: Any] {
                           let repeatType = rsMap["repeat_type"] as? String ?? (data["repeat_type"] as? String ?? "None")
                           let repeatUntil = rsMap["repeat_until_date"] as? String ?? (data["repeat_until_date"] as? String ?? "")
-                          return RepeatSettings(repeat_type: repeatType, repeat_until_date: repeatUntil)
+                          
+                          // Load repeatIntervals
+                          let repeatIntervals: CustomRepeatType? = {
+                              if let intervalsMap = rsMap["repeatIntervals"] as? [String: Any] {
+                                  let days = intervalsMap["days"] as? String
+                                  let weeks = intervalsMap["weeks"] as? [Int]
+                                  let months = intervalsMap["months"] as? [Int]
+                                  return CustomRepeatType(days: days, weeks: weeks, months: months)
+                              }
+                              return nil
+                          }()
+                          
+                          return RepeatSettings(repeat_type: repeatType, repeat_until_date: repeatUntil, repeatIntervals: repeatIntervals)
                       } else {
                           let repeatType = data["repeat_type"] as? String ?? "None"
                           let repeatUntil = data["repeat_until_date"] as? String ?? ""

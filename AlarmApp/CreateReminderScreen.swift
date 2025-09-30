@@ -184,12 +184,13 @@ struct CreateReminderScreen: View {
                         if title.isEmpty {
                             showReminderNameAlert = true
                         } else {
+                            let customRepeatType = customPatterns.isEmpty ? nil : CustomRepeatType(days: customPatterns.joined(separator: ","))
                             let reminder = ReminderData(
                                 ID: Int.random(in: 1000...9999),
                                 date: date,
                                 title: title,
                                 description: description,
-                                repeatSettings: RepeatSettings(repeat_type: repeat_setting, repeat_until_date: repeatUntil),
+                                repeatSettings: RepeatSettings(repeat_type: repeat_setting, repeat_until_date: repeatUntil, repeatIntervals: customRepeatType),
                                 priority: priority,
                                 isComplete: isComplete,
                                 author: author,

@@ -19,17 +19,18 @@ struct EditReminderScreen: View {
     @State var localEditScreenIsLocked: Bool
     @State var localEditScreenRepeatSetting: String
     @State var localEditScreenRepeatUntil: String
-    @State var localCustomPatterns: Set<String> = []
+    @State var localCustomPatterns: Set<String>
     @State private var localDate: Date
     let firestoreManager: FirestoreManager
     let reminderID: String
+    let onUpdate: (() -> Void)?
     var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: localDate)
     }
 
-    init(cur_screen: Binding<Screen>, reminder: Binding<ReminderData>, firestoreManager: FirestoreManager, reminderID: String) {
+    init(cur_screen: Binding<Screen>, reminder: Binding<ReminderData>, firestoreManager: FirestoreManager, reminderID: String, onUpdate: (() -> Void)? = nil) {
         self._cur_screen = cur_screen
         self._reminder = reminder
         //local variables
@@ -41,8 +42,22 @@ struct EditReminderScreen: View {
         //HAD TO MAKE REPEAT_UNTIL_DATE A STRING FOR THIS TO WORK -> might need to look into that (was originally a date type)
         self._localEditScreenRepeatUntil = State(initialValue: reminder.wrappedValue.repeatSettings.repeat_until_date)
         self._localDate = State(initialValue: reminder.wrappedValue.date)
+        
+        // Load custom patterns from existing reminder
+        let existingPatterns: Set<String> = {
+            if let days = reminder.wrappedValue.repeatSettings.repeatIntervals?.days {
+                let patterns = Set(days.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) })
+                print("DEBUG: Loading existing patterns: \(patterns)")
+                return patterns
+            }
+            print("DEBUG: No existing patterns found")
+            return []
+        }()
+        self._localCustomPatterns = State(initialValue: existingPatterns)
+        
         self.firestoreManager = firestoreManager
         self.reminderID = reminderID
+        self.onUpdate = onUpdate
         
     }
     
@@ -192,16 +207,20 @@ struct EditReminderScreen: View {
 
                     //SAVE BUTTON
                     Button(action: {
-                        firestoreManager.updateReminderFields(dateCreated: reminderID, fields: ["title": localTitle, "description": localDescription, "priority": localEditScreenPriority, "isLocked": localEditScreenIsLocked, "repeat_type": localEditScreenRepeatSetting, "repeat_until_date": localEditScreenRepeatUntil, "date": Timestamp(date: localDate)]) { success in
+                        let repeatIntervalsDict: [String: Any]? = localCustomPatterns.isEmpty ? nil : ["days": localCustomPatterns.joined(separator: ",")]
+                        firestoreManager.updateReminderFields(dateCreated: reminderID, fields: ["title": localTitle, "description": localDescription, "priority": localEditScreenPriority, "isLocked": localEditScreenIsLocked, "repeatSettings.repeat_type": localEditScreenRepeatSetting, "repeatSettings.repeat_until_date": localEditScreenRepeatUntil, "repeatSettings.repeatIntervals": repeatIntervalsDict, "date": Timestamp(date: localDate)]) { success in
                             if success {
                                 DispatchQueue.main.async {
+                                    let customRepeatType = localCustomPatterns.isEmpty ? nil : CustomRepeatType(days: localCustomPatterns.joined(separator: ","))
                                     reminder.title = localTitle
                                     reminder.description = localDescription
                                     reminder.priority = localEditScreenPriority
                                     reminder.isLocked = localEditScreenIsLocked
                                     reminder.repeatSettings.repeat_type = localEditScreenRepeatSetting
                                     reminder.repeatSettings.repeat_until_date = localEditScreenRepeatUntil
+                                    reminder.repeatSettings.repeatIntervals = customRepeatType
                                     reminder.date = localDate
+                                    onUpdate?()
                                 }
                             }
                         }

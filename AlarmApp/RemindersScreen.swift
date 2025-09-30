@@ -431,7 +431,6 @@ struct ReminderRow: View {
                     if showEditButton {
                         NavigationLink(destination: EditReminderScreen(
                             cur_screen: $cur_screen,
-                            //reminderDoc: curReminderDoc,
                             reminder: Binding(
                                 get: { reminder },
                                 set: { newValue in
@@ -439,7 +438,13 @@ struct ReminderRow: View {
                                 }
                             ),
                             firestoreManager: firestoreManager,
-                            reminderID: documentID
+                            reminderID: documentID,
+                            onUpdate: {
+                                // Refresh the reminder from Firebase
+                                firestoreManager.getReminder(dateCreated: documentID) { document in
+                                    self.curReminderDoc = document
+                                }
+                            }
                         )) {
                             
                             HStack(spacing: 6) {
