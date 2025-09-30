@@ -433,19 +433,9 @@ struct ReminderRow: View {
                             cur_screen: $cur_screen,
                             //reminderDoc: curReminderDoc,
                             reminder: Binding(
-                                get: { reminder }, // local reminder copy
+                                get: { reminder },
                                 set: { newValue in
-                                    // Update Firestore
-                                    firestoreManager.updateReminderFields(
-                                        dateCreated: documentID,
-                                        fields: [
-                                            "title": newValue.title,
-                                            "description": newValue.description,
-                                            "priority": newValue.priority,
-                                            "isComplete": newValue.isComplete,
-                                            "isLocked": newValue.isLocked
-                                        ]
-                                    )
+                                    reminder = newValue
                                 }
                             ),
                             firestoreManager: firestoreManager,
