@@ -1,21 +1,5 @@
 import SwiftUI
 
-// Import utility functions
-func getTitle(reminder: ReminderData) -> String {
-    return reminder.title
-}
-
-func getTimeFromReminder(reminder: ReminderData) -> String {
-    let formatter = DateFormatter()
-    formatter.timeStyle = .short
-    return formatter.string(from: reminder.date)
-}
-
-func getMonthFromReminder(reminder: ReminderData) -> String {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    return formatter.string(from: reminder.date)
-}
 
 func filterReminders(userData: [String: ReminderData], period: String, filteredDay: Date?) -> [String: ReminderData] {
     return userData.filter { (documentID, reminder) in

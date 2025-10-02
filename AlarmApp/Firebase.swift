@@ -27,15 +27,6 @@ class FirestoreManager {
     //READING FROM THE DATABASE
     private let db = Firestore.firestore()
         
-    func saveUserData(userId: String, data: [String: Any], completion: @escaping (Error?) -> Void) {
-        if let currentUser = Auth.auth().currentUser {
-            db.collection("users").document(currentUser.uid).setData(data) { error in
-                completion(error)
-            }
-        }
-        
-    }
-
     // Create a reminder
     func setReminder(reminderID: String, reminder: ReminderData) {
         if let currentUser = Auth.auth().currentUser {
@@ -196,6 +187,48 @@ class FirestoreManager {
         }
     }
 
+    
+    func saveUserData(userId: String, data: [String: Any], completion: @escaping (Error?) -> Void) {
+        if let currentUser = Auth.auth().currentUser {
+            db.collection("users").document(currentUser.uid).setData(data) { error in
+                completion(error)
+            }
+        }
+        
+    }
+    
+    func saveUserSettings(field: String, value: Any, completion: ((Error?) -> Void)? = nil) {
+        if let currentUser = Auth.auth().currentUser {
+            let settingsRef = db.collection("users").document(currentUser.uid).collection("userSettings").document("userSettings")
+            settingsRef.setData([field: value], merge: true) {error in
+                if let error = error {
+                    print("Error saving user setting: \(error)")
+                } else {
+                    print("Saved \(field) = \(value)")
+                }
+            completion?(error)}
+        }
+    }
+    
+    func loadUserSettings(field: String, completion: @escaping (Any?) -> Void) {
+        if let currentUser = Auth.auth().currentUser {
+            let settingsRef = db
+                .collection("users")
+                .document(currentUser.uid)
+                .collection("userSettings")
+                .document("userSettings")
+
+            settingsRef.getDocument { document, error in
+                if let document = document, document.exists,
+                   let value = document.data()?[field] {
+                    completion(value)
+                } else {
+                    completion(nil)
+                }
+            }
+        }
+    }
+    
     // Delete a specific field from a reminder
     func deleteReminderField(field: String, completion: @escaping (Result<Void, Error>) -> Void) {
         if let currentUser = Auth.auth().currentUser {

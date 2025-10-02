@@ -221,6 +221,19 @@ func weekString(from date: Date) -> String {
     return "\(formatter.string(from: startOfWeek)) – \(formatter.string(from: endOfWeek))"
 }
 
+func weekdayFromString(_ day: String) -> Int? {
+    let map = [
+        "Sun": 1, "Sunday": 1,
+        "Mon": 2, "Monday": 2,
+        "Tue": 3, "Tuesday": 3,
+        "Wed": 4, "Wednesday": 4,
+        "Thu": 5, "Thursday": 5,
+        "Fri": 6, "Friday": 6,
+        "Sat": 7, "Saturday": 7
+    ]
+    return map[day.capitalized]
+}
+
 func monthString(_ date: Date) -> String {
     let formatter = DateFormatter()
     formatter.dateFormat = "LLLL"

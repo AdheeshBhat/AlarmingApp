@@ -196,10 +196,19 @@ struct CreateReminderScreen: View {
                                 author: author,
                                 isLocked: isLocked
                             )
-                            let uniqueID = Date.now
-                            firestoreManager.setReminder(reminderID: getExactStringFromCurrentDate(), reminder: reminder)
+                            //let uniqueID = Date.now
+                            let reminderID = getExactStringFromCurrentDate()
+                            firestoreManager.setReminder(reminderID: reminderID, reminder: reminder)
                             presentationMode.wrappedValue.dismiss()
-                            setAlarm(dateAndTime: date, title: title, description: description, repeat_setting: reminder.repeatSettings.repeat_type, uniqueDate: uniqueID, soundType: selectedSound)
+                            setAlarm(
+                                dateAndTime: date,
+                                title: title,
+                                description: description,
+                                repeat_type: reminder.repeatSettings.repeat_type,
+                                repeat_until_date: reminder.repeatSettings.repeat_until_date,
+                                repeatIntervals: reminder.repeatSettings.repeatIntervals,
+                                reminderID: reminderID, soundType: selectedSound
+                            )
                         }
                     }) {
                         Text("Save New Reminder")

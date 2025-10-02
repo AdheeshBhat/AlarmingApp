@@ -15,50 +15,64 @@ struct SettingsScreen: View {
     @State var selectedSound: String = "Chord"
     @State private var showLogoutAlert = false
     let firestoreManager: FirestoreManager
-
-    
-
     
     var body: some View {
-        //TITLE
         VStack {
-            Text("Settings")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity, alignment: .center)
-                .padding(.top)
-        } //VStack ending
-        .padding(.bottom)
-        
-        //Heading
-        VStack {
-            Text("Account")
-                .font(.title)
-                .fontWeight(.semibold)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                
+            titleSection
+            accountHeading
+            notificationRow
+            soundPicker
+            Spacer()
+            logoutButton
+            Spacer()
+            saveSettingsButton
+            navBar
         }
-        .padding(.horizontal)
-        .padding(.bottom)
-        
-        //Notification Settings
+        .onAppear {
+            cur_screen = .SettingsScreen
+            firestoreManager.loadUserSettings(field: "SelectedSound") { value in
+                if let sound = value as? String {
+                    selectedSound = sound
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Subviews
+extension SettingsScreen {
+    private var titleSection: some View {
+        Text("Settings")
+            .font(.largeTitle)
+            .fontWeight(.bold)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.top)
+            .padding(.bottom)
+    }
+    
+    private var accountHeading: some View {
+        Text("Account")
+            .font(.title)
+            .fontWeight(.semibold)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal)
+            .padding(.bottom)
+    }
+    
+    private var notificationRow: some View {
         HStack {
             NotificationBellExperience(cur_screen: $cur_screen)
             Text("Notifications")
                 .font(.title3)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .foregroundColor(.primary)
-             
         }
         .padding(.horizontal)
-        .padding(.horizontal)
-        
-        
-        //NOTIFICATION SOUND PICKER
+    }
+    
+    private var soundPicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Button(action: {
-                isDropdownVisible.toggle()
-            }) {
+            Button(action: { isDropdownVisible.toggle() }) {
                 HStack {
                     Text("Alert Sound:")
                         .foregroundColor(.primary)
@@ -72,8 +86,8 @@ struct SettingsScreen: View {
                         .foregroundColor(.blue)
                 }
                 .padding(16)
-            } //Button ending
-
+            }
+            
             if isDropdownVisible {
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(["Chord", "Alert"], id: \.self) { sound in
@@ -92,12 +106,12 @@ struct SettingsScreen: View {
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.blue.opacity(0.3), lineWidth: 1)
                                 )
-                        } //Button ending
-                    } //For loop ending
-                } //VStack ending
+                        }
+                    }
+                }
                 .padding(.horizontal)
-            } //if statement ending
-        } //VStack ending (sound picker)
+            }
+        }
         .background(Color.blue.opacity(0.1))
         .cornerRadius(12)
         .overlay(
@@ -105,11 +119,10 @@ struct SettingsScreen: View {
                 .stroke(Color.blue.opacity(0.3), lineWidth: 1)
         )
         .padding(.horizontal)
-
-        // LOGOUT BUTTON
-        Button(action: {
-            showLogoutAlert = true
-        }) {
+    }
+    
+    private var logoutButton: some View {
+        Button(action: { showLogoutAlert = true }) {
             Text("Logout")
                 .font(.title2)
                 .fontWeight(.semibold)
@@ -128,11 +141,11 @@ struct SettingsScreen: View {
         } message: {
             Text("You will be signed out of your account.")
         }
-        
-        Spacer()
-        
-        // SAVE SETTINGS BUTTON
+    }
+    
+    private var saveSettingsButton: some View {
         Button(action: {
+            firestoreManager.saveUserSettings(field: "selectedSound", value: selectedSound)
             presentationMode.wrappedValue.dismiss()
         }) {
             Text("Save Settings")
@@ -145,22 +158,15 @@ struct SettingsScreen: View {
                 .cornerRadius(12)
         }
         .padding(.horizontal)
-        
-        
-        
-        .onAppear {
-            cur_screen = .SettingsScreen
-        }
-
-        VStack {
-            NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
-        }
-    } //body ending
+    }
+    
+    private var navBar: some View {
+        NavigationBarExperience(cur_screen: $cur_screen, firestoreManager: firestoreManager)
+    }
     
     private func logout() {
         do {
             try Auth.auth().signOut()
-            // Navigate back to login screen by dismissing all views
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let window = windowScene.windows.first {
                 window.rootViewController = UIHostingController(rootView: ContentView())
@@ -170,5 +176,3 @@ struct SettingsScreen: View {
         }
     }
 }
-
-

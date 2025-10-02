@@ -421,15 +421,15 @@ struct ReminderRow: View {
                     } // Alert ending
 
                     //DEBUG BUTTON
-                    Button(action: {
-                        print("documentID is \(documentID)")
-                        print("dateKey is \(createExactStringFromDate(date: dateKey))")
-                        print(reminder)
-                    }) {
-                        VStack {
-                            Text("DEBUG")
-                        }
-                    }
+//                    Button(action: {
+//                        print("documentID is \(documentID)")
+//                        print("dateKey is \(createExactStringFromDate(date: dateKey))")
+//                        print(reminder)
+//                    }) {
+//                        VStack {
+//                            Text("DEBUG")
+//                        }
+//                    }
                     if showEditButton {
                         NavigationLink(destination: EditReminderScreen(
                             cur_screen: $cur_screen,

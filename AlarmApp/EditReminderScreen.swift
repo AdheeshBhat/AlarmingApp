@@ -21,6 +21,7 @@ struct EditReminderScreen: View {
     @State var localEditScreenRepeatUntil: String
     @State var localCustomPatterns: Set<String>
     @State private var localDate: Date
+    @State var selectedSound: String = "Chord"
     let firestoreManager: FirestoreManager
     let reminderID: String
     let onUpdate: (() -> Void)?
@@ -47,10 +48,10 @@ struct EditReminderScreen: View {
         let existingPatterns: Set<String> = {
             if let days = reminder.wrappedValue.repeatSettings.repeatIntervals?.days {
                 let patterns = Set(days.split(separator: ",").map { String($0).trimmingCharacters(in: .whitespaces) })
-                print("DEBUG: Loading existing patterns: \(patterns)")
+                //print("DEBUG: Loading existing patterns: \(patterns)")
                 return patterns
             }
-            print("DEBUG: No existing patterns found")
+            //print("DEBUG: No existing patterns found")
             return []
         }()
         self._localCustomPatterns = State(initialValue: existingPatterns)
@@ -208,7 +209,18 @@ struct EditReminderScreen: View {
                     //SAVE BUTTON
                     Button(action: {
                         let repeatIntervalsDict: [String: Any]? = localCustomPatterns.isEmpty ? nil : ["days": localCustomPatterns.joined(separator: ",")]
-                        firestoreManager.updateReminderFields(dateCreated: reminderID, fields: ["title": localTitle, "description": localDescription, "priority": localEditScreenPriority, "isLocked": localEditScreenIsLocked, "repeatSettings.repeat_type": localEditScreenRepeatSetting, "repeatSettings.repeat_until_date": localEditScreenRepeatUntil, "repeatSettings.repeatIntervals": repeatIntervalsDict, "date": Timestamp(date: localDate)]) { success in
+                        firestoreManager.updateReminderFields(
+                            dateCreated: reminderID,
+                            fields: [
+                                "title": localTitle,
+                                "description": localDescription,
+                                "priority": localEditScreenPriority,
+                                "isLocked": localEditScreenIsLocked,
+                                "repeatSettings.repeat_type": localEditScreenRepeatSetting,
+                                "repeatSettings.repeat_until_date": localEditScreenRepeatUntil,
+                                "repeatSettings.repeatIntervals": repeatIntervalsDict,
+                                "date": Timestamp(date: localDate)]
+                        ) { success in
                             if success {
                                 DispatchQueue.main.async {
                                     let customRepeatType = localCustomPatterns.isEmpty ? nil : CustomRepeatType(days: localCustomPatterns.joined(separator: ","))
@@ -220,6 +232,20 @@ struct EditReminderScreen: View {
                                     reminder.repeatSettings.repeat_until_date = localEditScreenRepeatUntil
                                     reminder.repeatSettings.repeatIntervals = customRepeatType
                                     reminder.date = localDate
+                                    
+                                    // Cancel the old notification and set a new one
+                                    cancelAlarm(reminderID: reminderID) // cancel using reminderID identifier (same as in createReminderScreen)
+                                    
+                                    setAlarm(
+                                        dateAndTime: localDate,
+                                        title: localTitle,
+                                        description: localDescription,
+                                        repeat_type: localEditScreenRepeatSetting,
+                                        repeat_until_date: localEditScreenRepeatUntil,
+                                        repeatIntervals: customRepeatType,
+                                        reminderID: reminderID,
+                                        soundType: selectedSound
+                                    )
                                     onUpdate?()
                                 }
                             }
@@ -251,7 +277,7 @@ struct EditReminderScreen: View {
         .onAppear {
             cur_screen = .EditScreen
         }
-        .onChange(of: reminder.date) { newDate in
+        .onChange(of: reminder.date) { _, newDate in
             localDate = newDate
         }
     }
